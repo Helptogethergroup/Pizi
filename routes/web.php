@@ -87,6 +87,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::post('/users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
     Route::patch('/users/{user}/toggle', [\App\Http\Controllers\Admin\UserController::class, 'toggle'])->name('users.toggle');
+    
+
 
     // Wallet management
     Route::get('/wallets', [\App\Http\Controllers\Admin\WalletController::class, 'index'])->name('wallets.index');
@@ -101,6 +103,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/packages', [\App\Http\Controllers\Admin\CreditPackageController::class, 'store'])->name('packages.store');
     Route::patch('/packages/{package}/toggle', [\App\Http\Controllers\Admin\CreditPackageController::class, 'toggle'])->name('packages.toggle');
     Route::delete('/packages/{package}', [\App\Http\Controllers\Admin\CreditPackageController::class, 'destroy'])->name('packages.destroy');
+
+    // Field tracker
+    Route::get('/field-tracker', [\App\Http\Controllers\Admin\FieldTrackerController::class, 'index'])->name('field-tracker.index');
 });
 
 /* ---------- MANUAL LEAD ENTRY (shared by admin/telecaller/field_executive) ---------- */
@@ -109,4 +114,14 @@ Route::middleware(['auth', 'role:admin,telecaller,field_executive'])->group(func
         ->name('leads.manual.create');
     Route::post('/leads/manual', [\App\Http\Controllers\ManualLeadController::class, 'store'])
         ->name('leads.manual.store');
+});
+
+
+/* ---------- FIELD EXECUTIVE ---------- */
+Route::middleware(['auth', 'role:field_executive,admin'])->prefix('field')->name('fieldexec.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\FieldExec\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/visits', [\App\Http\Controllers\FieldExec\VisitController::class, 'index'])->name('visits.index');
+    Route::get('/visits/{visit}', [\App\Http\Controllers\FieldExec\VisitController::class, 'show'])->name('visits.show');
+    Route::post('/visits/{visit}/checkin', [\App\Http\Controllers\FieldExec\VisitController::class, 'checkin'])->name('visits.checkin');
+    Route::post('/visits/{visit}/complete', [\App\Http\Controllers\FieldExec\VisitController::class, 'complete'])->name('visits.complete');
 });

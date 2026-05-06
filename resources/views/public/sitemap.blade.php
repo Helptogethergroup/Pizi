@@ -16,4 +16,7 @@
     @foreach($blogs as $b)
         <url><loc>{{ route('blog.show', $b->slug) }}</loc><lastmod>{{ $b->updated_at->toAtomString() }}</lastmod><priority>0.6</priority></url>
     @endforeach
+    @foreach($landmarks as $lm)
+        <url><loc>{{ route('landmark.show', $lm->slug) }}</loc><lastmod>{{ $lm->updated_at->toAtomString() }}</lastmod><priority>0.8</priority></url>
+    @endforeach
 </urlset>

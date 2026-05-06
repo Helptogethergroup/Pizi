@@ -164,9 +164,10 @@ class PropertyController extends Controller
         $localities = Locality::where('is_active', true)->with('city')->get();
         $properties = Property::active()->select('slug', 'updated_at')->get();
         $blogs = \App\Models\Blog::published()->select('slug', 'updated_at')->get();
+        $landmarks = \App\Models\Landmark::where('is_active', true)->select('slug', 'updated_at')->get();
 
         return response()
-            ->view('public.sitemap', compact('cities', 'localities', 'properties', 'blogs'))
+            ->view('public.sitemap', compact('cities', 'localities', 'properties', 'blogs','landmarks'))
             ->header('Content-Type', 'application/xml');
     }
 }

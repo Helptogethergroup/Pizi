@@ -72,7 +72,7 @@ class AuthController extends Controller
             'admin' => redirect()->route('admin.dashboard'),
             'owner' => redirect()->route('owner.dashboard'),
             'telecaller' => redirect()->route('telecaller.dashboard'),
-            'field_executive' => redirect()->route('telecaller.dashboard'),
+            'field_executive' => redirect()->route('fieldexec.dashboard'),
             default => redirect('/'),
         };
     }

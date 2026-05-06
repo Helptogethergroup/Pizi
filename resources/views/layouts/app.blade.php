@@ -114,7 +114,7 @@
 
 {{-- FOOTER --}}
 <footer class="bg-ink-950 text-cream/80 mt-24">
-    <div class="max-w-7xl mx-auto px-4 lg:px-8 py-16 grid grid-cols-2 md:grid-cols-4 gap-8">
+   <div class="max-w-7xl mx-auto px-4 lg:px-8 py-16 grid grid-cols-2 md:grid-cols-5 gap-8">
         <div class="col-span-2 md:col-span-1">
             <div class="flex items-center gap-2 mb-4">
                 <div class="w-9 h-9 rounded-xl bg-cream flex items-center justify-center">
@@ -131,6 +131,15 @@
                 <li><a href="{{ route('city.show', 'noida') }}" class="hover:text-coral-400">PGs in Noida</a></li>
                 <li><a href="{{ route('city.show', 'gurgaon') }}" class="hover:text-coral-400">PGs in Gurgaon</a></li>
                 <li><a href="{{ route('city.show', 'ghaziabad') }}" class="hover:text-coral-400">PGs in Ghaziabad</a></li>
+            </ul>
+        </div>
+        <div>
+            <h4 class="font-display font-bold text-cream mb-4">Near Landmarks</h4>
+            <ul class="space-y-2 text-sm">
+                <li><a href="{{ route('landmarks.index') }}" class="hover:text-coral-400">All landmarks</a></li>
+                <li><a href="{{ route('landmark.show', 'delhi-university-north-campus') }}" class="hover:text-coral-400">Near DU</a></li>
+                <li><a href="{{ route('landmark.show', 'amity-university-noida') }}" class="hover:text-coral-400">Near Amity</a></li>
+                <li><a href="{{ route('landmark.show', 'dlf-cyber-city') }}" class="hover:text-coral-400">Near Cyber City</a></li>
             </ul>
         </div>
         <div>
