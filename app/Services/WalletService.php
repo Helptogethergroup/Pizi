@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Services;
-
+use App\Notifications\CreditsAdded;
+use App\Notifications\LowBalance;
 use App\Models\Lead;
 use App\Models\LeadPricing;
 use App\Models\LeadUnlock;
@@ -27,7 +28,7 @@ class WalletService
     /**
      * Add credits to a user's wallet (admin action / purchase / bonus).
      */
-    public function credit(
+ public function credit(
         User $user,
         int $amount,
         string $source = 'admin_credit',
@@ -39,7 +40,7 @@ class WalletService
             throw new RuntimeException('Credit amount must be positive.');
         }
 
-        return DB::transaction(function () use ($user, $amount, $source, $reference, $notes, $actionedBy) {
+        $tx = DB::transaction(function () use ($user, $amount, $source, $reference, $notes, $actionedBy) {
             $wallet = Wallet::lockForUpdate()
                 ->firstOrCreate(['user_id' => $user->id], ['balance' => 0]);
 
@@ -59,8 +60,16 @@ class WalletService
                 'actioned_by' => $actionedBy?->id,
             ]);
         });
-    }
 
+        // Fire notification (outside transaction)
+        try {
+            $user->notify(new CreditsAdded($amount, $tx->balance_after, $source));
+        } catch (\Exception $e) {
+            \Log::warning('Credit notification failed: ' . $e->getMessage());
+        }
+
+        return $tx;
+    }
     /**
      * Debit credits from a user's wallet (admin action / expiry).
      */
@@ -170,6 +179,15 @@ class WalletService
                 'lead_id' => $freshLead->id,
                 'notes' => "Unlocked lead: {$freshLead->name}",
             ]);
+
+            // Low balance warning
+            if ($wallet->balance < 50 && $wallet->balance > 0) {
+                try {
+                    $owner->notify(new LowBalance($wallet->balance));
+                } catch (\Exception $e) {
+                    \Log::warning('Low balance notification failed: ' . $e->getMessage());
+                }
+            }
 
             return [
                 'ok' => true,

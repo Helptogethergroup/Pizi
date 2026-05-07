@@ -55,6 +55,9 @@ Route::middleware(['auth', 'role:owner,admin'])->prefix('owner')->name('owner.')
     Route::get('/leads', [\App\Http\Controllers\Owner\LeadController::class, 'index'])->name('leads.index');
     Route::post('/leads/{lead}/unlock', [\App\Http\Controllers\Owner\LeadController::class, 'unlock'])->name('leads.unlock');
 
+    // Analytics
+    Route::get('/analytics', [\App\Http\Controllers\Owner\AnalyticsController::class, 'index'])->name('analytics');
+
     // Credit packages & Razorpay
     Route::get('/packages', [\App\Http\Controllers\Owner\PaymentController::class, 'packages'])->name('packages');
     Route::get('/checkout/{package}', [\App\Http\Controllers\Owner\PaymentController::class, 'checkout'])->name('checkout');
@@ -87,6 +90,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::post('/users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
     Route::patch('/users/{user}/toggle', [\App\Http\Controllers\Admin\UserController::class, 'toggle'])->name('users.toggle');
+
+    // Analytics
+    Route::get('/analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
     
 
 
@@ -124,4 +130,14 @@ Route::middleware(['auth', 'role:field_executive,admin'])->prefix('field')->name
     Route::get('/visits/{visit}', [\App\Http\Controllers\FieldExec\VisitController::class, 'show'])->name('visits.show');
     Route::post('/visits/{visit}/checkin', [\App\Http\Controllers\FieldExec\VisitController::class, 'checkin'])->name('visits.checkin');
     Route::post('/visits/{visit}/complete', [\App\Http\Controllers\FieldExec\VisitController::class, 'complete'])->name('visits.complete');
+});
+
+
+
+/* ---------- NOTIFICATIONS (any logged-in user) ---------- */
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/recent', [\App\Http\Controllers\NotificationController::class, 'recent'])->name('notifications.recent');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });

@@ -63,7 +63,7 @@
 
 {{-- Bottom tab bar (mobile-first) --}}
 <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-ink-900/10 ios-bottom-safe md:relative md:border-0">
-    <div class="grid grid-cols-3 max-w-md mx-auto">
+    <div class="grid grid-cols-4 max-w-md mx-auto">
         <a href="{{ route('fieldexec.dashboard') }}" class="flex flex-col items-center py-3 {{ request()->routeIs('fieldexec.dashboard') ? 'text-coral-500' : 'text-ink-900/60' }}">
             <div class="text-xl">🏠</div>
             <div class="text-xs font-semibold mt-0.5">Today</div>
@@ -72,13 +72,20 @@
             <div class="text-xl">📋</div>
             <div class="text-xs font-semibold mt-0.5">All Visits</div>
         </a>
+        <a href="{{ route('notifications.index') }}" class="relative flex flex-col items-center py-3 {{ request()->routeIs('notifications.*') ? 'text-coral-500' : 'text-ink-900/60' }}">
+            <div class="text-xl">🔔</div>
+            @php $u = auth()->user()->unreadNotifications->count(); @endphp
+            @if($u > 0)
+                <span class="absolute top-2 right-1/4 w-4 h-4 rounded-full bg-coral-500 text-white text-[10px] font-bold flex items-center justify-center">{{ $u > 9 ? '9+' : $u }}</span>
+            @endif
+            <div class="text-xs font-semibold mt-0.5">Alerts</div>
+        </a>
         <a href="{{ route('fieldexec.visits.index', ['filter' => 'closed']) }}" class="flex flex-col items-center py-3 text-ink-900/60">
             <div class="text-xl">📊</div>
             <div class="text-xs font-semibold mt-0.5">Closed</div>
         </a>
     </div>
 </nav>
-
 @stack('scripts')
 </body>
 </html>

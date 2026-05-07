@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\TeleCaller;
-
+use App\Notifications\VisitScheduled;
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\Property;
@@ -52,8 +52,7 @@ class LeadController extends Controller
 
         return back()->with('success', 'Lead updated.');
     }
-
-    public function scheduleVisit(Request $request, Lead $lead)
+public function scheduleVisit(Request $request, Lead $lead)
     {
         $this->authorizeAccess($lead);
 
@@ -63,7 +62,7 @@ class LeadController extends Controller
             'field_executive_id' => 'nullable|exists:users,id',
         ]);
 
-        Visit::create([
+        $visit = Visit::create([
             'lead_id' => $lead->id,
             'property_id' => $data['property_id'],
             'scheduled_at' => $data['scheduled_at'],
@@ -75,6 +74,16 @@ class LeadController extends Controller
             'status' => 'visit_scheduled',
             'assigned_field_executive_id' => $data['field_executive_id'] ?? null,
         ]);
+
+        // Notify field exec
+        try {
+            $visit->load('lead', 'property');
+            if ($fieldExec = \App\Models\User::find($data['field_executive_id'] ?? null)) {
+                $fieldExec->notify(new VisitScheduled($visit));
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Visit notification failed: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Site visit scheduled.');
     }

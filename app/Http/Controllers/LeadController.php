@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Lead;
 use App\Models\Property;
 use App\Models\User;
+use App\Notifications\NewLeadMatched;
+use App\Services\LeadMatchingService;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
@@ -53,6 +55,34 @@ class LeadController extends Controller
 
         if ($lead->property_id) {
             Property::where('id', $lead->property_id)->increment('lead_count');
+        }
+
+        // Notify top-3 matched owners about this new lead
+        try {
+            $matcher = app(LeadMatchingService::class);
+            $matchedOwners = User::where('role', 'owner')
+                ->where('is_active', true)
+                ->whereHas('properties', fn ($q) => $q->where('is_active', true))
+                ->with('properties')
+                ->get()
+                ->map(function ($owner) use ($matcher, $lead) {
+                    $bestScore = 0;
+                    foreach ($owner->properties as $prop) {
+                        $s = $matcher->score($lead, $prop);
+                        if ($s > $bestScore) $bestScore = $s;
+                    }
+                    $owner->best_score = $bestScore;
+                    return $owner;
+                })
+                ->filter(fn ($o) => $o->best_score >= 50)
+                ->sortByDesc('best_score')
+                ->take(3);
+
+            foreach ($matchedOwners as $owner) {
+                $owner->notify(new NewLeadMatched($lead, $owner->best_score));
+            }
+        } catch (\Exception $e) {
+            \Log::warning('Lead notification failed: ' . $e->getMessage());
         }
 
         return $this->respondSuccess($request, 'Thanks! Our team will reach out within 30 minutes.');
