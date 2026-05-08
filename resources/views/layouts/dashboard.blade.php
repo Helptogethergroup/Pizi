@@ -41,6 +41,7 @@
                 <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.users.*') ? 'bg-cream/10 text-coral-500' : '' }}">👥 Users</a>
                 <a href="{{ route('admin.wallets.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.wallets.*') ? 'bg-cream/10 text-coral-500' : '' }}">💰 Wallets</a>
                 <a href="{{ route('admin.pricing.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.pricing.*') ? 'bg-cream/10 text-coral-500' : '' }}">💲 Pricing</a>
+                <a href="{{ route('admin.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}">📝 Blogs</a>
                 <a href="{{ route('admin.field-tracker.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.field-tracker.*') ? 'bg-cream/10 text-coral-500' : '' }}">Field Tracker</a>
                 <a href="{{ route('admin.packages.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.packages.*') ? 'bg-cream/10 text-coral-500' : '' }}"> Packages</a>
             @elseif($role === 'owner')
@@ -49,6 +50,7 @@
                 <a href="{{ route('owner.properties.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.properties.*') ? 'bg-cream/10 text-coral-500' : '' }}">🏠 My Properties</a>
                 <a href="{{ route('owner.properties.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">+ Add new</a>
                 <a href="{{ route('owner.wallet') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.wallet') ? 'bg-cream/10 text-coral-500' : '' }}">💰 Wallet</a>
+                <a href="{{ route('owner.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}">📝 My Blogs</a>
                 <a href="{{ route('owner.packages') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.packages') || request()->routeIs('owner.checkout') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Buy Credits</a>
                 <a href="{{ route('owner.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}">🎯 Leads</a>
             @elseif($role === 'telecaller')

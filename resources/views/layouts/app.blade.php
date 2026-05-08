@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
     <meta name="theme-color" content="#0f2748">
 
-    <title>@yield('title', 'PGFind — PGs & Hostels in Delhi NCR & Noida')</title>
+    <title>@yield('title', 'pizi — PGs & Hostels in Delhi NCR & Noida')</title>
     <meta name="description" content="@yield('meta_description', 'Find verified PGs, hostels & co-living spaces across Delhi NCR and Noida. Filter by budget, locality, gender. Free site visits, zero brokerage.')">
     <meta name="keywords" content="@yield('meta_keywords', 'pg in delhi, pg in noida, hostel delhi, coliving noida, paying guest delhi ncr, ladies pg, boys pg')">
     <link rel="canonical" href="{{ url()->current() }}">
 
     {{-- Open Graph --}}
     <meta property="og:type" content="website">
-    <meta property="og:title" content="@yield('title', 'PGFind')">
+    <meta property="og:title" content="@yield('title', 'Pizi')">
     <meta property="og:description" content="@yield('meta_description', 'Verified PGs across Delhi NCR & Noida.')">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:image" content="@yield('og_image', asset('images/og-default.jpg'))">
@@ -60,10 +60,11 @@
 <header class="sticky top-0 z-40 bg-cream/80 backdrop-blur-md border-b border-ink-900/10">
     <div class="max-w-7xl mx-auto px-4 lg:px-8 h-16 flex items-center justify-between">
         <a href="{{ route('home') }}" class="flex items-center gap-2">
-            <div class="w-9 h-9 rounded-xl bg-ink-900 flex items-center justify-center">
+            <!-- <div class="w-9 h-9 rounded-xl bg-ink-900 flex items-center justify-center">
                 <svg viewBox="0 0 24 24" class="w-5 h-5 text-coral-500" fill="currentColor"><path d="M12 2 2 9v13h7v-7h6v7h7V9z"/></svg>
-            </div>
-            <span class="font-display font-bold text-xl tracking-tight">PGFind</span>
+            </div> -->
+            <img src="{{asset("assets/images/logo.png")}}" height="100" width="150" alt="">
+            <!-- <span class="font-display font-bold text-xl tracking-tight">Pizi</span> -->
         </a>
 
         <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
@@ -157,7 +158,7 @@
                 <li>📞 {{ env('BRAND_PHONE', '+91 97582 85929') }}</li>
                 <li>✉ {{ env('BRAND_EMAIL', 'contact@pgfind.in') }}</li>
                 <li>
-                    <a href="https://wa.me/{{ env('BRAND_WHATSAPP', '919999999999') }}" class="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-600">
+                    <a href="https://wa.me/{{ env('BRAND_WHATSAPP', '+91 99999 99999') }}" class="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-600">
                         WhatsApp Us
                     </a>
                 </li>
@@ -165,7 +166,7 @@
         </div>
     </div>
     <div class="border-t border-cream/10 py-6 text-center text-xs text-cream/50">
-        &copy; {{ date('Y') }} PGFind. All rights reserved.
+        &copy; {{ date('Y') }} Pizi. All rights reserved.
     </div>
 </footer>
 

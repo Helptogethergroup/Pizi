@@ -19,4 +19,4 @@
     @foreach($landmarks as $lm)
         <url><loc>{{ route('landmark.show', $lm->slug) }}</loc><lastmod>{{ $lm->updated_at->toAtomString() }}</lastmod><priority>0.8</priority></url>
     @endforeach
-</urlset>
+</urlset>   

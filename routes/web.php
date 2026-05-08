@@ -48,6 +48,15 @@ Route::middleware(['auth', 'role:owner,admin'])->prefix('owner')->name('owner.')
         ->name('properties.toggle');
 
 
+        // Blogs
+    Route::get('/blogs', [\App\Http\Controllers\Owner\BlogController::class, 'index'])->name('blogs.index');
+    Route::get('/blogs/create', [\App\Http\Controllers\Owner\BlogController::class, 'create'])->name('blogs.create');
+    Route::post('/blogs', [\App\Http\Controllers\Owner\BlogController::class, 'store'])->name('blogs.store');
+    Route::get('/blogs/{blog}/edit', [\App\Http\Controllers\Owner\BlogController::class, 'edit'])->name('blogs.edit');
+    Route::patch('/blogs/{blog}', [\App\Http\Controllers\Owner\BlogController::class, 'update'])->name('blogs.update');
+    Route::delete('/blogs/{blog}', [\App\Http\Controllers\Owner\BlogController::class, 'destroy'])->name('blogs.destroy');
+
+
         // Wallet
     Route::get('/wallet', [\App\Http\Controllers\Owner\WalletController::class, 'index'])->name('wallet');
     
@@ -83,6 +92,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::patch('/properties/{property}/verify', [\App\Http\Controllers\Admin\PropertyController::class, 'verify'])->name('properties.verify');
     Route::patch('/properties/{property}/feature', [\App\Http\Controllers\Admin\PropertyController::class, 'feature'])->name('properties.feature');
     Route::delete('/properties/{property}', [\App\Http\Controllers\Admin\PropertyController::class, 'destroy'])->name('properties.destroy');
+    Route::patch('/properties/{property}/toggle', [\App\Http\Controllers\Admin\PropertyController::class, 'toggle'])->name('properties.toggle');
 
     Route::get('/leads', [\App\Http\Controllers\Admin\LeadController::class, 'index'])->name('leads.index');
     Route::patch('/leads/{lead}/assign', [\App\Http\Controllers\Admin\LeadController::class, 'assign'])->name('leads.assign');
@@ -94,7 +104,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Analytics
     Route::get('/analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
     
-
+    // Blogs
+    Route::get('/blogs', [\App\Http\Controllers\Admin\BlogController::class, 'index'])->name('blogs.index');
+    Route::get('/blogs/create', [\App\Http\Controllers\Admin\BlogController::class, 'create'])->name('blogs.create');
+    Route::post('/blogs', [\App\Http\Controllers\Admin\BlogController::class, 'store'])->name('blogs.store');
+    Route::get('/blogs/{blog}/edit', [\App\Http\Controllers\Admin\BlogController::class, 'edit'])->name('blogs.edit');
+    Route::patch('/blogs/{blog}', [\App\Http\Controllers\Admin\BlogController::class, 'update'])->name('blogs.update');
+    Route::patch('/blogs/{blog}/toggle', [\App\Http\Controllers\Admin\BlogController::class, 'togglePublish'])->name('blogs.toggle');
+    Route::delete('/blogs/{blog}', [\App\Http\Controllers\Admin\BlogController::class, 'destroy'])->name('blogs.destroy');
 
     // Wallet management
     Route::get('/wallets', [\App\Http\Controllers\Admin\WalletController::class, 'index'])->name('wallets.index');

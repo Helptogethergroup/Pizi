@@ -13,29 +13,23 @@ use RuntimeException;
 
 class LeadController extends Controller
 {
-    public function index(Request $request, LeadMatchingService $matcher)
+   public function index(Request $request, LeadMatchingService $matcher)
     {
         $owner = auth()->user();
+        $allMatched = $matcher->leadsForOwner($owner, 60);
 
-        // Ensure wallet exists
-        $wallet = $owner->wallet ?? $owner->wallet()->create(['balance' => 0]);
-
-        // Get matched leads with score, badge, affordability
-        $minScore = (int) $request->get('min_score', 30);
-        $allMatched = $matcher->leadsForOwner($owner, $minScore);
+        $tab = $request->get('tab', 'all');
 
         // Filter by tab
-        $tab = $request->get('tab', 'all');
         $filtered = match ($tab) {
-            'hot' => $allMatched->filter(fn ($l) => $l->match_score >= 70),
-            'unlocked' => $allMatched->filter(fn ($l) => $l->is_unlocked),
-            'affordable' => $allMatched->filter(fn ($l) => $l->can_afford && !$l->is_unlocked),
+            'hot' => $allMatched->where('match_score', '>=', 70),
+            'affordable' => $allMatched->filter(fn($l) => $l->affordable && !$l->is_unlocked),
+            'unlocked' => $allMatched->where('is_unlocked', true),
             default => $allMatched,
         };
 
-        // Manual pagination since we built a collection
-        $perPage = 12;
         $page = (int) $request->get('page', 1);
+        $perPage = 12;
         $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
             $filtered->forPage($page, $perPage),
             $filtered->count(),
@@ -44,16 +38,22 @@ class LeadController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        $pricing = LeadPricing::where('is_active', true)->pluck('credit_cost', 'lead_type');
+        $wallet = $owner->wallet ?? \App\Models\Wallet::firstOrCreate(
+            ['user_id' => $owner->id], ['balance' => 0]
+        );
 
-        $stats = [
-            'total' => $allMatched->count(),
-            'hot' => $allMatched->filter(fn ($l) => $l->match_score >= 70)->count(),
-            'unlocked' => $allMatched->filter(fn ($l) => $l->is_unlocked)->count(),
-            'affordable' => $allMatched->filter(fn ($l) => $l->can_afford && !$l->is_unlocked)->count(),
+        // Tab counts
+        $counts = [
+            'all' => $allMatched->count(),
+            'hot' => $allMatched->where('match_score', '>=', 70)->count(),
+            'affordable' => $allMatched->filter(fn($l) => $l->affordable && !$l->is_unlocked)->count(),
+            'unlocked' => $allMatched->where('is_unlocked', true)->count(),
         ];
 
-        return view('owner.leads', compact('paginated', 'pricing', 'wallet', 'stats', 'tab'));
+        // Pricing for top strip
+        $pricing = \App\Models\LeadPricing::where('is_active', true)->get()->keyBy('lead_type');
+
+        return view('owner.leads', compact('paginated', 'wallet', 'tab', 'counts', 'pricing'));
     }
 
     public function unlock(Lead $lead, WalletService $service)

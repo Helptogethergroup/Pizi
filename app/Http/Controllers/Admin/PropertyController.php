@@ -21,8 +21,25 @@ class PropertyController extends Controller
             $q->where('is_verified', (bool) $request->verified);
         }
 
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $q->where('is_active', true);
+            } elseif ($request->status === 'disabled') {
+                $q->where('is_active', false);
+            }
+        }
+
         $properties = $q->latest()->paginate(20)->withQueryString();
-        return view('admin.properties', compact('properties'));
+
+        // Stats for dashboard tiles
+        $stats = [
+            'total' => Property::count(),
+            'active' => Property::where('is_active', true)->count(),
+            'pending' => Property::where('is_verified', false)->count(),
+            'featured' => Property::where('is_featured', true)->count(),
+        ];
+
+        return view('admin.properties', compact('properties', 'stats'));
     }
 
     public function verify(Property $property)
@@ -38,6 +55,14 @@ class PropertyController extends Controller
         $property->is_featured = !$property->is_featured;
         $property->save();
         return back()->with('success', 'Featured status updated.');
+    }
+
+    public function toggle(Property $property)
+    {
+        $property->is_active = !$property->is_active;
+        $property->save();
+        $msg = $property->is_active ? 'Property enabled — visible on site.' : 'Property disabled — hidden from site.';
+        return back()->with('success', $msg);
     }
 
     public function destroy(Property $property)

@@ -2,112 +2,211 @@
 @section('title', 'Lead — ' . $lead->name)
 @section('content')
 
-<a href="{{ route('telecaller.leads.index') }}" class="text-sm text-ink-900/60">← Back to leads</a>
+<div class="flex items-center gap-3 mb-6">
+    <a href="{{ route('telecaller.leads.index') }}" class="text-2xl">←</a>
+    <div>
+        <h1 class="font-display font-black text-2xl">{{ $lead->name }}</h1>
+        <p class="text-xs text-ink-900/60">Lead #{{ $lead->id }} · {{ ucfirst($lead->source ?? 'website') }} · {{ $lead->created_at->format('d M, h:i A') }}</p>
+    </div>
+</div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
-    {{-- Lead info & actions --}}
-    <div class="lg:col-span-2 space-y-6">
-        <div class="bg-white p-8 rounded-2xl border border-ink-900/10">
-            <div class="flex items-start justify-between">
-                <div>
-                    <h1 class="font-display font-black text-3xl">{{ $lead->name }}</h1>
-                    <p class="text-ink-900/60 mt-1">📞 <a href="tel:{{ $lead->phone }}" class="font-semibold text-ink-900 hover:text-coral-600">{{ $lead->phone }}</a> · {{ $lead->email ?? 'No email' }}</p>
-                    <span class="inline-block mt-3 px-3 py-1 rounded-full text-xs font-semibold {{ $lead->statusBadge() }}">{{ str_replace('_',' ',$lead->status) }}</span>
-                </div>
-                <div class="text-right text-xs text-ink-900/50">
-                    <div>Source: <strong>{{ $lead->source }}</strong></div>
-                    <div>Created: {{ $lead->created_at->format('d M Y, h:i A') }}</div>
-                </div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    {{-- LEFT: Lead info + edit form --}}
+    <div class="space-y-4">
+
+        {{-- Quick contact --}}
+        <div class="bg-white p-5 rounded-2xl border border-ink-900/10">
+            <div class="grid grid-cols-2 gap-2">
+                <a href="tel:{{ $lead->phone }}" class="flex items-center justify-center gap-2 py-3 bg-emerald-500 text-white rounded-xl font-bold">📞 Call</a>
+                <a href="https://wa.me/{{ preg_replace('/\D/', '', $lead->phone) }}" target="_blank" class="flex items-center justify-center gap-2 py-3 bg-emerald-600 text-white rounded-xl font-bold">💬 WhatsApp</a>
             </div>
-
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
-                <a href="tel:{{ $lead->phone }}" class="text-center py-3 bg-emerald-500 text-white rounded-xl font-bold">📞 Call</a>
-                @if($lead->property)
-                <a href="{{ route('telecaller.leads.whatsapp', [$lead, $lead->property]) }}" target="_blank" class="text-center py-3 bg-emerald-600 text-white rounded-xl font-bold">💬 Send PG details</a>
-                @endif
-                <a href="https://wa.me/{{ preg_replace('/\D/', '', $lead->phone) }}" target="_blank" class="text-center py-3 bg-coral-500 text-white rounded-xl font-bold">WhatsApp</a>
-                <a href="mailto:{{ $lead->email }}" class="text-center py-3 border border-ink-900/15 rounded-xl font-bold">✉ Email</a>
-            </div>
-
-            @if($lead->message)
-                <div class="mt-6 p-4 bg-cream rounded-xl">
-                    <div class="text-xs font-semibold text-ink-900/60 uppercase">Lead's message</div>
-                    <p class="mt-1">{{ $lead->message }}</p>
-                </div>
-            @endif
-
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6 text-sm">
-                <div><div class="text-xs text-ink-900/60 uppercase">Budget</div><div class="font-semibold">{{ $lead->budget_min ? '₹'.number_format($lead->budget_min) : '?' }} – {{ $lead->budget_max ? '₹'.number_format($lead->budget_max) : '?' }}</div></div>
-                <div><div class="text-xs text-ink-900/60 uppercase">Move-in</div><div class="font-semibold">{{ $lead->move_in_date?->format('d M Y') ?? 'Flexible' }}</div></div>
-                <div><div class="text-xs text-ink-900/60 uppercase">Preferred locality</div><div class="font-semibold">{{ $lead->preferred_locality ?: '—' }}</div></div>
+            <div class="grid grid-cols-2 gap-3 mt-4 text-sm">
+                <div><div class="text-xs text-ink-900/50 uppercase">Phone</div><div class="font-bold">{{ $lead->phone }}</div></div>
+                <div><div class="text-xs text-ink-900/50 uppercase">Email</div><div class="font-bold">{{ $lead->email ?? '—' }}</div></div>
             </div>
         </div>
 
-        {{-- Update status --}}
-        <div class="bg-white p-8 rounded-2xl border border-ink-900/10">
-            <h2 class="font-display font-bold text-xl mb-4">Update status</h2>
-            <form method="POST" action="{{ route('telecaller.leads.update', $lead) }}" class="space-y-4">
+        {{-- Edit form (live updates) --}}
+        <div class="bg-white p-5 rounded-2xl border border-ink-900/10">
+            <h3 class="font-display font-bold text-lg mb-3">📝 Live update preferences</h3>
+            <p class="text-xs text-ink-900/60 mb-4">Change budget or area — matching properties on the right update instantly.</p>
+
+            <form id="leadEditForm" method="POST" action="{{ route('telecaller.leads.update', $lead) }}">
                 @csrf @method('PATCH')
-                <div class="grid grid-cols-2 gap-4">
+
+                <div class="space-y-3">
                     <div>
-                        <label class="text-xs font-semibold text-ink-900/60 uppercase">New status</label>
-                        <select name="status" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
-                            @foreach(['contacted','interested','follow_up','visit_scheduled','visit_done','closed_won','closed_lost','junk'] as $s)
-                                <option value="{{ $s }}" @selected($lead->status === $s)>{{ str_replace('_',' ',$s) }}</option>
+                        <label class="text-xs font-bold text-ink-900/60 uppercase">Status</label>
+                        <select name="status" class="liveField w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15">
+                            @foreach(['new'=>'New','contacted'=>'Contacted','interested'=>'Interested','follow_up'=>'Follow up','visit_scheduled'=>'Visit scheduled','visit_done'=>'Visit done','closed_won'=>'✓ Closed Won','closed_lost'=>'✗ Closed Lost','not_interested'=>'Not interested'] as $key => $label)
+                                <option value="{{ $key }}" @selected($lead->status === $key)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
+
                     <div>
-                        <label class="text-xs font-semibold text-ink-900/60 uppercase">Next follow-up</label>
-                        <input type="datetime-local" name="next_follow_up_at" value="{{ $lead->next_follow_up_at?->format('Y-m-d\TH:i') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
+                        <label class="text-xs font-bold text-ink-900/60 uppercase">📍 Preferred Locality</label>
+                        <input name="preferred_locality" value="{{ $lead->preferred_locality }}"
+                               class="liveField w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15"
+                               placeholder="e.g. Mukherjee Nagar">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-ink-900/60 uppercase">🏙 Preferred City</label>
+                        <input name="preferred_city" value="{{ $lead->preferred_city }}"
+                               class="liveField w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15"
+                               placeholder="e.g. Delhi">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-xs font-bold text-ink-900/60 uppercase">💰 Budget Min</label>
+                            <input type="number" name="budget_min" value="{{ $lead->budget_min }}"
+                                   class="liveField w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15"
+                                   placeholder="6000">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-ink-900/60 uppercase">💰 Budget Max</label>
+                            <input type="number" name="budget_max" value="{{ $lead->budget_max }}"
+                                   class="liveField w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15"
+                                   placeholder="10000">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-ink-900/60 uppercase">👤 Gender preference</label>
+                        <select name="preferred_gender" class="liveField w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15">
+                            <option value="">—</option>
+                            <option value="male" @selected($lead->preferred_gender === 'male')>Male</option>
+                            <option value="female" @selected($lead->preferred_gender === 'female')>Female</option>
+                            <option value="unisex" @selected($lead->preferred_gender === 'unisex')>Unisex / No preference</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-ink-900/60 uppercase">📝 Notes</label>
+                        <textarea name="notes" rows="3"
+                                  class="liveField w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15"
+                                  placeholder="Tenant feedback, preferences, follow-up info...">{{ $lead->notes }}</textarea>
                     </div>
                 </div>
-                <div>
-                    <label class="text-xs font-semibold text-ink-900/60 uppercase">Notes</label>
-                    <textarea name="telecaller_notes" rows="3" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">{{ $lead->telecaller_notes }}</textarea>
-                </div>
-                <button class="px-6 py-3 bg-coral-500 text-white rounded-xl font-bold">Save update</button>
+
+                <div id="saveStatus" class="text-xs mt-3 h-4"></div>
             </form>
         </div>
 
         {{-- Schedule visit --}}
-        <div class="bg-white p-8 rounded-2xl border border-ink-900/10">
-            <h2 class="font-display font-bold text-xl mb-4">Schedule a site visit</h2>
-            <form method="POST" action="{{ route('telecaller.leads.visit', $lead) }}" class="space-y-4">
+        <div class="bg-white p-5 rounded-2xl border border-ink-900/10">
+            <h3 class="font-display font-bold text-lg mb-3">📅 Schedule site visit</h3>
+            <form method="POST" action="{{ route('telecaller.leads.visit', $lead) }}" class="space-y-3">
                 @csrf
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="hidden" name="property_id" value="{{ $lead->property_id }}">
-                    <div>
-                        <label class="text-xs font-semibold text-ink-900/60 uppercase">Date & time</label>
-                        <input type="datetime-local" name="scheduled_at" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
-                    </div>
-                    <div>
-                        <label class="text-xs font-semibold text-ink-900/60 uppercase">Property</label>
-                        <input value="{{ $lead->property?->name ?? 'No property linked' }}" disabled class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15 bg-ink-900/5">
-                    </div>
+                <div>
+                    <label class="text-xs font-bold text-ink-900/60 uppercase">Property</label>
+                    <select name="property_id" required class="w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15">
+                        <option value="">Select property...</option>
+                        @foreach($matchingProperties as $p)
+                            <option value="{{ $p->id }}">{{ $p->name }} — {{ $p->locality?->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
-                <button class="px-6 py-3 bg-ink-900 text-cream rounded-xl font-bold">Schedule visit</button>
+                <div>
+                    <label class="text-xs font-bold text-ink-900/60 uppercase">Date & time</label>
+                    <input type="datetime-local" name="scheduled_at" required class="w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-ink-900/60 uppercase">Field Executive</label>
+                    <select name="field_executive_id" class="w-full mt-1 px-3 py-2 rounded-lg border border-ink-900/15">
+                        <option value="">— Auto-assign —</option>
+                        @foreach($fieldExecs as $fe)
+                            <option value="{{ $fe->id }}">{{ $fe->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <button class="w-full py-2.5 bg-coral-500 text-white rounded-lg font-bold">Schedule visit</button>
             </form>
         </div>
     </div>
 
-    {{-- Property snapshot --}}
+    {{-- RIGHT: Live matching properties --}}
     <div>
-        @if($lead->property)
-            <div class="bg-white rounded-2xl border border-ink-900/10 overflow-hidden sticky top-6">
-                <img src="{{ $lead->property->cover_url }}" class="w-full aspect-[4/3] object-cover">
-                <div class="p-6">
-                    <h3 class="font-display font-bold text-xl">{{ $lead->property->name }}</h3>
-                    <p class="text-sm text-ink-900/60 mt-1">{{ $lead->property->locality?->name }}</p>
-                    <div class="font-display font-black text-2xl text-coral-500 mt-3">{{ $lead->property->rent_range }}</div>
-                    <a href="{{ route('property.show', $lead->property->slug) }}" target="_blank" class="block text-center mt-4 py-2 border border-ink-900/15 rounded-lg text-sm font-semibold">View on site →</a>
-                </div>
+        <div class="bg-cream p-5 rounded-2xl sticky top-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="font-display font-bold text-lg">🎯 Matching Properties</h3>
+                <span id="matchCount" class="text-xs text-ink-900/60">{{ $matchingProperties->count() }} matches</span>
             </div>
-        @else
-            <div class="bg-white p-6 rounded-2xl border border-ink-900/10 text-center text-ink-900/60">
-                General inquiry — no specific property attached.
+            <p class="text-xs text-ink-900/60 mb-4">Live results based on lead's current budget + area. Send via WhatsApp instantly.</p>
+
+            <div id="matchingResults">
+                @include('telecaller._matching_properties', compact('matchingProperties'))
             </div>
-        @endif
+        </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+const form = document.getElementById('leadEditForm');
+const status = document.getElementById('saveStatus');
+const matchingDiv = document.getElementById('matchingResults');
+const matchCount = document.getElementById('matchCount');
+let saveTimer = null;
+
+// Auto-save on field change (debounced 600ms)
+document.querySelectorAll('.liveField').forEach(field => {
+    field.addEventListener('input', triggerSave);
+    field.addEventListener('change', triggerSave);
+});
+
+function triggerSave() {
+    status.textContent = '⏳ Saving...';
+    status.className = 'text-xs mt-3 h-4 text-ink-900/60';
+
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveForm, 600);
+}
+
+async function saveForm() {
+    const formData = new FormData(form);
+
+    try {
+        const res = await fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        });
+
+        if (!res.ok) throw new Error('Save failed');
+
+        const data = await res.json();
+
+        // Update matching properties live
+        if (data.matches_html) {
+            matchingDiv.innerHTML = data.matches_html;
+            // Recount
+            const cards = matchingDiv.querySelectorAll('.bg-white.border').length;
+            matchCount.textContent = cards + ' matches';
+        }
+
+        status.textContent = '✓ Saved · matches updated';
+        status.className = 'text-xs mt-3 h-4 text-emerald-600 font-bold';
+
+        setTimeout(() => { status.textContent = ''; }, 2000);
+    } catch (err) {
+        status.textContent = '⚠️ Save failed — try again';
+        status.className = 'text-xs mt-3 h-4 text-rose-600 font-bold';
+    }
+}
+
+// WhatsApp share — open in new tab
+function shareWA(propertyId) {
+    const url = '/telecaller/leads/{{ $lead->id }}/whatsapp/' + propertyId;
+    window.open(url, '_blank');
+}
+</script>
+@endpush
+
 @endsection

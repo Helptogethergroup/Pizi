@@ -92,69 +92,68 @@ class LeadMatchingService
      * Get all matched leads for a specific owner across all their properties.
      * Returns sorted collection with score + badge + affordability attached.
      */
-    public function leadsForOwner(User $owner, int $minScore = 30): Collection
+ public function leadsForOwner($owner, int $limit = 60)
     {
-        $properties = Property::where('owner_id', $owner->id)->with(['city', 'locality'])->get();
+        $properties = $owner->properties()->where('is_active', true)
+            ->with(['city', 'locality'])->get();
 
-        if ($properties->isEmpty()) {
-            return collect();
-        }
+        if ($properties->isEmpty()) return collect();
 
-        $propertyIds = $properties->pluck('id');
-        $cityIds = $properties->pluck('city_id')->unique();
+        $unlockedIds = \App\Models\LeadUnlock::where('owner_id', $owner->id)
+            ->pluck('lead_id')->toArray();
 
-        // Pull leads from owner's properties OR generic leads matching owner's cities
-        $leads = Lead::with(['property.city', 'property.locality', 'unlocks' => fn ($q) => $q->where('user_id', $owner->id)])
-            ->where(function ($q) use ($propertyIds, $cityIds) {
-                $q->whereIn('property_id', $propertyIds)
-                  ->orWhere(function ($qb) use ($cityIds) {
-                      // Generic leads (no specific property) but matching city preference
-                      $qb->whereNull('property_id');
-                  });
-            })
-            ->where(function ($q) use ($owner) {
-                // Not locked OR locked by this owner
-                $q->where('is_locked', false)
-                  ->orWhere('locked_by_user_id', $owner->id);
-            })
+        $lockedByOthers = \App\Models\LeadUnlock::where('owner_id', '!=', $owner->id)
+            ->pluck('lead_id')->toArray();
+
+        $ownerLocalities = $properties->pluck('locality.name')->filter()->unique()->toArray();
+        $ownerCities = $properties->pluck('city.name')->filter()->unique()->toArray();
+
+        $leads = \App\Models\Lead::whereNotIn('id', $lockedByOthers)
+            ->where('status', '!=', 'closed_lost')
             ->latest()
-            ->take(200)
+            ->take($limit * 3)
             ->get();
 
-        $walletBalance = $owner->wallet?->balance ?? 0;
-        $pricing = LeadPricing::where('is_active', true)->pluck('credit_cost', 'lead_type')->toArray();
+        $wallet = $owner->wallet;
 
-        return $leads
-            ->map(function (Lead $lead) use ($properties, $walletBalance, $pricing) {
-                // Find best-matching property of this owner for this lead
-                $bestScore = 0;
-                $bestProperty = null;
-                foreach ($properties as $property) {
-                    $s = $this->score($lead, $property);
-                    if ($s > $bestScore) {
-                        $bestScore = $s;
-                        $bestProperty = $property;
-                    }
+        $scored = $leads->map(function ($lead) use ($properties, $unlockedIds, $wallet, $ownerLocalities, $ownerCities) {
+            $bestScore = 0;
+            $bestProp = null;
+            foreach ($properties as $prop) {
+                $s = $this->score($lead, $prop);
+                if ($s > $bestScore) {
+                    $bestScore = $s;
+                    $bestProp = $prop;
                 }
+            }
 
-                $cost = $pricing[$lead->lead_type ?? 'direct'] ?? 0;
-                $isUnlocked = $lead->unlocks->isNotEmpty();
+            // AREA MATCH BONUS
+            $areaMatch = false;
+            if ($lead->preferred_locality && in_array($lead->preferred_locality, $ownerLocalities)) {
+                $bestScore = min(100, $bestScore + 15);
+                $areaMatch = true;
+            } elseif ($lead->preferred_city && in_array($lead->preferred_city, $ownerCities)) {
+                $bestScore = min(100, $bestScore + 5);
+            }
 
-                $lead->match_score = $bestScore;
-                $lead->matched_property = $bestProperty;
-                $lead->badge_info = $this->badge($bestScore);
-                $lead->unlock_cost = $cost;
-                $lead->is_unlocked = $isUnlocked;
-                $lead->can_afford = $isUnlocked || $walletBalance >= $cost;
+            $lead->match_score = $bestScore;
+            $lead->matched_property = $bestProp;
+            $lead->is_unlocked = in_array($lead->id, $unlockedIds);
+            $lead->area_match = $areaMatch;
 
-                return $lead;
-            })
-            ->filter(fn (Lead $lead) => $lead->match_score >= $minScore)
-            ->sortByDesc(function (Lead $lead) {
-                // Unlocked first, then by score
-                return ($lead->is_unlocked ? 1000 : 0) + $lead->match_score;
-            })
-            ->values();
+            $type = $lead->lead_type ?? 'direct';
+            $pricing = \App\Models\LeadPricing::where('lead_type', $type)
+                ->where('is_active', true)->first();
+            $lead->unlock_cost = $pricing?->credit_cost ?? 0;
+            $lead->affordable = $wallet && $wallet->balance >= $lead->unlock_cost;
+
+            return $lead;
+        });
+
+        // Sort: area-matched first, then by score
+        return $scored->sortByDesc(function ($lead) {
+            return ($lead->area_match ? 1000 : 0) + $lead->match_score;
+        })->values();
     }
 
     /**

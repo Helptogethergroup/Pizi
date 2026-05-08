@@ -1,29 +1,30 @@
 <?php
 
 namespace App\Http\Controllers\TeleCaller;
-use App\Notifications\VisitScheduled;
+
 use App\Http\Controllers\Controller;
 use App\Models\Lead;
 use App\Models\Property;
 use App\Models\Visit;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
 {
     public function index(Request $request)
     {
-        $q = Lead::where('assigned_telecaller_id', auth()->id())
-            ->with('property');
+        $q = Lead::query();
+
+        if (!auth()->user()->isAdmin()) {
+            $q->where('assigned_telecaller_id', auth()->id());
+        }
 
         if ($request->filled('status')) {
             $q->where('status', $request->status);
         }
         if ($request->filled('search')) {
             $term = '%' . $request->search . '%';
-            $q->where(function ($qb) use ($term) {
-                $qb->where('name', 'like', $term)
-                   ->orWhere('phone', 'like', $term);
-            });
+            $q->where(fn($x) => $x->where('name', 'like', $term)->orWhere('phone', 'like', $term));
         }
 
         $leads = $q->latest()->paginate(20)->withQueryString();
@@ -33,8 +34,14 @@ class LeadController extends Controller
     public function show(Lead $lead)
     {
         $this->authorizeAccess($lead);
-        $lead->load(['property.images', 'property.amenities', 'visits.fieldExecutive']);
-        return view('telecaller.lead-detail', compact('lead'));
+        $lead->load('property', 'telecaller');
+
+        // Find matching properties for this lead based on current preferences
+        $matchingProperties = $this->findMatchingProperties($lead);
+
+        $fieldExecs = User::where('role', 'field_executive')->where('is_active', true)->get();
+
+        return view('telecaller.lead-detail', compact('lead', 'matchingProperties', 'fieldExecs'));
     }
 
     public function update(Request $request, Lead $lead)
@@ -42,17 +49,36 @@ class LeadController extends Controller
         $this->authorizeAccess($lead);
 
         $data = $request->validate([
-            'status' => 'required|in:new,contacted,interested,follow_up,visit_scheduled,visit_done,closed_won,closed_lost,junk',
-            'telecaller_notes' => 'nullable|string',
-            'next_follow_up_at' => 'nullable|date',
+            'name' => 'nullable|string|max:120',
+            'phone' => 'nullable|string|max:15',
+            'email' => 'nullable|email|max:160',
+            'preferred_locality' => 'nullable|string|max:120',
+            'preferred_city' => 'nullable|string|max:120',
+            'preferred_gender' => 'nullable|in:male,female,unisex',
+            'budget_min' => 'nullable|numeric|min:0',
+            'budget_max' => 'nullable|numeric|min:0',
+            'move_in_date' => 'nullable|date',
+            'status' => 'nullable|in:new,contacted,interested,follow_up,visit_scheduled,visit_done,closed_won,closed_lost,not_interested',
+            'notes' => 'nullable|string|max:2000',
         ]);
 
-        $data['last_contacted_at'] = now();
-        $lead->update($data);
+        $lead->update(array_filter($data, fn($v) => $v !== null));
+
+        // AJAX response — for live update
+        if ($request->wantsJson() || $request->ajax()) {
+            $matches = $this->findMatchingProperties($lead->fresh());
+            return response()->json([
+                'ok' => true,
+                'message' => '✓ Lead updated.',
+                'lead' => $lead->fresh(),
+                'matches_html' => view('telecaller._matching_properties', ['matchingProperties' => $matches])->render(),
+            ]);
+        }
 
         return back()->with('success', 'Lead updated.');
     }
-public function scheduleVisit(Request $request, Lead $lead)
+
+    public function scheduleVisit(Request $request, Lead $lead)
     {
         $this->authorizeAccess($lead);
 
@@ -78,8 +104,8 @@ public function scheduleVisit(Request $request, Lead $lead)
         // Notify field exec
         try {
             $visit->load('lead', 'property');
-            if ($fieldExec = \App\Models\User::find($data['field_executive_id'] ?? null)) {
-                $fieldExec->notify(new VisitScheduled($visit));
+            if ($fieldExec = User::find($data['field_executive_id'] ?? null)) {
+                $fieldExec->notify(new \App\Notifications\VisitScheduled($visit));
             }
         } catch (\Exception $e) {
             \Log::warning('Visit notification failed: ' . $e->getMessage());
@@ -88,27 +114,53 @@ public function scheduleVisit(Request $request, Lead $lead)
         return back()->with('success', 'Site visit scheduled.');
     }
 
-    /**
-     * Build a wa.me deep link with pre-filled property details.
-     * One-click send from tele-caller dashboard.
-     */
     public function whatsappLink(Lead $lead, Property $property)
     {
         $this->authorizeAccess($lead);
 
-        $url = url('/pg/' . $property->slug);
         $msg = "Hi {$lead->name}, here are the PG details you asked about:\n\n"
-            . "🏠 *{$property->name}*\n"
-            . "📍 {$property->address_line}, " . ($property->locality?->name) . "\n"
-            . "💰 Rent: " . $property->rent_range . "/month\n"
-            . "🛡️ Deposit: ₹" . number_format($property->security_deposit) . "\n\n"
-            . "View full details & photos: $url\n\n"
-            . "Reply YES to schedule a free site visit. — PGFind";
+            . "🏠 {$property->name}\n"
+            . "📍 {$property->address_line}, " . ($property->locality?->name ?? '') . "\n"
+            . "💰 Rent: ₹" . number_format($property->rent_min) . "–" . number_format($property->rent_max) . "/month\n"
+            . "🛡️ Deposit: ₹" . number_format($property->security_deposit ?? 0) . "\n\n"
+            . "View full details: " . route('property.show', $property->slug) . "\n\n"
+            . "Reply YES to schedule a free site visit.\n— PGFind";
 
-        $waUrl = 'https://wa.me/' . preg_replace('/\D/', '', $lead->phone)
-            . '?text=' . urlencode($msg);
+        $phone = preg_replace('/\D/', '', $lead->phone);
+        $url = "https://wa.me/{$phone}?text=" . urlencode($msg);
 
-        return redirect()->away($waUrl);
+        return redirect($url);
+    }
+
+    /**
+     * Find matching properties based on lead's current budget + area.
+     */
+    private function findMatchingProperties(Lead $lead, int $limit = 8)
+    {
+        $q = Property::where('is_active', true)->where('is_verified', true)
+            ->with(['city', 'locality', 'images']);
+
+        // Filter by gender
+        if ($lead->preferred_gender && $lead->preferred_gender !== 'unisex') {
+            $q->whereIn('gender', [$lead->preferred_gender, 'unisex']);
+        }
+
+        // Filter by budget
+        if ($lead->budget_max) {
+            $q->where('rent_min', '<=', $lead->budget_max);
+        }
+        if ($lead->budget_min) {
+            $q->where('rent_max', '>=', $lead->budget_min);
+        }
+
+        // Filter by locality (exact match) or city
+        if ($lead->preferred_locality) {
+            $q->whereHas('locality', fn($l) => $l->where('name', $lead->preferred_locality));
+        } elseif ($lead->preferred_city) {
+            $q->whereHas('city', fn($c) => $c->where('name', $lead->preferred_city));
+        }
+
+        return $q->orderBy('rent_min')->take($limit)->get();
     }
 
     private function authorizeAccess(Lead $lead): void
