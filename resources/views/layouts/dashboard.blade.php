@@ -57,6 +57,13 @@
                 <a href="{{ route('telecaller.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Dashboard</a>
                 <a href="{{ route('telecaller.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}">🎯 My Leads</a>
                 <a href="{{ route('leads.manual.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('leads.manual.*') ? 'bg-cream/10 text-coral-500' : '' }}">+ Add Lead</a>
+
+                @elseif($role === 'seo_manager')
+                <a href="{{ route('seo.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Dashboard</a>
+                <a href="{{ route('seo.settings.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.settings.*') ? 'bg-cream/10 text-coral-500' : '' }}">🔍 SEO Settings</a>
+                <a href="{{ route('seo.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}">📝 Blogs</a>
+       
+
             @endif
              <a href="{{ route('notifications.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 mt-4 {{ request()->routeIs('notifications.*') ? 'bg-cream/10 text-coral-500' : '' }}">
                 🔔 Notifications

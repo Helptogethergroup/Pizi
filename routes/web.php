@@ -158,3 +158,27 @@ Route::middleware('auth')->group(function () {
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });
+
+
+/* ---------- SEO MANAGER ---------- */
+Route::middleware(['auth', 'role:seo_manager,admin'])->prefix('seo')->name('seo.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Seo\DashboardController::class, 'index'])->name('dashboard');
+
+    // SEO settings (page-wise meta)
+    Route::get('/settings', [\App\Http\Controllers\Seo\SeoSettingController::class, 'index'])->name('settings.index');
+    Route::get('/settings/create', [\App\Http\Controllers\Seo\SeoSettingController::class, 'create'])->name('settings.create');
+    Route::post('/settings', [\App\Http\Controllers\Seo\SeoSettingController::class, 'store'])->name('settings.store');
+    Route::get('/settings/{setting}/edit', [\App\Http\Controllers\Seo\SeoSettingController::class, 'edit'])->name('settings.edit');
+    Route::patch('/settings/{setting}', [\App\Http\Controllers\Seo\SeoSettingController::class, 'update'])->name('settings.update');
+    Route::patch('/settings/{setting}/toggle', [\App\Http\Controllers\Seo\SeoSettingController::class, 'toggle'])->name('settings.toggle');
+    Route::delete('/settings/{setting}', [\App\Http\Controllers\Seo\SeoSettingController::class, 'destroy'])->name('settings.destroy');
+
+    // Blog CRUD
+    Route::get('/blogs', [\App\Http\Controllers\Seo\BlogController::class, 'index'])->name('blogs.index');
+    Route::get('/blogs/create', [\App\Http\Controllers\Seo\BlogController::class, 'create'])->name('blogs.create');
+    Route::post('/blogs', [\App\Http\Controllers\Seo\BlogController::class, 'store'])->name('blogs.store');
+    Route::get('/blogs/{blog}/edit', [\App\Http\Controllers\Seo\BlogController::class, 'edit'])->name('blogs.edit');
+    Route::patch('/blogs/{blog}', [\App\Http\Controllers\Seo\BlogController::class, 'update'])->name('blogs.update');
+    Route::patch('/blogs/{blog}/toggle', [\App\Http\Controllers\Seo\BlogController::class, 'togglePublish'])->name('blogs.toggle');
+    Route::delete('/blogs/{blog}', [\App\Http\Controllers\Seo\BlogController::class, 'destroy'])->name('blogs.destroy');
+});

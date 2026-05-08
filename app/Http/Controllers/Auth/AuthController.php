@@ -66,13 +66,14 @@ class AuthController extends Controller
         return redirect('/');
     }
 
-    private function redirectByRole(User $user)
+   private function redirectByRole(User $user)
     {
         return match ($user->role) {
             'admin' => redirect()->route('admin.dashboard'),
             'owner' => redirect()->route('owner.dashboard'),
             'telecaller' => redirect()->route('telecaller.dashboard'),
             'field_executive' => redirect()->route('fieldexec.dashboard'),
+            'seo_manager' => redirect()->route('seo.dashboard'),
             default => redirect('/'),
         };
     }

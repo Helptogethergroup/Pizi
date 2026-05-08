@@ -1,7 +1,7 @@
 {
-    "name": "pgfind/pg-aggregator",
+    "name": "pizi/pg-aggregator",
     "type": "project",
-    "description": "PGFind — A PG/Hostel aggregator for Delhi NCR & Noida.",
+    "description": "Pizi — A PG/Hostel aggregator for Delhi NCR & Noida.",
     "keywords": ["laravel", "pg", "hostel", "real-estate", "delhi", "noida"],
     "license": "MIT",
     "require": {

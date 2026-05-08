@@ -87,4 +87,9 @@ class User extends Authenticatable
         $wallet = $this->wallet ?? $this->wallet()->create(['balance' => 0]);
         return $wallet->balance;
     }
+
+    public function isSeoManager(): bool
+    {
+        return $this->role === 'seo_manager';
+    }
 }
