@@ -12,4 +12,4 @@
     @include('admin.blogs._form')
 </form>
 
-@endsection
+@endsection 

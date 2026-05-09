@@ -29,7 +29,7 @@ class UserController extends Controller
             'name' => 'required|string|max:120',
             'email' => 'required|email|unique:users,email',
             'phone' => 'required|string|max:15',
-            'role' => 'required|in:admin,owner,telecaller,field_executive',
+            'role' => 'required|in:telecaller,field_executive,owner,seo_manager,admin',
             'password' => 'required|string|min:6',
         ]);
         $data['password'] = Hash::make($data['password']);
