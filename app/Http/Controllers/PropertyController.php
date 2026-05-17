@@ -14,21 +14,84 @@ class PropertyController extends Controller
      * Generic search page (with filters).
      * URL: /search
      */
-    public function search(Request $request)
+   public function search(Request $request)
     {
-        $properties = $this->filteredQuery($request)->paginate(12)->withQueryString();
-        $cities = City::where('is_active', true)->orderBy('name')->get();
-        $amenities = Amenity::orderBy('name')->get();
+        $q = Property::active()
+            ->where('is_verified', true)
+            ->with(['city', 'locality', 'amenities']);
 
-        return view('public.search', [
-            'properties' => $properties,
-            'cities' => $cities,
-            'amenities' => $amenities,
-            'filters' => $request->only([
-                'city', 'locality', 'gender', 'min_rent', 'max_rent',
-                'sharing', 'amenities', 'q',
-            ]),
-        ]);
+        // Free-text search across name, locality, city, address
+        if ($request->filled('q')) {
+            $term = '%' . $request->q . '%';
+            $q->where(function ($w) use ($term) {
+                $w->where('name', 'like', $term)
+                  ->orWhere('address_line', 'like', $term)
+                  ->orWhere('landmark', 'like', $term)
+                  ->orWhereHas('locality', fn($l) => $l->where('name', 'like', $term))
+                  ->orWhereHas('city', fn($c) => $c->where('name', 'like', $term));
+            });
+        }
+
+        // City filter
+        if ($request->filled('city')) {
+            $q->whereHas('city', fn($c) => $c->where('slug', $request->city));
+        }
+
+        // Locality filter
+        if ($request->filled('locality')) {
+            $q->whereHas('locality', fn($l) => $l->where('slug', $request->locality));
+        }
+
+        // Gender filter
+        if ($request->filled('gender')) {
+            $q->where(function ($w) use ($request) {
+                $w->where('gender', $request->gender)
+                  ->orWhere('gender', 'unisex');
+            });
+        }
+
+        // Property type
+        if ($request->filled('type')) {
+            $q->where('property_type', $request->type);
+        }
+
+        // Budget
+        if ($request->filled('budget_max')) {
+            $q->where('rent_min', '<=', $request->budget_max);
+        }
+        if ($request->filled('budget_min')) {
+            $q->where('rent_max', '>=', $request->budget_min);
+        }
+
+        // Food included
+        if ($request->filled('food')) {
+            $q->where('food_included', (bool) $request->food);
+        }
+
+        // Amenities (multi-select)
+        if ($request->filled('amenities')) {
+            $amenityIds = (array) $request->amenities;
+            $q->whereHas('amenities', function ($a) use ($amenityIds) {
+                $a->whereIn('amenities.id', $amenityIds);
+            }, '=', count($amenityIds));
+        }
+
+        // Sort
+        $sort = $request->get('sort', 'latest');
+        match ($sort) {
+            'price_low' => $q->orderBy('rent_min', 'asc'),
+            'price_high' => $q->orderBy('rent_min', 'desc'),
+            'popular' => $q->orderBy('view_count', 'desc'),
+            default => $q->latest(),
+        };
+
+        $properties = $q->paginate(12)->withQueryString();
+
+        // For filter sidebar
+        $cities = \App\Models\City::where('is_active', true)->orderBy('name')->get();
+        $amenities = \App\Models\Amenity::orderBy('name')->get();
+
+        return view('public.search', compact('properties', 'cities', 'amenities'));
     }
 
     /**

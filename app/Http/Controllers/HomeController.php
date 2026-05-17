@@ -20,8 +20,17 @@ class HomeController extends Controller
             ->latest()->take(8)->get();
 
         $cities = City::where('is_active', true)
-           ->withCount(['properties' => fn ($q) => $q->where('properties.is_active', true)])
+            ->withCount(['properties' => fn($q) => $q->where('properties.is_active', true)])
             ->orderBy('display_order')->get();
+
+        $localities = \App\Models\Locality::where('is_active', true)
+            ->with('city')
+            ->orderBy('name')
+            ->get();
+
+        $landmarks = \App\Models\Landmark::where('is_active', true)
+            ->orderBy('name')
+            ->get();
 
         $stats = [
             'properties' => Property::active()->count(),
@@ -31,7 +40,7 @@ class HomeController extends Controller
 
         $blogs = Blog::published()->latest('published_at')->take(3)->get();
 
-        return view('public.home', compact('featured', 'latest', 'cities', 'stats', 'blogs'));
+        return view('public.home', compact('featured', 'latest', 'cities', 'stats', 'blogs', 'localities' ,'landmarks'));
     }
 
     public function about()
