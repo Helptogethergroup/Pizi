@@ -13,7 +13,7 @@ use RuntimeException;
 
 class LeadController extends Controller
 {
-   public function index(Request $request, LeadMatchingService $matcher)
+    public function index(Request $request, LeadMatchingService $matcher)
     {
         $owner = auth()->user();
         $allMatched = $matcher->leadsForOwner($owner, 60);
@@ -39,7 +39,8 @@ class LeadController extends Controller
         );
 
         $wallet = $owner->wallet ?? \App\Models\Wallet::firstOrCreate(
-            ['user_id' => $owner->id], ['balance' => 0]
+            ['user_id' => $owner->id],
+            ['balance' => 0]
         );
 
         // Tab counts
@@ -62,7 +63,8 @@ class LeadController extends Controller
 
         try {
             $result = $service->unlockLead($owner, $lead);
-            return back()->with('success', "✓ Lead unlocked! {$result['credits_spent']} credits used. Balance: {$result['balance_remaining']}");
+            $balance = $result['balance_remaining'] ?? $owner->wallet?->fresh()?->balance ?? 0;
+            return back()->with('success', "✓ Lead unlocked! {$result['credits_spent']} credits used. Balance: {$balance}");
         } catch (RuntimeException $e) {
             return back()->withErrors(['unlock' => $e->getMessage()]);
         }
