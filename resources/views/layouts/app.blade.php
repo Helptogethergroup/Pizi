@@ -70,12 +70,13 @@
 
             {{-- Logo --}}
             <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
-                <div class="w-10 h-10 rounded-xl bg-ink-950 flex items-center justify-center group-hover:bg-coral-500 transition-colors">
+                <!-- <div class="w-10 h-10 rounded-xl bg-ink-950 flex items-center justify-center group-hover:bg-coral-500 transition-colors">
                     <svg viewBox="0 0 24 24" class="w-5 h-5 text-coral-500 group-hover:text-white transition-colors" fill="currentColor">
                         <path d="M12 2 2 9v13h7v-7h6v7h7V9z"/>
                     </svg>
                 </div>
-                <span class="font-display font-black text-xl text-ink-950">PG<span class="text-coral-500">Find</span></span>
+                <span class="font-display font-black text-xl text-ink-950">PG<span class="text-coral-500">Find</span></span> -->
+                    
             </a>
 
             {{-- Desktop nav --}}
