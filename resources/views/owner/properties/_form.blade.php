@@ -16,18 +16,14 @@
                 @endforeach
             </select>
         </div>
-    <div>
-    <label class="text-xs font-semibold text-ink-900/60 uppercase">
-        Address
-    </label>
-
-    <textarea 
-        name="address"
-        rows="3"
-        class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15"
-        placeholder="Enter full address"
-    >{{ old('address', $property->address ?? '') }}</textarea>
-</div>
+        <div>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">Locality</label>
+            <select name="locality_id" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
+                @foreach($localities as $l)
+                    <option value="{{ $l->id }}" data-city="{{ $l->city_id }}" @selected(old('locality_id', $property->locality_id ?? '') == $l->id)>{{ $l->name }} ({{ $l->city?->name }})</option>
+                @endforeach
+            </select>
+        </div>
         <div>
             <label class="text-xs font-semibold text-ink-900/60 uppercase">For</label>
             <select name="gender" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
