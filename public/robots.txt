@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /owner
+Disallow: /telecaller
+Disallow: /login
+Disallow: /register
+
+Sitemap: /sitemap.xml

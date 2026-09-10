@@ -1,0 +1,25 @@
+{
+  "name": "Pizi - Find Verified PGs",
+  "short_name": "Pizi",
+  "description": "Find verified PGs in Delhi NCR. Real photos. Verified owners.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#0f2748",
+  "background_color": "#fefcf6",
+  "icons": [
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

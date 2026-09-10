@@ -1,0 +1,22 @@
+{
+    "name": "PGFind Field",
+    "short_name": "PGFind",
+    "description": "Field Executive app for PGFind",
+    "start_url": "/field",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0f2748",
+    "theme_color": "#0f2748",
+    "icons": [
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIyIiBmaWxsPSIjMGYyNzQ4Ii8+PHBhdGggZD0iTTUwIDI1IEw3MCA1MCBMNjAgNTAgTDYwIDc1IEw0MCA3NSBMNDAgNTAgTDMwIDUwIFoiIGZpbGw9IiNmZjZiNWIiLz48L3N2Zz4=",
+            "sizes": "192x192",
+            "type": "image/svg+xml"
+        },
+        {
+            "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgcng9IjIyIiBmaWxsPSIjMGYyNzQ4Ii8+PHBhdGggZD0iTTUwIDI1IEw3MCA1MCBMNjAgNTAgTDYwIDc1IEw0MCA3NSBMNDAgNTAgTDMwIDUwIFoiIGZpbGw9IiNmZjZiNWIiLz48L3N2Zz4=",
+            "sizes": "512x512",
+            "type": "image/svg+xml"
+        }
+    ]
+}

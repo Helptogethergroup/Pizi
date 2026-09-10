@@ -1,0 +1,148 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+// ============================================
+// PIZI REST API (No Sanctum - Custom Tokens)
+// Base URL: https://pizi.in/api
+// All routes return JSON
+// ============================================
+
+// ============ AUTH ROUTES ============
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [App\Http\Controllers\Api\AuthController::class, 'register']);
+    Route::post('/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
+    Route::post('/send-otp', [App\Http\Controllers\Api\AuthController::class, 'sendOtp']);
+    Route::post('/verify-otp', [App\Http\Controllers\Api\AuthController::class, 'verifyOtp']);
+    Route::post('/forgot-password', [App\Http\Controllers\Api\AuthController::class, 'forgotPassword']);
+
+    Route::middleware('api.auth')->group(function () {
+        Route::post('/logout', [App\Http\Controllers\Api\AuthController::class, 'logout']);
+        Route::get('/me', [App\Http\Controllers\Api\AuthController::class, 'me']);
+        Route::patch('/profile', [App\Http\Controllers\Api\AuthController::class, 'updateProfile']);
+    });
+});
+
+// ============ PUBLIC ROUTES (NO AUTH) ============
+
+Route::prefix('properties')->group(function () {
+    Route::get('/', [App\Http\Controllers\Api\PropertyController::class, 'index']);
+    Route::get('/featured', [App\Http\Controllers\Api\PropertyController::class, 'featured']);
+    Route::get('/{slug}', [App\Http\Controllers\Api\PropertyController::class, 'show']);
+    Route::post('/{id}/view', [App\Http\Controllers\Api\PropertyController::class, 'trackView']);
+});
+
+Route::get('/cities', [App\Http\Controllers\Api\LocationController::class, 'cities']);
+Route::get('/cities/{slug}', [App\Http\Controllers\Api\LocationController::class, 'cityDetail']);
+Route::get('/cities/{cityId}/localities', [App\Http\Controllers\Api\LocationController::class, 'localities']);
+Route::get('/localities/{slug}', [App\Http\Controllers\Api\LocationController::class, 'localityDetail']);
+Route::get('/amenities', [App\Http\Controllers\Api\AmenityController::class, 'index']);
+Route::get('/blogs', [App\Http\Controllers\Api\BlogController::class, 'index']);
+Route::get('/blogs/{slug}', [App\Http\Controllers\Api\BlogController::class, 'show']);
+Route::post('/leads', [App\Http\Controllers\Api\LeadController::class, 'store']);
+Route::get('/seo/{page_key}', [App\Http\Controllers\Api\SeoController::class, 'show']);
+
+// ============ AUTHENTICATED ROUTES ============
+Route::middleware('api.auth')->group(function () {
+
+    Route::get('/user/wishlist', [App\Http\Controllers\Api\WishlistController::class, 'index']);
+    Route::post('/user/wishlist/{propertyId}', [App\Http\Controllers\Api\WishlistController::class, 'toggle']);
+    Route::get('/user/notifications', [App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::patch('/user/notifications/{id}/read', [App\Http\Controllers\Api\NotificationController::class, 'markRead']);
+
+    // ===== OWNER =====
+    Route::prefix('owner')->middleware('api.role:owner,admin')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Api\Owner\DashboardController::class, 'index']);
+
+        Route::get('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'index']);
+        Route::post('/properties', [App\Http\Controllers\Api\Owner\PropertyController::class, 'store']);
+        Route::get('/properties/{id}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'show']);
+        Route::patch('/properties/{id}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'update']);
+        Route::delete('/properties/{id}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'destroy']);
+        Route::post('/properties/{id}/images', [App\Http\Controllers\Api\Owner\PropertyController::class, 'uploadImages']);
+        Route::delete('/properties/images/{imageId}', [App\Http\Controllers\Api\Owner\PropertyController::class, 'deleteImage']);
+
+        Route::get('/tenants', [App\Http\Controllers\Api\Owner\TenantController::class, 'index']);
+        Route::post('/tenants', [App\Http\Controllers\Api\Owner\TenantController::class, 'store']);
+        Route::get('/tenants/{id}', [App\Http\Controllers\Api\Owner\TenantController::class, 'show']);
+        Route::patch('/tenants/{id}', [App\Http\Controllers\Api\Owner\TenantController::class, 'update']);
+        Route::delete('/tenants/{id}', [App\Http\Controllers\Api\Owner\TenantController::class, 'destroy']);
+        Route::patch('/tenants/{id}/kyc/approve', [App\Http\Controllers\Api\Owner\TenantController::class, 'approveKyc']);
+        Route::patch('/tenants/{id}/kyc/reject', [App\Http\Controllers\Api\Owner\TenantController::class, 'rejectKyc']);
+        Route::patch('/tenants/{id}/status', [App\Http\Controllers\Api\Owner\TenantController::class, 'changeStatus']);
+        Route::post('/tenants/{id}/documents', [App\Http\Controllers\Api\Owner\TenantController::class, 'uploadDocument']);
+        Route::delete('/tenants/documents/{docId}', [App\Http\Controllers\Api\Owner\TenantController::class, 'deleteDocument']);
+
+        Route::get('/rent', [App\Http\Controllers\Api\Owner\RentController::class, 'index']);
+        Route::post('/rent', [App\Http\Controllers\Api\Owner\RentController::class, 'store']);
+        Route::get('/rent/{id}', [App\Http\Controllers\Api\Owner\RentController::class, 'show']);
+        Route::delete('/rent/{id}', [App\Http\Controllers\Api\Owner\RentController::class, 'destroy']);
+        Route::post('/rent/generate-all', [App\Http\Controllers\Api\Owner\RentController::class, 'generateAll']);
+        Route::post('/rent/{id}/payment', [App\Http\Controllers\Api\Owner\RentController::class, 'recordPayment']);
+        Route::delete('/rent/payments/{paymentId}', [App\Http\Controllers\Api\Owner\RentController::class, 'deletePayment']);
+
+        Route::get('/complaints', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'index']);
+        Route::post('/complaints', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'store']);
+        Route::get('/complaints/{id}', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'show']);
+        Route::patch('/complaints/{id}/assign', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'assign']);
+        Route::patch('/complaints/{id}/status', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'changeStatus']);
+        Route::patch('/complaints/{id}/priority', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'changePriority']);
+        Route::post('/complaints/{id}/comments', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'addComment']);
+        Route::delete('/complaints/{id}', [App\Http\Controllers\Api\Owner\ComplaintController::class, 'destroy']);
+
+        Route::get('/rooms', [App\Http\Controllers\Api\Owner\RoomController::class, 'index']);
+        Route::post('/rooms', [App\Http\Controllers\Api\Owner\RoomController::class, 'store']);
+        Route::get('/rooms/{id}', [App\Http\Controllers\Api\Owner\RoomController::class, 'show']);
+        Route::patch('/rooms/{id}', [App\Http\Controllers\Api\Owner\RoomController::class, 'update']);
+        Route::delete('/rooms/{id}', [App\Http\Controllers\Api\Owner\RoomController::class, 'destroy']);
+        Route::post('/rooms/{id}/beds', [App\Http\Controllers\Api\Owner\RoomController::class, 'storeBed']);
+        Route::patch('/beds/{bedId}/assign', [App\Http\Controllers\Api\Owner\RoomController::class, 'assignBed']);
+        Route::patch('/beds/{bedId}/unassign', [App\Http\Controllers\Api\Owner\RoomController::class, 'unassignBed']);
+        Route::patch('/beds/{bedId}/status', [App\Http\Controllers\Api\Owner\RoomController::class, 'changeBedStatus']);
+        Route::delete('/beds/{bedId}', [App\Http\Controllers\Api\Owner\RoomController::class, 'destroyBed']);
+
+        Route::get('/agreements', [App\Http\Controllers\Api\Owner\AgreementController::class, 'index']);
+        Route::post('/agreements', [App\Http\Controllers\Api\Owner\AgreementController::class, 'store']);
+        Route::get('/agreements/{id}', [App\Http\Controllers\Api\Owner\AgreementController::class, 'show']);
+        Route::patch('/agreements/{id}', [App\Http\Controllers\Api\Owner\AgreementController::class, 'update']);
+        Route::post('/agreements/{id}/sign-owner', [App\Http\Controllers\Api\Owner\AgreementController::class, 'signAsOwner']);
+        Route::post('/agreements/{id}/sign-tenant', [App\Http\Controllers\Api\Owner\AgreementController::class, 'signAsTenant']);
+        Route::patch('/agreements/{id}/terminate', [App\Http\Controllers\Api\Owner\AgreementController::class, 'terminate']);
+        Route::delete('/agreements/{id}', [App\Http\Controllers\Api\Owner\AgreementController::class, 'destroy']);
+    });
+
+    // ===== ADMIN =====
+    Route::prefix('admin')->middleware('api.role:admin')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Api\Admin\DashboardController::class, 'index']);
+
+        Route::get('/properties', [App\Http\Controllers\Api\Admin\PropertyController::class, 'index']);
+        Route::get('/properties/{id}', [App\Http\Controllers\Api\Admin\PropertyController::class, 'show']);
+        Route::patch('/properties/{id}/verify', [App\Http\Controllers\Api\Admin\PropertyController::class, 'verify']);
+        Route::patch('/properties/{id}/feature', [App\Http\Controllers\Api\Admin\PropertyController::class, 'feature']);
+        Route::delete('/properties/{id}', [App\Http\Controllers\Api\Admin\PropertyController::class, 'destroy']);
+
+        Route::get('/tenants', [App\Http\Controllers\Api\Admin\TenantController::class, 'index']);
+        Route::get('/rent', [App\Http\Controllers\Api\Admin\RentController::class, 'index']);
+        Route::get('/complaints', [App\Http\Controllers\Api\Admin\ComplaintController::class, 'index']);
+        Route::get('/rooms', [App\Http\Controllers\Api\Admin\RoomController::class, 'index']);
+        Route::get('/agreements', [App\Http\Controllers\Api\Admin\AgreementController::class, 'index']);
+
+        Route::get('/users', [App\Http\Controllers\Api\Admin\UserController::class, 'index']);
+        Route::patch('/users/{id}', [App\Http\Controllers\Api\Admin\UserController::class, 'update']);
+        Route::delete('/users/{id}', [App\Http\Controllers\Api\Admin\UserController::class, 'destroy']);
+
+        Route::get('/leads', [App\Http\Controllers\Api\Admin\LeadController::class, 'index']);
+        Route::patch('/leads/{id}/assign', [App\Http\Controllers\Api\Admin\LeadController::class, 'assign']);
+
+        Route::get('/blogs', [App\Http\Controllers\Api\Admin\BlogController::class, 'index']);
+        Route::post('/blogs', [App\Http\Controllers\Api\Admin\BlogController::class, 'store']);
+        Route::patch('/blogs/{id}', [App\Http\Controllers\Api\Admin\BlogController::class, 'update']);
+        Route::delete('/blogs/{id}', [App\Http\Controllers\Api\Admin\BlogController::class, 'destroy']);
+    });
+});
+
+// ============ FALLBACK ============
+Route::fallback(function () {
+    return response()->json(['success' => false, 'message' => 'API endpoint not found'], 404);
+});
