@@ -58,13 +58,18 @@ class OwnerController extends Controller
         $stats = [
             'total_properties'  => DB::table('properties')->where('owner_id', $oid)->whereNull('deleted_at')->count(),
             'active_properties' => DB::table('properties')->where('owner_id', $oid)->where('is_active', 1)->whereNull('deleted_at')->count(),
-            'total_views'       => DB::table('properties')->where('owner_id', $oid)->sum('view_count') ?? 0,
-            'total_leads'       => DB::table('leads')->whereIn('property_id', function ($q) use ($oid) {
+            'total_views'       => DB::table('properties')->where('owner_id', $oid)->whereNull('deleted_at')->sum('view_count') ?? 0,
+            'total_leads'       => DB::table('leads')->whereNull('leads.deleted_at')->whereIn('property_id', function ($q) use ($oid) {
                 $q->select('id')->from('properties')->where('owner_id', $oid);
             })->count(),
             'active_tenants'    => DB::table('tenants')->where('owner_id', $oid)->where('status', 'active')->count(),
             'pending_dues'      => (float) DB::table('rent_bills')->where('owner_id', $oid)->whereIn('status', ['pending', 'partial', 'overdue'])->sum('due_amount'),
             'open_complaints'   => DB::table('complaints')->where('owner_id', $oid)->whereIn('status', ['open', 'assigned', 'in_progress'])->count(),
+            'total_rooms'       => DB::table('rooms')->where('owner_id', $oid)->whereNull('deleted_at')->count(),
+            'vacant_beds'       => DB::table('beds')->where('owner_id', $oid)->whereNull('deleted_at')->where('status', 'vacant')->count(),
+            'occupied_beds'     => DB::table('beds')->where('owner_id', $oid)->whereNull('deleted_at')->where('status', 'occupied')->count(),
+            'month_collection'  => (float) DB::table('rent_payments')->where('owner_id', $oid)
+                ->whereRaw("DATE_FORMAT(paid_at, '%Y-%m') = ?", [date('Y-m')])->sum('amount'),
         ];
 
         $properties = DB::table('properties')
@@ -80,10 +85,12 @@ class OwnerController extends Controller
         $recentLeads = DB::table('leads')
             ->leftJoin('properties', 'leads.property_id', '=', 'properties.id')
             ->where('properties.owner_id', $oid)
+            ->whereNull('leads.deleted_at')
             ->select('leads.*', 'properties.name as property_name')
             ->orderBy('leads.created_at', 'desc')
             ->limit(10)
-            ->get();
+            ->get()
+            ->map(fn ($lead) => $this->formatLeadForApp($lead));
 
         return $this->ok([
             'stats'        => $stats,
@@ -102,6 +109,7 @@ class OwnerController extends Controller
 
         $leadsByDay = DB::table('leads')
             ->whereIn('property_id', $propertyIds)
+            ->whereNull('deleted_at')
             ->where('created_at', '>=', now()->subDays(30))
             ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
             ->groupBy('date')
@@ -113,9 +121,30 @@ class OwnerController extends Controller
             ->whereRaw("DATE_FORMAT(paid_at, '%Y-%m') = ?", [now()->format('Y-m')])
             ->sum('amount');
 
+        // Same figures the web dashboard's Analytics page shows — kept in
+        // sync here so the app matches it: total/closed leads, credit
+        // spend over the last 6 months, lead-type breakdown, per-property
+        // performance, and current wallet totals.
+        $web = app(\App\Services\AnalyticsService::class)->ownerAnalytics($request->user());
+
+        $propertyPerformance = collect($web['properties'])->map(fn ($p) => [
+            'id'                 => $p->id,
+            'name'               => $p->name,
+            'leads_count'        => $p->leads_count,
+            'closed_leads_count' => $p->closed_leads_count,
+            'view_count'         => $p->view_count,
+        ])->values();
+
         return $this->ok([
-            'leads_by_day'      => $leadsByDay,
-            'month_collection'  => (float) $monthCollection,
+            'leads_by_day'         => $leadsByDay,
+            'month_collection'     => (float) $monthCollection,
+            'total_leads'          => $web['totals']['total_leads'],
+            'closed_leads'         => $web['totals']['closed_leads'],
+            'credits_spent'        => (int) $web['totals']['total_spent'],
+            'current_balance'      => (int) $web['totals']['current_balance'],
+            'credit_usage_6mo'     => $web['credit_usage'],
+            'lead_types_breakdown' => $web['lead_types'],
+            'property_performance' => $propertyPerformance,
         ]);
     }
 
@@ -390,9 +419,59 @@ class OwnerController extends Controller
         $property = DB::table('properties')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
         if (!$property) return $this->notFound();
 
-        $data = $request->only(['name', 'description', 'rules', 'gender', 'property_type', 'rent_min', 'rent_max', 'security_deposit', 'address_line', 'pincode', 'food_included', 'is_active']);
+        $validator = Validator::make($request->all(), [
+            'name'                  => 'sometimes|required|string|max:255',
+            'description'           => 'nullable|string',
+            'rules'                 => 'nullable|string',
+            'city_id'               => 'nullable|integer|exists:cities,id',
+            'locality_id'           => 'nullable|integer|exists:localities,id',
+            'nearby_university_id'  => 'nullable|integer',
+            'gender'                => 'sometimes|required|in:male,female,unisex',
+            'property_type'         => 'sometimes|required|in:pg,hostel,coliving,flatmate',
+            'rent_min'              => 'sometimes|required|numeric|min:0',
+            'rent_max'              => 'sometimes|required|numeric|min:0',
+            'security_deposit'      => 'nullable|numeric|min:0',
+            'food_included'         => 'nullable|boolean',
+            'sharing_options'       => 'nullable|array',
+            'address_line'          => 'nullable|string',
+            'landmark'              => 'nullable|string',
+            'nearby_police_station' => 'nullable|string',
+            'pincode'               => 'nullable|string',
+            'latitude'              => 'nullable',
+            'longitude'             => 'nullable',
+            'google_map_link'       => 'nullable|string',
+            'total_rooms'           => 'nullable|integer',
+            'available_rooms'       => 'nullable|integer',
+            'meta_title'            => 'nullable|string',
+            'meta_description'      => 'nullable|string',
+            'cover_image'           => 'nullable|string',
+            'is_active'             => 'nullable|boolean',
+            'amenities'             => 'nullable|array',
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $data = $request->only([
+            'name', 'description', 'rules', 'city_id', 'locality_id', 'nearby_university_id',
+            'gender', 'property_type', 'rent_min', 'rent_max', 'security_deposit', 'food_included',
+            'address_line', 'landmark', 'nearby_police_station', 'pincode', 'latitude', 'longitude',
+            'google_map_link', 'total_rooms', 'available_rooms', 'meta_title', 'meta_description',
+            'cover_image', 'is_active',
+        ]);
+        if ($request->has('sharing_options')) {
+            $data['sharing_options'] = json_encode($request->sharing_options);
+        }
         $data['updated_at'] = now();
         DB::table('properties')->where('id', $id)->update($data);
+
+        if ($request->has('amenities')) {
+            DB::table('property_amenities')->where('property_id', $id)->delete();
+            $rows = collect($request->amenities ?? [])->map(fn ($aid) => [
+                'property_id' => $id, 'amenity_id' => $aid,
+            ])->toArray();
+            if ($rows) DB::table('property_amenities')->insert($rows);
+        }
 
         return $this->ok(['message' => 'Updated']);
     }
@@ -457,6 +536,7 @@ class OwnerController extends Controller
             ->leftJoin('cities', 'properties.city_id', '=', 'cities.id')
             ->leftJoin('localities', 'properties.locality_id', '=', 'localities.id')
             ->where('properties.owner_id', $oid)
+            ->whereNull('leads.deleted_at')
             ->select(
                 'leads.id',
                 'leads.name',
@@ -476,6 +556,13 @@ class OwnerController extends Controller
                 'leads.locked_at',
                 'leads.created_at',
                 'leads.updated_at',
+                // NOTE: the `leads.is_locked` DB column is misleadingly named —
+                // it is actually set to TRUE once the owner has PAID/unlocked
+                // the lead (see leadUnlock()). So "is_locked = 1" really means
+                // "unlocked", which is why phone/email are revealed on that
+                // condition. We don't rename the DB column (too many other
+                // places depend on it) — instead we expose it to the app as
+                // the correctly-named `is_unlocked` field below.
                 DB::raw("CASE WHEN leads.is_locked = 1 THEN leads.phone ELSE NULL END as phone_visible"),
                 DB::raw("CASE WHEN leads.is_locked = 1 THEN leads.email ELSE NULL END as email_visible"),
                 'properties.id as property_id',
@@ -507,9 +594,14 @@ class OwnerController extends Controller
 
         $paginated = $query->paginate(20);
 
+        // credit_cost per lead_type (direct/verified/converted/manual) — used
+        // below to tell the app exactly how many credits unlocking THIS lead
+        // will cost, without it having to know the pricing table itself.
+        $pricing = DB::table('lead_pricing')->where('is_active', true)->pluck('credit_cost', 'lead_type');
+
         // Reshape into a clean structure — lead fields + a full "property" object,
         // instead of a flat row with only property_name.
-        $paginated->getCollection()->transform(function ($row) {
+        $paginated->getCollection()->transform(function ($row) use ($pricing) {
             return [
                 'id' => $row->id,
                 'name' => $row->name,
@@ -517,8 +609,17 @@ class OwnerController extends Controller
                 // that business rule is unchanged, just applied consistently here.
                 'phone' => $row->phone_visible,
                 'email' => $row->email_visible,
-                'is_locked' => (bool) $row->is_locked,
-                'locked_at' => $row->locked_at,
+                // Correctly-named field — true once the owner has paid to
+                // unlock this lead (phone/email become visible above).
+                'is_unlocked' => (bool) $row->is_locked,
+                'unlocked_at' => $row->locked_at,
+                // Set by admin/telecaller when they verify a lead's genuineness
+                // (Owner\LeadController::markVerified() / telecaller equivalent) —
+                // NOT related to unlock/payment status above.
+                'is_lead_verified' => $row->lead_type === 'verified',
+                // Credits it costs THIS owner to unlock this specific lead —
+                // varies by lead_type (verified leads cost more, e.g. 40 vs 20).
+                'credit_value' => (int) ($pricing[$row->lead_type] ?? $pricing['direct'] ?? 20),
                 'preferred_locality' => $row->preferred_locality,
                 'preferred_city' => $row->preferred_city,
                 'preferred_gender' => $row->preferred_gender,
@@ -570,8 +671,16 @@ class OwnerController extends Controller
         $lead = DB::table('leads')->where('id', $id)->first();
         if (!$lead) return $this->notFound();
 
+        // A lead must either belong to one of this owner's own properties,
+        // or have no property_id yet (unmatched pool lead) — otherwise any
+        // owner could pay to unlock a lead that was never actually theirs.
+        if ($lead->property_id) {
+            $ownsProperty = DB::table('properties')->where('id', $lead->property_id)->where('owner_id', $oid)->exists();
+            if (!$ownsProperty) return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        }
+
         if ($lead->is_locked) {
-            return $this->ok(['message' => 'Already unlocked', 'lead' => $lead]);
+            return $this->ok(['message' => 'Already unlocked', 'lead' => $this->formatLeadForApp($lead)]);
         }
 
         $wallet = DB::table('wallets')->where('user_id', $oid)->first();
@@ -609,7 +718,35 @@ class OwnerController extends Controller
             ]);
         });
 
-        return $this->ok(['message' => 'Unlocked', 'lead' => DB::table('leads')->where('id', $id)->first()]);
+        return $this->ok(['message' => 'Unlocked', 'lead' => $this->formatLeadForApp(DB::table('leads')->where('id', $id)->first())]);
+    }
+
+    /**
+     * Rewrites the raw `leads` row's confusingly-named `is_locked` column
+     * (true = actually UNLOCKED/paid — see the note in leads() above) into
+     * a correctly-named `is_unlocked` field, and masks phone/email until
+     * unlocked. Used anywhere a single raw lead row needs to go to the app.
+     */
+    private function formatLeadForApp($lead)
+    {
+        $lead = (array) $lead;
+        $unlocked = (bool) ($lead['is_locked'] ?? false);
+        $lead['is_unlocked'] = $unlocked;
+        $lead['unlocked_at'] = $lead['locked_at'] ?? null;
+        unset($lead['is_locked'], $lead['locked_at']);
+        if (!$unlocked) {
+            $lead['phone'] = null;
+            $lead['email'] = null;
+        }
+
+        // Same verified-flag + per-lead credit cost as the leads() list —
+        // kept here too so a single-lead response (unlock, dashboard) has
+        // the same shape.
+        $leadType = $lead['lead_type'] ?? 'direct';
+        $lead['is_lead_verified'] = $leadType === 'verified';
+        $lead['credit_value'] = (int) (DB::table('lead_pricing')->where('lead_type', $leadType)->where('is_active', true)->value('credit_cost') ?? 20);
+
+        return (object) $lead;
     }
 
     // ═══════════════════════════════════════════════════════════════
@@ -1031,11 +1168,11 @@ class OwnerController extends Controller
     public function rooms(Request $request)
     {
         $oid = $this->ownerId($request);
-        $query = DB::table('rooms')->where('owner_id', $oid)->orderBy('created_at', 'desc');
+        $query = DB::table('rooms')->where('owner_id', $oid)->whereNull('deleted_at')->orderBy('created_at', 'desc');
         if ($request->property_id) $query->where('property_id', $request->property_id);
         $rooms = $query->get();
         $roomIds = $rooms->pluck('id');
-        $beds = DB::table('beds')->whereIn('room_id', $roomIds)->get()->groupBy('room_id');
+        $beds = DB::table('beds')->whereIn('room_id', $roomIds)->whereNull('deleted_at')->get()->groupBy('room_id');
         $rooms = $rooms->map(function ($r) use ($beds) {
             $r = (array) $r;
             $r['beds'] = $beds->get($r['id'], collect([]))->values();
@@ -1046,10 +1183,10 @@ class OwnerController extends Controller
 
     public function roomShow(Request $request, $id)
     {
-        $room = DB::table('rooms')->where('id', $id)->first();
+        $room = DB::table('rooms')->where('id', $id)->where('owner_id', $this->ownerId($request))->whereNull('deleted_at')->first();
         if (!$room) return $this->notFound();
         $room = (array) $room;
-        $room['beds'] = DB::table('beds')->where('room_id', $id)->get();
+        $room['beds'] = DB::table('beds')->where('room_id', $id)->whereNull('deleted_at')->get();
         return $this->ok((object) $room);
     }
 
@@ -1183,8 +1320,11 @@ class OwnerController extends Controller
             return response()->json(['success' => false, 'errors' => ['delete' => ['Cannot delete: room has occupied beds.']]], 422);
         }
 
-        DB::table('beds')->where('room_id', $id)->delete();
-        DB::table('rooms')->where('id', $id)->delete();
+        // Soft-delete (not a hard delete) — matches the website's behaviour,
+        // where a deleted room lands in Trash and can be restored within 30
+        // days instead of being gone forever.
+        DB::table('beds')->where('room_id', $id)->update(['deleted_at' => now()]);
+        DB::table('rooms')->where('id', $id)->update(['deleted_at' => now()]);
         return $this->ok(['message' => 'Deleted']);
     }
 
@@ -1271,7 +1411,7 @@ class OwnerController extends Controller
         if ($bed->status === 'occupied') {
             return response()->json(['success' => false, 'errors' => ['delete' => ['Cannot delete occupied bed.']]], 422);
         }
-        DB::table('beds')->where('id', $id)->delete();
+        DB::table('beds')->where('id', $id)->update(['deleted_at' => now()]);
         return $this->ok(['message' => 'Deleted']);
     }
 
