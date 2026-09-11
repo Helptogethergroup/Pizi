@@ -12,6 +12,9 @@
 .env
 .env.backup
 .env.production
+# Server-specific — added manually per-environment (root .htaccess, if any),
+# never something the repo itself should carry.
+/.htaccess
 .phpactor.json
 .phpunit.result.cache
 Homestead.json
