@@ -399,6 +399,7 @@ Route::post('/guide/dismiss', [\App\Http\Controllers\Owner\GuideController::clas
         Route::get('/leads', [\App\Http\Controllers\Owner\LeadController::class, 'index'])->name('leads.index');
         Route::get('/leads/{lead}', [\App\Http\Controllers\Owner\LeadController::class, 'show'])->name('leads.show');
         Route::post('/leads/{lead}/unlock', [\App\Http\Controllers\Owner\LeadController::class, 'unlock'])->name('leads.unlock');
+        Route::post('/leads/{lead}/report-junk', [\App\Http\Controllers\Owner\LeadController::class, 'reportJunk'])->name('leads.reportJunk');
         Route::patch('/leads/{lead}/status', [\App\Http\Controllers\Owner\LeadController::class, 'updateStatus'])->name('leads.updateStatus');
         Route::patch('/leads/{lead}/inquiry-type', [\App\Http\Controllers\Owner\LeadController::class, 'updateInquiryType'])->name('leads.updateInquiryType');
         Route::post('/leads/{lead}/remark', [\App\Http\Controllers\Owner\LeadController::class, 'addRemark'])->name('leads.addRemark');
