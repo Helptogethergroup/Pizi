@@ -45,54 +45,106 @@
     @endforeach
 </div>
 
-{{-- Filter Panel --}}
-<form method="GET" id="filterForm" class="bg-white p-4 rounded-xl border border-ink-900/10 mb-6 flex flex-wrap items-end gap-3">
+{{-- Filter Panel — pick everything, then hit Filter once. Nothing
+     auto-submits, so you can set 3-4 filters together without the page
+     reloading after every single click. --}}
+<form method="GET" id="filterForm" class="bg-white p-4 rounded-xl border border-ink-900/10 mb-6 space-y-3">
     <input type="hidden" name="tab" value="{{ $tab }}">
 
     <div>
-        <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Status</label>
-        <select name="status" onchange="document.getElementById('filterForm').submit()" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
-            <option value="">All statuses</option>
-            @foreach(['new_lead'=>'New Lead','open'=>'Open','contacted'=>'Contacted','connected'=>'Connected','not_connected'=>'Not Connected','follow_up'=>'Follow Up','visit_scheduled'=>'Visit Scheduled','visit_completed'=>'Visit Completed','deal_closed'=>'Deal Closed','lost'=>'Lost','cancelled'=>'Cancelled'] as $val => $label)
-                <option value="{{ $val }}" @selected(request('status') === $val)>{{ $label }}</option>
-            @endforeach
-        </select>
+        <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Search by name or phone</label>
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="e.g. Rahul or 98765..."
+               class="w-full px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
     </div>
 
+    <div class="flex flex-wrap items-end gap-3">
+        <div>
+            <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Status</label>
+            <select name="status" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
+                <option value="">All statuses</option>
+                @foreach(['new_lead'=>'New Lead','open'=>'Open','contacted'=>'Contacted','connected'=>'Connected','not_connected'=>'Not Connected','follow_up'=>'Follow Up','visit_scheduled'=>'Visit Scheduled','visit_completed'=>'Visit Completed','deal_closed'=>'Deal Closed','lost'=>'Lost','cancelled'=>'Cancelled'] as $val => $label)
+                    <option value="{{ $val }}" @selected(request('status') === $val)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Inquiry</label>
+            <select name="inquiry_type" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
+                <option value="">All</option>
+                <option value="tenant" @selected(request('inquiry_type') === 'tenant')>🧳 Tenant</option>
+                <option value="owner" @selected(request('inquiry_type') === 'owner')>🏠 Owner</option>
+                <option value="unknown" @selected(request('inquiry_type') === 'unknown')>❓ Unknown</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Date</label>
+            <select name="date_range" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
+                <option value="">Any time</option>
+                <option value="today" @selected(request('date_range') === 'today')>Today</option>
+                <option value="yesterday" @selected(request('date_range') === 'yesterday')>Yesterday</option>
+                <option value="week" @selected(request('date_range') === 'week')>This Week</option>
+                <option value="month" @selected(request('date_range') === 'month')>This Month</option>
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Property</label>
+            <select name="property_id" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
+                <option value="">All properties</option>
+                @foreach($properties as $p)
+                    <option value="{{ $p->id }}" @selected((string) request('property_id') === (string) $p->id)>{{ $p->name }} ({{ $propertyLeadCounts[$p->id] ?? 0 }})</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Locality</label>
+            <select name="locality" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
+                <option value="">All localities</option>
+                @foreach($localities as $loc)
+                    <option value="{{ $loc }}" @selected(request('locality') === $loc)>📍 {{ $loc }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Sort by</label>
+            <select name="sort" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
+                <option value="" @selected(!request('sort'))>🎯 Best Match</option>
+                <option value="newest" @selected(request('sort') === 'newest')>🆕 Newest first</option>
+                <option value="budget_high" @selected(request('sort') === 'budget_high')>💰 Budget: High to Low</option>
+                <option value="budget_low" @selected(request('sort') === 'budget_low')>💰 Budget: Low to High</option>
+            </select>
+        </div>
+
+        <button class="px-6 py-2 bg-ink-950 text-cream rounded-lg text-sm font-bold">Filter</button>
+
+        @if(request()->hasAny(['status','date_range','property_id','locality','search','sort','area_only']))
+            <a href="?tab={{ $tab }}" class="px-4 py-2 text-sm font-bold text-rose-600 hover:underline">Clear filters</a>
+        @endif
+    </div>
+
+    {{-- Quick toggle — one click instead of setting the Locality dropdown
+         to match "my area" leads (same area_match signal the score bonus uses). --}}
     <div>
-        <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Inquiry</label>
-        <select name="inquiry_type" onchange="document.getElementById('filterForm').submit()" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
-            <option value="">All</option>
-            <option value="tenant" @selected(request('inquiry_type') === 'tenant')>🧳 Tenant</option>
-            <option value="owner" @selected(request('inquiry_type') === 'owner')>🏠 Owner</option>
-            <option value="unknown" @selected(request('inquiry_type') === 'unknown')>❓ Unknown</option>
-        </select>
+        @php
+            $areaOnlyParams = array_merge(request()->except(['area_only', 'page']), ['area_only' => 1]);
+            $withoutAreaOnly = request()->except(['area_only', 'page']);
+        @endphp
+        @if(request()->boolean('area_only'))
+            <a href="?{{ http_build_query($withoutAreaOnly) }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-coral-500 text-white">
+                📍 Only my area ✕
+            </a>
+        @else
+            <a href="?{{ http_build_query($areaOnlyParams) }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-cream text-ink-900/70 border border-ink-900/15 hover:bg-coral-50 hover:text-coral-700 hover:border-coral-200">
+                📍 Only my area
+            </a>
+        @endif
     </div>
-
-    <div>
-        <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Date</label>
-        <select name="date_range" onchange="document.getElementById('filterForm').submit()" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
-            <option value="">Any time</option>
-            <option value="today" @selected(request('date_range') === 'today')>Today</option>
-            <option value="yesterday" @selected(request('date_range') === 'yesterday')>Yesterday</option>
-            <option value="week" @selected(request('date_range') === 'week')>This Week</option>
-            <option value="month" @selected(request('date_range') === 'month')>This Month</option>
-        </select>
-    </div>
-
-    <div>
-        <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Property</label>
-        <select name="property_id" onchange="document.getElementById('filterForm').submit()" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
-            <option value="">All properties</option>
-            @foreach($properties as $p)
-                <option value="{{ $p->id }}" @selected((string) request('property_id') === (string) $p->id)>{{ $p->name }}</option>
-            @endforeach
-        </select>
-    </div>
-
-    @if(request()->hasAny(['status','date_range','property_id']))
-        <a href="?tab={{ $tab }}" class="px-4 py-2 text-sm font-bold text-rose-600 hover:underline">Clear filters</a>
-    @endif
 </form>
 
 {{-- Tabs --}}

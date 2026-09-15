@@ -7,7 +7,11 @@
                : ($lead->match_score >= 50 ? 'bg-yellow-100 text-yellow-800' : 'bg-slate-100 text-slate-700'));
     $emoji = $lead->match_score >= 85 ? '🔥' : ($lead->match_score >= 70 ? '⭐' : ($lead->match_score >= 50 ? '✓' : ''));
 @endphp
-<div class="bg-white p-5 rounded-2xl border-2 {{ $lead->area_match ?? false ? 'border-coral-500' : 'border-ink-900/10' }}">
+<div class="bg-white p-5 rounded-2xl border-2 {{ $lead->area_match ?? false ? 'border-coral-500' : 'border-ink-900/10' }} relative">
+
+    @if($lead->is_new ?? false)
+        <span class="absolute -top-2 -right-2 px-2 py-0.5 rounded-full text-[11px] font-black bg-rose-500 text-white shadow">● NEW</span>
+    @endif
 
     {{-- Header --}}
     <div class="flex items-start justify-between mb-3">

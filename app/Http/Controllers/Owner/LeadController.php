@@ -18,7 +18,24 @@ class LeadController extends Controller
         $owner = auth()->user();
         $allMatched = $matcher->leadsForOwner($owner, 60);
 
+        // "NEW" badge — leads created since the owner's previous visit to
+        // this page. Captured before we overwrite the timestamp below, and
+        // skipped entirely on someone's very first visit (nothing to
+        // compare against yet, so nothing should look "new").
+        $lastVisit = $owner->leads_last_viewed_at;
+        $allMatched->each(function ($lead) use ($lastVisit) {
+            $lead->is_new = $lastVisit && $lead->created_at && $lead->created_at->gt($lastVisit);
+        });
+        $owner->forceFill(['leads_last_viewed_at' => now()])->saveQuietly();
+
         $tab = $request->get('tab', 'all');
+
+        // NEW: "Only my area" quick toggle — leads whose locality/city
+        // already matches one of the owner's own properties (same signal
+        // the +15/+5 score bonus uses), one click instead of the dropdown.
+        if ($request->boolean('area_only')) {
+            $allMatched = $allMatched->where('area_match', true);
+        }
 
         // Filter by tab (existing lead-type based tabs)
         $filtered = match ($tab) {
@@ -70,6 +87,38 @@ class LeadController extends Controller
             $filtered = $filtered->where('inquiry_type', $request->inquiry_type);
         }
 
+        // NEW: Locality filter — which of the owner's OWN localities this
+        // lead is for. Matches either the exact property it's tied to, or
+        // (for a general lead) a loose match against what the tenant typed
+        // as their preferred locality — same free-text matching used to
+        // compute the lead's match score, so "sector 21" still matches a
+        // lead who typed "Sector-21, near metro".
+        if ($request->filled('locality')) {
+            $locality = $request->locality;
+            $filtered = $filtered->filter(function ($lead) use ($locality) {
+                if ($lead->matched_property && $lead->matched_property->locality) {
+                    return $lead->matched_property->locality->name === $locality;
+                }
+                return $lead->preferred_locality && stripos($lead->preferred_locality, $locality) !== false;
+            });
+        }
+
+        // NEW: Search by name or phone
+        if ($request->filled('search')) {
+            $term = strtolower($request->search);
+            $filtered = $filtered->filter(fn ($l) => str_contains(strtolower($l->name ?? ''), $term)
+                || str_contains(strtolower($l->phone ?? ''), $term));
+        }
+
+        // NEW: Sort — default stays the service's own area/score ranking;
+        // these give the owner an explicit way to reorder instead.
+        $filtered = match ($request->get('sort')) {
+            'newest' => $filtered->sortByDesc('created_at'),
+            'budget_high' => $filtered->sortByDesc(fn ($l) => $l->budget_max ?? $l->budget_min ?? 0),
+            'budget_low' => $filtered->sortBy(fn ($l) => $l->budget_min ?? $l->budget_max ?? PHP_INT_MAX),
+            default => $filtered,
+        };
+
         $filtered = $filtered->values();
 
         $page = (int) $request->get('page', 1);
@@ -113,12 +162,26 @@ class LeadController extends Controller
         $telecallers = \App\Models\User::where('role', 'telecaller')->get(['id', 'name']);
         $sources = $allMatched->pluck('source')->filter()->unique()->values();
 
+        // How many matched leads are on each property, so the dropdown can
+        // show "Heritage Nest — Sector 21 (5)" instead of a blind list.
+        $propertyLeadCounts = $allMatched
+            ->filter(fn ($l) => $l->matched_property)
+            ->groupBy(fn ($l) => $l->matched_property->id)
+            ->map->count();
+
+        // Localities the owner actually has a property in — filter options
+        // for "which locality is this lead for".
+        $localities = $owner->properties()->where('is_active', true)
+            ->with('locality')->get()
+            ->pluck('locality.name')->filter()->unique()->values();
+
         // Pricing for top strip
         $pricing = \App\Models\LeadPricing::where('is_active', true)->get()->keyBy('lead_type');
 
         return view('owner.leads', compact(
             'paginated', 'wallet', 'tab', 'counts', 'pricing',
-            'statusCounts', 'properties', 'telecallers', 'sources'
+            'statusCounts', 'properties', 'telecallers', 'sources', 'localities',
+            'propertyLeadCounts'
         ));
     }
 

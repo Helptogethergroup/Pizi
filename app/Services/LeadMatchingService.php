@@ -132,8 +132,15 @@ public function leadsForOwner($owner, int $limit = 60)
               ->orWhere(function ($q2) use ($ownerCities) {
                   $q2->whereNull('property_id')
                      ->where(function ($q3) use ($ownerCities) {
-                         $q3->whereNull('preferred_city')
-                            ->orWhereIn('preferred_city', $ownerCities);
+                         $q3->whereNull('preferred_city');
+                         // preferred_city is free-typed text (from a Meta
+                         // ad form, chat widget, contact form) — never an
+                         // exact match to the cities table. "noida sector
+                         // 62" or "new delhi" must still count as a match,
+                         // not silently vanish from every owner's queue.
+                         foreach ($ownerCities as $city) {
+                             $q3->orWhere('preferred_city', 'like', '%' . $city . '%');
+                         }
                      });
               });
         })
@@ -155,12 +162,17 @@ public function leadsForOwner($owner, int $limit = 60)
             }
         }
 
-        // AREA MATCH BONUS
+        // AREA MATCH BONUS — preferred_locality/city is free-typed text,
+        // so compare loosely (case-insensitive substring) not exact match.
         $areaMatch = false;
-        if ($lead->preferred_locality && in_array($lead->preferred_locality, $ownerLocalities)) {
+        if ($lead->preferred_locality && collect($ownerLocalities)->contains(
+            fn ($loc) => stripos($lead->preferred_locality, $loc) !== false || stripos($loc, $lead->preferred_locality) !== false
+        )) {
             $bestScore = min(100, $bestScore + 15);
             $areaMatch = true;
-        } elseif ($lead->preferred_city && in_array($lead->preferred_city, $ownerCities)) {
+        } elseif ($lead->preferred_city && collect($ownerCities)->contains(
+            fn ($city) => stripos($lead->preferred_city, $city) !== false
+        )) {
             $bestScore = min(100, $bestScore + 5);
         }
 

@@ -68,6 +68,13 @@ $lead->update(['assigned_telecaller_id' => $request->telecaller_id]);
 
     public function markVerified(Lead $lead)
     {
+        // A verified lead needs a city so it actually reaches the right
+        // owners — without it, it falls into the "city unknown" bucket
+        // shown to every owner instead of the ones who can act on it.
+        if (!$lead->property_id && !$lead->preferred_city) {
+            return back()->withErrors(['verify' => 'Please fill in the "Preferred City" field before verifying this lead.']);
+        }
+
         $lead->update(['lead_type' => 'verified']);
         return back()->with('success', '✓ Lead marked as Verified.');
     }
