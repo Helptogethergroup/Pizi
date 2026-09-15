@@ -159,17 +159,39 @@ public function store(Request $request)
     } catch (\Illuminate\Validation\ValidationException $e) {
         return redirect()->back()->withInput()->withErrors($e->errors());
 
+    } catch (\Illuminate\Database\QueryException $e) {
+        \Log::error('Property creation DB error', ['user_id' => auth()->id(), 'error' => $e->getMessage()]);
+        if ($field = $this->missingRequiredField($e)) {
+            return redirect()->back()->withInput()
+                ->withErrors([$field => 'The ' . str_replace('_', ' ', $field) . ' field is required.']);
+        }
+        return redirect()->back()->withInput()
+            ->with('error', 'Unable to add property. Please try again or contact support.');
+
     } catch (\Exception $e) {
         \Log::error('Property creation failed', [
             'user_id' => auth()->id(),
             'error' => $e->getMessage(),
             'trace' => $e->getTraceAsString()
         ]);
-        
+
         return redirect()->back()->withInput()
             ->with('error', 'Unable to add property. Please try again or contact support.');
     }
 }
+
+/**
+ * Turn a raw "Column 'x' cannot be null" / "doesn't have a default
+ * value" DB error into the column name, so the caller can show it as
+ * a normal per-field validation message instead of a generic error.
+ */
+private function missingRequiredField(\Illuminate\Database\QueryException $e): ?string
+{
+    if (preg_match("/Column '([a-zA-Z0-9_]+)' cannot be null/", $e->getMessage(), $m)) return $m[1];
+    if (preg_match("/Field '([a-zA-Z0-9_]+)' doesn't have a default value/", $e->getMessage(), $m)) return $m[1];
+    return null;
+}
+
     public function edit(Property $property)
     {
         $this->authorizeOwner($property);
@@ -295,15 +317,23 @@ public function update(Request $request, Property $property)
     } catch (\Illuminate\Validation\ValidationException $e) {
         return redirect()->back()->withInput()->withErrors($e->errors());
 
+    } catch (\Illuminate\Database\QueryException $e) {
+        \Log::error('Property update DB error', ['property_id' => $property->id, 'error' => $e->getMessage()]);
+        if ($field = $this->missingRequiredField($e)) {
+            return redirect()->back()->withInput()
+                ->withErrors([$field => 'The ' . str_replace('_', ' ', $field) . ' field is required.']);
+        }
+        return redirect()->back()->withInput()
+            ->with('error', 'Unable to update property. Please try again or contact support.');
+
 } catch (\Throwable $e) {
         \Log::error('Property update failed', [
             'property_id' => $property->id,
             'error' => $e->getMessage(),
         ]);
-        
-        // 🔥 TEMPORARY DEBUG
+
         return redirect()->back()->withInput()
-            ->with('error', 'DEBUG: ' . $e->getMessage());
+            ->with('error', 'Unable to update property. Please try again or contact support.');
     }
 }
 
