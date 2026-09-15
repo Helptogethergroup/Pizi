@@ -31,8 +31,9 @@ public function create()
     $cities = City::orderBy('name')->get();
     $localities = Locality::all();
     $amenities = Amenity::all();
-    
-    return view('owner.properties.create', compact('cities', 'localities', 'amenities'));
+    $landmarks = \App\Models\Landmark::where('is_active', true)->orderBy('name')->get();
+
+    return view('owner.properties.create', compact('cities', 'localities', 'amenities', 'landmarks'));
 }
 public function store(Request $request)
 {
@@ -43,7 +44,10 @@ public function store(Request $request)
         $data = $this->validateProperty($request);
         $data['owner_id'] = auth()->id();
         $data['nearby_university_id'] = $request->nearby_university_id;
-        
+        $data['pet_allowed'] = $request->boolean('pet_allowed');
+        $data['guest_entry_allowed'] = $request->boolean('guest_entry_allowed');
+        $data['food_timing'] = $this->buildFoodTiming($request);
+
         // New properties must be verified by admin before going live
        $data['is_active'] = false;
 
@@ -132,6 +136,8 @@ public function store(Request $request)
             $property->amenities()->sync($request->amenities);
         }
 
+        $this->syncLandmarks($request, $property);
+
         // Additional images
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $i => $img) {
@@ -170,7 +176,9 @@ public function store(Request $request)
         $cities = City::where('is_active', true)->orderBy('name')->get();
         $localities = Locality::where('is_active', true)->orderBy('name')->get();
         $amenities = Amenity::orderBy('name')->get();
-        return view('owner.properties.edit', compact('property', 'cities', 'localities', 'amenities'));
+        $landmarks = \App\Models\Landmark::where('is_active', true)->orderBy('name')->get();
+        $property->load('landmarks');
+        return view('owner.properties.edit', compact('property', 'cities', 'localities', 'amenities', 'landmarks'));
     }
 
 
@@ -180,6 +188,9 @@ public function update(Request $request, Property $property)
         $this->authorizeOwner($property);
         $data = $this->validateProperty($request);
          $data['nearby_university_id'] = $request->nearby_university_id;
+         $data['pet_allowed'] = $request->boolean('pet_allowed');
+         $data['guest_entry_allowed'] = $request->boolean('guest_entry_allowed');
+         $data['food_timing'] = $this->buildFoodTiming($request);
          
      // Handle manual university entry
         if (empty($data['nearby_university_id']) && !empty($request->university_name)) {
@@ -261,6 +272,8 @@ public function update(Request $request, Property $property)
             $property->amenities()->sync($request->amenities ?? []);
         }
 
+        $this->syncLandmarks($request, $property);
+
         if ($request->hasFile('images')) {
             $start = $property->images()->max('display_order') ?? 0;
             foreach ($request->file('images') as $i => $img) {
@@ -331,6 +344,42 @@ public function update(Request $request, Property $property)
         }
     }
 
+    /**
+     * Meal-wise timing + which days it's served — e.g. breakfast & dinner
+     * daily, lunch only on weekends. Stored as JSON on food_timing.
+     */
+    private function buildFoodTiming(Request $request): ?array
+    {
+        $timing = [];
+        foreach (['breakfast', 'lunch', 'dinner'] as $meal) {
+            $time = $request->input("{$meal}_timing");
+            $days = $request->input("{$meal}_days");
+            if ($time || ($days && $days !== 'none')) {
+                $timing[$meal] = ['timing' => $time, 'days' => $days ?: 'all'];
+            }
+        }
+        return $timing ?: null;
+    }
+
+    /**
+     * Nearby landmarks (metro/hospital/market/etc) with distance — synced
+     * into the property_landmarks pivot. Expects landmark_id[] + matching
+     * landmark_distance[] arrays from the form.
+     */
+    private function syncLandmarks(Request $request, Property $property): void
+    {
+        if (!$request->has('landmark_id')) return;
+
+        $ids = $request->input('landmark_id', []);
+        $distances = $request->input('landmark_distance', []);
+        $sync = [];
+        foreach ($ids as $i => $id) {
+            if (!$id) continue;
+            $sync[$id] = ['distance_km' => $distances[$i] ?? null];
+        }
+        $property->landmarks()->sync($sync);
+    }
+
     private function validateProperty(Request $request): array
     {
         return $request->validate([
@@ -338,14 +387,24 @@ public function update(Request $request, Property $property)
             'description' => 'nullable|string',
             'rules' => 'nullable|string',
             'city_id' => 'required|exists:cities,id',
-            'locality_id' => 'nullable|exists:localities,id',
-            'locality_name' => 'nullable|string|max:120',
+            'locality_id' => 'required_without:locality_name|nullable|integer|exists:localities,id',
+            'locality_name' => 'required_without:locality_id|nullable|string|max:120',
             'gender' => 'required|in:male,female,unisex',
             'property_type' => 'required|in:pg,hostel,coliving,flatmate',
             'rent_min' => 'required|numeric|min:0',
             'rent_max' => 'required|numeric|min:0',
             'security_deposit' => 'nullable|numeric|min:0',
             'food_included' => 'nullable|boolean',
+            'food_type' => 'nullable|in:veg,non_veg,both',
+            'breakfast_timing' => 'nullable|string|max:60',
+            'breakfast_days' => 'nullable|in:all,weekdays,weekends,none',
+            'lunch_timing' => 'nullable|string|max:60',
+            'lunch_days' => 'nullable|in:all,weekdays,weekends,none',
+            'dinner_timing' => 'nullable|string|max:60',
+            'dinner_days' => 'nullable|in:all,weekdays,weekends,none',
+            'construction_year' => 'nullable|integer|min:1950|max:' . (date('Y') + 1),
+            'pet_allowed' => 'nullable|boolean',
+            'guest_entry_allowed' => 'nullable|boolean',
             'address_line' => 'required|string|max:255',
             'landmark' => 'nullable|string|max:120',
             'nearby_police_station' => 'nullable|string|max:200',

@@ -21,6 +21,7 @@ class Property extends Model
         'gender', 'property_type',  'nearby_university_id',  
         'latitude', 'longitude', 'google_map_link',  
         'rent_min', 'rent_max', 'security_deposit', 'food_included',
+        'food_type', 'food_timing', 'construction_year', 'pet_allowed', 'guest_entry_allowed',
         'sharing_options',
       'address_line', 'landmark', 'nearby_police_station', 'pincode', 'latitude', 'longitude',
         'is_active', 'is_verified', 'is_featured',
@@ -31,7 +32,10 @@ class Property extends Model
 
     protected $casts = [
         'sharing_options' => 'array',
+        'food_timing' => 'array',
         'food_included' => 'boolean',
+        'pet_allowed' => 'boolean',
+        'guest_entry_allowed' => 'boolean',
         'is_active' => 'boolean',
         'is_verified' => 'boolean',
         'is_featured' => 'boolean',

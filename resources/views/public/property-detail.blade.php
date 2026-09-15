@@ -280,6 +280,87 @@
                     </div>
                 @endif
 
+                {{-- MEAL TIMINGS --}}
+                @php
+                    $foodTiming = is_array($property->food_timing) ? $property->food_timing : (json_decode($property->food_timing ?? '', true) ?: []);
+                    $mealLabels = ['breakfast' => '🥣 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner'];
+                    $dayLabels = ['all' => 'Everyday', 'weekdays' => 'Weekdays only (Mon–Fri)', 'weekends' => 'Weekends only (Sat–Sun)'];
+                @endphp
+                @if($property->food_type || count($foodTiming))
+                    <div class="bg-white rounded-2xl p-6 border border-ink-900/10">
+                        <h2 class="font-display font-bold text-xl text-ink-950 mb-4">🍴 Food & meal timings</h2>
+                        @if($property->food_type)
+                            <div class="mb-4">
+                                <span class="inline-block px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold uppercase">
+                                    {{ ['veg' => '🥦 Veg only', 'non_veg' => '🍗 Non-veg only', 'both' => '🥦🍗 Veg & Non-veg both'][$property->food_type] ?? $property->food_type }}
+                                </span>
+                            </div>
+                        @endif
+                        @if(count($foodTiming))
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                @foreach($mealLabels as $meal => $label)
+                                    @if(!empty($foodTiming[$meal]) && ($foodTiming[$meal]['days'] ?? 'none') !== 'none')
+                                        <div class="p-4 rounded-xl bg-cream border border-ink-900/10">
+                                            <div class="text-sm font-bold text-ink-950">{{ $label }}</div>
+                                            @if(!empty($foodTiming[$meal]['timing']))
+                                                <div class="text-sm text-ink-700 mt-1">{{ $foodTiming[$meal]['timing'] }}</div>
+                                            @endif
+                                            <div class="text-xs text-ink-900/50 mt-1">{{ $dayLabels[$foodTiming[$meal]['days']] ?? 'Everyday' }}</div>
+                                        </div>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                {{-- BUILDING DETAILS --}}
+                @if($property->construction_year || !is_null($property->pet_allowed) || !is_null($property->guest_entry_allowed))
+                    <div class="bg-white rounded-2xl p-6 border border-ink-900/10">
+                        <h2 class="font-display font-bold text-xl text-ink-950 mb-4">🏢 Building details</h2>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            @if($property->construction_year)
+                                <div class="p-3 rounded-xl bg-cream text-center">
+                                    <div class="text-xs text-ink-900/50 uppercase font-bold">Built in</div>
+                                    <div class="font-display font-black text-lg text-ink-950 mt-1">{{ $property->construction_year }}</div>
+                                </div>
+                            @endif
+                            @if(!is_null($property->pet_allowed))
+                                <div class="p-3 rounded-xl bg-cream text-center">
+                                    <div class="text-xs text-ink-900/50 uppercase font-bold">Pets</div>
+                                    <div class="font-display font-black text-lg text-ink-950 mt-1">{{ $property->pet_allowed ? '🐾 Allowed' : '✕ Not allowed' }}</div>
+                                </div>
+                            @endif
+                            @if(!is_null($property->guest_entry_allowed))
+                                <div class="p-3 rounded-xl bg-cream text-center">
+                                    <div class="text-xs text-ink-900/50 uppercase font-bold">Guests</div>
+                                    <div class="font-display font-black text-lg text-ink-950 mt-1">{{ $property->guest_entry_allowed ? '🚪 Allowed' : '✕ Not allowed' }}</div>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+                {{-- NEARBY LOCATIONS --}}
+                @if($property->landmarks && $property->landmarks->count())
+                    <div class="bg-white rounded-2xl p-6 border border-ink-900/10">
+                        <h2 class="font-display font-bold text-xl text-ink-950 mb-4">📍 Nearby locations</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            @foreach($property->landmarks as $lm)
+                                <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-cream">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="text-lg flex-shrink-0">{{ ['metro' => '🚇', 'hospital' => '🏥', 'mall' => '🛍', 'university' => '🎓'][$lm->type] ?? '📍' }}</span>
+                                        <span class="text-sm font-semibold text-ink-700 truncate">{{ $lm->name }}</span>
+                                    </div>
+                                    @if($lm->pivot->distance_km)
+                                        <span class="text-xs font-bold text-ink-900/50 flex-shrink-0">{{ $lm->pivot->distance_km }} km</span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 {{-- RULES --}}
                 @if($property->rules)
                     <div class="bg-white rounded-2xl p-6 border border-ink-900/10">

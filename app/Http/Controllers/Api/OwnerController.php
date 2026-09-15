@@ -209,9 +209,10 @@ class OwnerController extends Controller
         $p = DB::table('properties')
             ->leftJoin('cities', 'properties.city_id', '=', 'cities.id')
             ->leftJoin('localities', 'properties.locality_id', '=', 'localities.id')
+            ->leftJoin('universities', 'properties.nearby_university_id', '=', 'universities.id')
             ->where('properties.id', $id)
             ->where('properties.owner_id', $this->ownerId($request))
-            ->select('properties.*', 'cities.name as city_name', 'localities.name as locality_name')
+            ->select('properties.*', 'cities.name as city_name', 'localities.name as locality_name', 'universities.name as nearby_university_name')
             ->first();
 
         if (!$p) return $this->notFound();
@@ -232,6 +233,15 @@ class OwnerController extends Controller
         if (is_string($p['sharing_options'] ?? null)) {
             $p['sharing_options'] = json_decode($p['sharing_options'], true);
         }
+        if (is_string($p['food_timing'] ?? null)) {
+            $p['food_timing'] = json_decode($p['food_timing'], true);
+        }
+
+        $p['landmarks'] = DB::table('property_landmarks')
+            ->join('landmarks', 'property_landmarks.landmark_id', '=', 'landmarks.id')
+            ->where('property_landmarks.property_id', $id)
+            ->select('landmarks.id', 'landmarks.name', 'landmarks.type', 'property_landmarks.distance_km')
+            ->get();
 
         return $this->ok((object) $p);
     }
@@ -262,6 +272,18 @@ class OwnerController extends Controller
         'security_deposit' => 'nullable|numeric|min:0',
 
         'food_included' => 'nullable|boolean',
+
+        'food_type' => 'nullable|in:veg,non_veg,both',
+
+        // { "breakfast": {"timing":"8-9AM","days":"all"}, "lunch": {...}, "dinner": {...} }
+        // days: all | weekdays | weekends | none
+        'food_timing' => 'nullable|array',
+
+        'construction_year' => 'nullable|integer|min:1950|max:' . (date('Y') + 1),
+
+        'pet_allowed' => 'nullable|boolean',
+
+        'guest_entry_allowed' => 'nullable|boolean',
 
         'sharing_options' => 'nullable|array',
 
@@ -339,6 +361,16 @@ class OwnerController extends Controller
 
         'food_included' => $request->food_included ?? false,
 
+        'food_type' => $request->food_type,
+
+        'food_timing' => $request->has('food_timing') ? json_encode($request->food_timing) : null,
+
+        'construction_year' => $request->construction_year,
+
+        'pet_allowed' => $request->pet_allowed ?? false,
+
+        'guest_entry_allowed' => $request->guest_entry_allowed ?? false,
+
         'sharing_options' => json_encode($request->sharing_options),
 
 
@@ -402,7 +434,7 @@ class OwnerController extends Controller
 
     ]);
 
-
+    $this->syncLandmarks($request, $id);
 
     return $this->ok([
 
@@ -413,6 +445,25 @@ class OwnerController extends Controller
     ]);
 
 }
+
+    // Nearby locations (metro/hospital/market/etc) — expects
+    // landmarks: [{"landmark_id": 6, "distance_km": 1.2}, ...]
+    private function syncLandmarks(Request $request, int $propertyId): void
+    {
+        if (!$request->has('landmarks')) return;
+
+        DB::table('property_landmarks')->where('property_id', $propertyId)->delete();
+        $rows = collect($request->landmarks ?? [])
+            ->filter(fn ($l) => !empty($l['landmark_id']))
+            ->map(fn ($l) => [
+                'property_id' => $propertyId,
+                'landmark_id' => $l['landmark_id'],
+                'distance_km' => $l['distance_km'] ?? null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
+        if ($rows) DB::table('property_landmarks')->insert($rows);
+    }
 
     public function propertyUpdate(Request $request, $id)
     {
@@ -432,6 +483,11 @@ class OwnerController extends Controller
             'rent_max'              => 'sometimes|required|numeric|min:0',
             'security_deposit'      => 'nullable|numeric|min:0',
             'food_included'         => 'nullable|boolean',
+            'food_type'             => 'nullable|in:veg,non_veg,both',
+            'food_timing'           => 'nullable|array',
+            'construction_year'     => 'nullable|integer|min:1950|max:' . (date('Y') + 1),
+            'pet_allowed'           => 'nullable|boolean',
+            'guest_entry_allowed'   => 'nullable|boolean',
             'sharing_options'       => 'nullable|array',
             'address_line'          => 'nullable|string',
             'landmark'              => 'nullable|string',
@@ -455,12 +511,16 @@ class OwnerController extends Controller
         $data = $request->only([
             'name', 'description', 'rules', 'city_id', 'locality_id', 'nearby_university_id',
             'gender', 'property_type', 'rent_min', 'rent_max', 'security_deposit', 'food_included',
+            'food_type', 'construction_year', 'pet_allowed', 'guest_entry_allowed',
             'address_line', 'landmark', 'nearby_police_station', 'pincode', 'latitude', 'longitude',
             'google_map_link', 'total_rooms', 'available_rooms', 'meta_title', 'meta_description',
             'cover_image', 'is_active',
         ]);
         if ($request->has('sharing_options')) {
             $data['sharing_options'] = json_encode($request->sharing_options);
+        }
+        if ($request->has('food_timing')) {
+            $data['food_timing'] = json_encode($request->food_timing);
         }
         $data['updated_at'] = now();
         DB::table('properties')->where('id', $id)->update($data);
@@ -472,6 +532,8 @@ class OwnerController extends Controller
             ])->toArray();
             if ($rows) DB::table('property_amenities')->insert($rows);
         }
+
+        $this->syncLandmarks($request, $id);
 
         return $this->ok(['message' => 'Updated']);
     }
@@ -1557,10 +1619,19 @@ class OwnerController extends Controller
     public function reviewReply(Request $request, $id)
     {
         $request->validate(['reply' => 'required|string|max:1000']);
+
+        $oid = $this->ownerId($request);
+        $review = DB::table('reviews')
+            ->join('properties', 'reviews.property_id', '=', 'properties.id')
+            ->where('reviews.id', $id)
+            ->where('properties.owner_id', $oid)
+            ->first();
+        if (!$review) return $this->notFound();
+
         DB::table('reviews')->where('id', $id)->update([
-            'owner_reply'    => $request->reply,
-            'replied_at'     => now(),
-            'updated_at'     => now(),
+            'owner_response'      => $request->reply,
+            'owner_responded_at'  => now(),
+            'updated_at'          => now(),
         ]);
         return $this->ok(['message' => 'Reply added']);
     }
@@ -1575,28 +1646,79 @@ class OwnerController extends Controller
 
     public function blogShow(Request $request, $id)
     {
-        return $this->ok(DB::table('blogs')->where('id', $id)->first());
+        $blog = DB::table('blogs')->where('id', $id)->where('author_id', $this->ownerId($request))->first();
+        if (!$blog) return $this->notFound();
+        return $this->ok($blog);
     }
 
     public function blogStore(Request $request)
     {
-        return app(AdminController::class)->blogStore($request);
+        $validator = Validator::make($request->all(), [
+            'title'             => 'required|string|max:255',
+            'excerpt'           => 'nullable|string',
+            'content'           => 'required|string',
+            'meta_title'        => 'nullable|string|max:255',
+            'meta_description'  => 'nullable|string|max:320',
+            'is_published'      => 'nullable|boolean',
+        ]);
+        if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+
+        $data = $request->only(['title', 'excerpt', 'content', 'meta_title', 'meta_description']);
+        $data['is_published'] = $request->boolean('is_published');
+        $data['author_id']    = $this->ownerId($request);
+        $data['slug']         = Str::slug($request->title) . '-' . Str::random(6);
+        $data['published_at'] = $data['is_published'] ? now() : null;
+        $data['created_at']   = now();
+        $data['updated_at']   = now();
+
+        if ($request->hasFile('cover_image')) {
+            $data['cover_image'] = $request->file('cover_image')->store('blogs', 'public');
+        }
+
+        $id = DB::table('blogs')->insertGetId($data);
+        return $this->ok(['id' => $id]);
     }
 
     public function blogUpdate(Request $request, $id)
     {
-        return app(AdminController::class)->blogUpdate($request, $id);
+        $blog = DB::table('blogs')->where('id', $id)->where('author_id', $this->ownerId($request))->first();
+        if (!$blog) return $this->notFound();
+
+        // Only touch fields actually sent — sending just {"title": "..."} must
+        // not blank out content/excerpt/etc like the old shared saveBlog() did.
+        $data = $request->only(['title', 'excerpt', 'content', 'meta_title', 'meta_description']);
+        if ($request->has('is_published')) {
+            $data['is_published'] = $request->boolean('is_published');
+            $data['published_at'] = $data['is_published'] ? ($blog->published_at ?? now()) : null;
+        }
+        if ($request->hasFile('cover_image')) {
+            $data['cover_image'] = $request->file('cover_image')->store('blogs', 'public');
+        }
+        $data['updated_at'] = now();
+
+        DB::table('blogs')->where('id', $id)->update($data);
+        return $this->ok(['message' => 'Updated']);
     }
 
-    public function blogDelete($id)
+    public function blogDelete(Request $request, $id)
     {
+        $blog = DB::table('blogs')->where('id', $id)->where('author_id', $this->ownerId($request))->first();
+        if (!$blog) return $this->notFound();
         DB::table('blogs')->where('id', $id)->delete();
         return $this->ok(['message' => 'Deleted']);
     }
 
-    public function blogToggle($id)
+    public function blogToggle(Request $request, $id)
     {
-        return app(AdminController::class)->blogToggle($id);
+        $blog = DB::table('blogs')->where('id', $id)->where('author_id', $this->ownerId($request))->first();
+        if (!$blog) return $this->notFound();
+        $new = $blog->is_published ? 0 : 1;
+        DB::table('blogs')->where('id', $id)->update([
+            'is_published' => $new,
+            'published_at' => $new ? now() : null,
+            'updated_at'   => now(),
+        ]);
+        return $this->ok(['message' => 'Toggled']);
     }
 
     // ═══════════════════════════════════════════════════════════════

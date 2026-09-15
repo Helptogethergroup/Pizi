@@ -89,8 +89,9 @@ public function verify(Property $property)
         $cities = \App\Models\City::where('is_active', true)->orderBy('name')->get();
         $localities = \App\Models\Locality::where('is_active', true)->orderBy('name')->get();
         $amenities = \App\Models\Amenity::orderBy('name')->get();
+        $landmarks = \App\Models\Landmark::where('is_active', true)->orderBy('name')->get();
 
-        return view('admin.properties.create', compact('cities', 'localities', 'amenities'));
+        return view('admin.properties.create', compact('cities', 'localities', 'amenities', 'landmarks'));
     }
 
     /**
@@ -104,8 +105,8 @@ public function verify(Property $property)
             'property_type' => 'required|in:pg,hostel,coliving,flatmate',
             'gender' => 'required|in:male,female,unisex',
             'city_id' => 'required|exists:cities,id',
-            'locality_id' => 'nullable|exists:localities,id',
-            'locality_name' => 'nullable|string|max:120',
+            'locality_id' => 'required_without:locality_name|nullable|integer|exists:localities,id',
+            'locality_name' => 'required_without:locality_id|nullable|string|max:120',
             'address_line' => 'required|string|max:500',
             'pincode' => 'nullable|string|max:10',
             'landmark' => 'nullable|string|max:200',
@@ -119,6 +120,16 @@ public function verify(Property $property)
             'total_rooms' => 'nullable|integer|min:0',
             'available_rooms' => 'nullable|integer|min:0',
             'food_included' => 'nullable|boolean',
+            'food_type' => 'nullable|in:veg,non_veg,both',
+            'breakfast_timing' => 'nullable|string|max:60',
+            'breakfast_days' => 'nullable|in:all,weekdays,weekends,none',
+            'lunch_timing' => 'nullable|string|max:60',
+            'lunch_days' => 'nullable|in:all,weekdays,weekends,none',
+            'dinner_timing' => 'nullable|string|max:60',
+            'dinner_days' => 'nullable|in:all,weekdays,weekends,none',
+            'construction_year' => 'nullable|integer|min:1950|max:' . (date('Y') + 1),
+            'pet_allowed' => 'nullable|boolean',
+            'guest_entry_allowed' => 'nullable|boolean',
             'description' => 'nullable|string',
             'rules' => 'nullable|string',
             'amenities' => 'nullable|array',
@@ -198,6 +209,9 @@ public function verify(Property $property)
         $data['is_featured'] = $request->boolean('is_featured');
         $data['is_active'] = $request->has('is_active') ? $request->boolean('is_active') : true;
         $data['food_included'] = $request->boolean('food_included');
+        $data['pet_allowed'] = $request->boolean('pet_allowed');
+        $data['guest_entry_allowed'] = $request->boolean('guest_entry_allowed');
+        $data['food_timing'] = $this->buildFoodTiming($request);
 
         $amenityIds = $data['amenities'] ?? [];
         unset($data['amenities'], $data['locality_name']);
@@ -207,6 +221,8 @@ public function verify(Property $property)
         if ($amenityIds) {
             $property->amenities()->sync($amenityIds);
         }
+
+        $this->syncLandmarks($request, $property);
 
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $img) {
@@ -239,6 +255,42 @@ public function verify(Property $property)
             ->with('error', 'Unable to create property. Please try again or contact support.');
     }
 }
+    /**
+     * Meal-wise timing + which days it's served — e.g. breakfast & dinner
+     * daily, lunch only on weekends. Stored as JSON on food_timing.
+     */
+    private function buildFoodTiming(Request $request): ?array
+    {
+        $timing = [];
+        foreach (['breakfast', 'lunch', 'dinner'] as $meal) {
+            $time = $request->input("{$meal}_timing");
+            $days = $request->input("{$meal}_days");
+            if ($time || ($days && $days !== 'none')) {
+                $timing[$meal] = ['timing' => $time, 'days' => $days ?: 'all'];
+            }
+        }
+        return $timing ?: null;
+    }
+
+    /**
+     * Nearby landmarks (metro/hospital/market/etc) with distance — synced
+     * into the property_landmarks pivot. Expects landmark_id[] + matching
+     * landmark_distance[] arrays from the form.
+     */
+    private function syncLandmarks(Request $request, Property $property): void
+    {
+        if (!$request->has('landmark_id')) return;
+
+        $ids = $request->input('landmark_id', []);
+        $distances = $request->input('landmark_distance', []);
+        $sync = [];
+        foreach ($ids as $i => $id) {
+            if (!$id) continue;
+            $sync[$id] = ['distance_km' => $distances[$i] ?? null];
+        }
+        $property->landmarks()->sync($sync);
+    }
+
     public function toggle(Property $property)
     {
         $property->is_active = !$property->is_active;

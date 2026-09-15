@@ -53,11 +53,11 @@
         <h3 class="font-display font-bold text-lg mb-4">🏠 Basic info</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
-                <label class="text-xs font-bold uppercase text-ink-900/60">Property name *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Property name <span class="text-rose-500">*</span></label>
                 <input name="name" required value="{{ old('name') }}" placeholder="e.g. Sai Stay PG" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
             </div>
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">Property type *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Property type <span class="text-rose-500">*</span></label>
                 <select name="property_type" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
                     <option value="pg" @selected(old('property_type')==='pg')>🏠 PG</option>
                     <option value="hostel" @selected(old('property_type')==='hostel')>🏨 Hostel</option>
@@ -66,7 +66,7 @@
                 </select>
             </div>
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">Gender *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Gender <span class="text-rose-500">*</span></label>
                 <select name="gender" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
                     <option value="male" @selected(old('gender')==='male')>👨 Boys only</option>
                     <option value="female" @selected(old('gender')==='female')>👩 Girls only</option>
@@ -81,7 +81,7 @@
         <h3 class="font-display font-bold text-lg mb-4">📍 Location</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">City *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">City <span class="text-rose-500">*</span></label>
                 <select name="city_id" id="citySelect" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15" onchange="filterLocalities()">
                     <option value="">— Select city —</option>
                     @foreach($cities as $c)
@@ -92,7 +92,7 @@
 
             {{-- 🔥 SMART LOCALITY FIELD --}}
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">Locality *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Locality <span class="text-rose-500">*</span></label>
                 <div class="mt-1 flex gap-2">
                     <select name="locality_id" id="localitySelect" class="flex-1 min-w-0 px-4 py-3 rounded-xl border border-ink-900/15">
                         <option value="">— Select locality —</option>
@@ -110,7 +110,7 @@
             </div>
 
             <div class="md:col-span-2">
-                <label class="text-xs font-bold uppercase text-ink-900/60">Full address *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Full address <span class="text-rose-500">*</span></label>
                 <textarea name="address_line" required rows="2" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15" placeholder="e.g. H-No 45, Mukherjee Nagar Main Road, near Batra Cinema">{{ old('address_line') }}</textarea>
             </div>
 
@@ -212,17 +212,19 @@ function toggleAdminManualUniversity() {
     <input type="url" name="google_map_link" value="{{ old('google_map_link') }}" placeholder="https://maps.app.goo.gl/... or https://www.google.com/maps/place/..." class="w-full px-4 py-3 rounded-xl border border-ink-900/15 text-sm">
     <p class="text-xs text-ink-900/50 mt-1">This is just saved as text for reference — it does NOT set the map pin. Use the map above to set the actual location.</p>
 </div>
+        </div>
+    </div>
 
     {{-- PRICING --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
         <h3 class="font-display font-bold text-lg mb-4">💰 Pricing & Rooms</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">Rent (min) ₹ *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Rent (min) ₹ <span class="text-rose-500">*</span></label>
                 <input name="rent_min" required type="number" min="0" value="{{ old('rent_min') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
             </div>
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">Rent (max) ₹ *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Rent (max) ₹ <span class="text-rose-500">*</span></label>
                 <input name="rent_max" required type="number" min="0" value="{{ old('rent_max') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
             </div>
             <div>
@@ -244,6 +246,84 @@ function toggleAdminManualUniversity() {
                 </label>
             </div>
         </div>
+
+        {{-- Extra info: food type, construction year, pet & guest policy --}}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+            <div>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Food type</label>
+                <select name="food_type" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
+                    <option value="">— Select —</option>
+                    <option value="veg" @selected(old('food_type') === 'veg')>Veg only</option>
+                    <option value="non_veg" @selected(old('food_type') === 'non_veg')>Non-veg only</option>
+                    <option value="both" @selected(old('food_type') === 'both')>Both veg & non-veg</option>
+                </select>
+            </div>
+            <div>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Building construction year</label>
+                <input name="construction_year" type="number" min="1950" max="{{ date('Y') + 1 }}" placeholder="e.g. 2018" value="{{ old('construction_year') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
+            </div>
+            <div class="flex flex-col justify-end gap-2 pb-2">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="pet_allowed" value="1" @checked(old('pet_allowed')) class="rounded w-5 h-5">
+                    <span class="font-semibold">🐾 Pets allowed</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" name="guest_entry_allowed" value="1" @checked(old('guest_entry_allowed')) class="rounded w-5 h-5">
+                    <span class="font-semibold">🚪 Guest entry allowed</span>
+                </label>
+            </div>
+        </div>
+
+        {{-- Meal timing — per meal, and which days it's served --}}
+        <div class="mt-4">
+            <label class="text-xs font-bold uppercase text-ink-900/60 mb-1 block">Meal timings</label>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                @foreach(['breakfast' => '🥣 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner'] as $meal => $label)
+                    <div class="border border-ink-900/10 rounded-xl p-3">
+                        <p class="text-sm font-semibold mb-2">{{ $label }}</p>
+                        <input name="{{ $meal }}_timing" placeholder="e.g. 8-9 AM"
+                               value="{{ old("{$meal}_timing") }}"
+                               class="w-full px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
+                        <select name="{{ $meal }}_days" class="w-full mt-2 px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
+                            <option value="all" @selected(old("{$meal}_days") === 'all')>All days</option>
+                            <option value="weekdays" @selected(old("{$meal}_days") === 'weekdays')>Weekdays only (Mon-Fri)</option>
+                            <option value="weekends" @selected(old("{$meal}_days") === 'weekends')>Weekends only (Sat-Sun)</option>
+                            <option value="none" @selected(old("{$meal}_days", 'none') === 'none')>Not served</option>
+                        </select>
+                    </div>
+                @endforeach
+            </div>
+            <p class="text-xs text-ink-900/50 mt-1">Example: Mon–Fri breakfast + dinner only, Sat–Sun sab teen meals — bas Lunch ko "Weekends only" set kar do.</p>
+        </div>
+
+        {{-- Nearby locations — metro, hospital, market, university etc --}}
+        <div class="mt-4">
+            <label class="text-xs font-bold uppercase text-ink-900/60 mb-1 block">Nearby locations</label>
+            <div id="landmarkRows" class="space-y-2">
+                <div class="flex flex-col sm:flex-row gap-2 landmark-row">
+                    <select name="landmark_id[]" class="flex-1 px-3 py-2.5 rounded-lg border border-ink-900/15 text-sm">
+                        <option value="">— Select location —</option>
+                        @foreach($landmarks as $l)
+                            <option value="{{ $l->id }}">{{ $l->name }} ({{ ucfirst($l->type) }})</option>
+                        @endforeach
+                    </select>
+                    <input name="landmark_distance[]" type="number" step="0.1" min="0" placeholder="Distance (km)"
+                           class="w-full sm:w-40 px-3 py-2.5 rounded-lg border border-ink-900/15 text-sm">
+                    <button type="button" onclick="this.closest('.landmark-row').remove()"
+                            class="px-3 py-2.5 rounded-lg border border-rose-200 text-rose-600 text-sm shrink-0">✕ Remove</button>
+                </div>
+            </div>
+            <button type="button" id="addLandmarkRow" class="mt-2 text-sm font-semibold text-coral-600">+ Add another nearby location</button>
+        </div>
+        <script>
+            document.getElementById('addLandmarkRow')?.addEventListener('click', function () {
+                const rows = document.getElementById('landmarkRows');
+                const first = rows.querySelector('.landmark-row');
+                const clone = first.cloneNode(true);
+                clone.querySelectorAll('select, input').forEach(el => el.value = '');
+                rows.appendChild(clone);
+            });
+        </script>
     </div>
 
     {{-- DESCRIPTION --}}
@@ -284,7 +364,7 @@ function toggleAdminManualUniversity() {
         <h3 class="font-display font-bold text-lg mb-4">📸 Photos</h3>
         <div class="space-y-3">
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">Cover image (main photo) *</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60">Cover image (main photo) <span class="text-rose-500">*</span></label>
                 <input type="file" name="cover_image" accept="image/*" class="w-full mt-1 text-sm">
             </div>
             <div>
@@ -629,5 +709,31 @@ function useMyLocation() {
     );
 }
 </script>
+
+{{-- Jump to whichever field failed validation and show the exact
+     reason right next to it, instead of only a generic banner at top. --}}
+@if($errors->any())
+<script>
+(function () {
+    const errors = @json($errors->messages());
+    let firstField = null;
+    Object.keys(errors).forEach(function (key) {
+        const base = key.split('.')[0];
+        const field = document.querySelector('[name="' + base + '"]') || document.querySelector('[name="' + base + '[]"]');
+        if (!field) return;
+        field.classList.add('border-rose-500', 'ring-1', 'ring-rose-500');
+        const msg = document.createElement('p');
+        msg.className = 'text-rose-600 text-xs mt-1 font-semibold';
+        msg.textContent = errors[key][0];
+        field.insertAdjacentElement('afterend', msg);
+        if (!firstField) firstField = field;
+    });
+    if (firstField) {
+        firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        firstField.focus();
+    }
+})();
+</script>
+@endif
 
 @endsection

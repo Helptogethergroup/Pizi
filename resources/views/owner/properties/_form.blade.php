@@ -5,11 +5,11 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="md:col-span-2">
-            <label class="text-xs font-semibold text-ink-900/60 uppercase">Property name</label>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">Property name <span class="text-rose-500">*</span></label>
             <input name="name" required value="{{ old('name', $property->name ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500">
         </div>
         <div>
-            <label class="text-xs font-semibold text-ink-900/60 uppercase">City</label>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">City <span class="text-rose-500">*</span></label>
             <select name="city_id" id="citySelect" required onchange="filterLocalities()" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
                 @foreach($cities as $c)
                     <option value="{{ $c->id }}" @selected(old('city_id', $property->city_id ?? '') == $c->id)>{{ $c->name }}</option>
@@ -35,7 +35,7 @@
     </div>
 </div>
         <div>
-            <label class="text-xs font-semibold text-ink-900/60 uppercase">For</label>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">For <span class="text-rose-500">*</span></label>
             <select name="gender" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
                 @foreach(['unisex' => 'Unisex', 'male' => 'Boys only', 'female' => 'Girls only'] as $v => $l)
                     <option value="{{ $v }}" @selected(old('gender', $property->gender ?? '') === $v)>{{ $l }}</option>
@@ -43,7 +43,7 @@
             </select>
         </div>
         <div>
-            <label class="text-xs font-semibold text-ink-900/60 uppercase">Type</label>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">Type <span class="text-rose-500">*</span></label>
             <select name="property_type" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
                 @foreach(['pg' => 'PG', 'hostel' => 'Hostel', 'coliving' => 'Co-living', 'flatmate' => 'Flatmate'] as $v => $l)
                     <option value="{{ $v }}" @selected(old('property_type', $property->property_type ?? '') === $v)>{{ $l }}</option>
@@ -147,11 +147,11 @@
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div>
-            <label class="text-xs font-semibold text-ink-900/60 uppercase">Rent (min ₹)</label>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">Rent (min ₹) <span class="text-rose-500">*</span></label>
             <input name="rent_min" type="number" required value="{{ old('rent_min', $property->rent_min ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
         </div>
         <div>
-            <label class="text-xs font-semibold text-ink-900/60 uppercase">Rent (max ₹)</label>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">Rent (max ₹) <span class="text-rose-500">*</span></label>
             <input name="rent_max" type="number" required value="{{ old('rent_max', $property->rent_max ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
         </div>
         <div>
@@ -181,8 +181,105 @@
         </div>
     </div>
 
+    {{-- Extra info: food type, construction year, pet & guest policy --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">Food type</label>
+            <select name="food_type" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
+                <option value="">— Select —</option>
+                <option value="veg" @selected(old('food_type', $property->food_type ?? '') === 'veg')>Veg only</option>
+                <option value="non_veg" @selected(old('food_type', $property->food_type ?? '') === 'non_veg')>Non-veg only</option>
+                <option value="both" @selected(old('food_type', $property->food_type ?? '') === 'both')>Both veg & non-veg</option>
+            </select>
+        </div>
+        <div>
+            <label class="text-xs font-semibold text-ink-900/60 uppercase">Building construction year</label>
+            <input name="construction_year" type="number" min="1950" max="{{ date('Y') + 1 }}" placeholder="e.g. 2018" value="{{ old('construction_year', $property->construction_year ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
+        </div>
+        <div class="flex flex-col justify-end gap-2 pb-2">
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="pet_allowed" value="1" @checked(old('pet_allowed', $property->pet_allowed ?? false)) class="rounded">
+                Pets allowed
+            </label>
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="guest_entry_allowed" value="1" @checked(old('guest_entry_allowed', $property->guest_entry_allowed ?? false)) class="rounded">
+                Guest entry allowed
+            </label>
+        </div>
+    </div>
+
+    {{-- Meal timing — per meal, and which days it's served --}}
+    @php $ft = old('food_timing') ?: ($property->food_timing ?? []); @endphp
     <div>
-        <label class="text-xs font-semibold text-ink-900/60 uppercase">Address</label>
+        <label class="text-xs font-semibold text-ink-900/60 uppercase mb-1 block">Meal timings</label>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            @foreach(['breakfast' => '🥣 Breakfast', 'lunch' => '🍛 Lunch', 'dinner' => '🍽 Dinner'] as $meal => $label)
+                <div class="border border-ink-900/10 rounded-xl p-3">
+                    <p class="text-sm font-semibold mb-2">{{ $label }}</p>
+                    <input name="{{ $meal }}_timing" placeholder="e.g. 8-9 AM"
+                           value="{{ old("{$meal}_timing", $ft[$meal]['timing'] ?? '') }}"
+                           class="w-full px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
+                    <select name="{{ $meal }}_days" class="w-full mt-2 px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
+                        @php $selectedDays = old("{$meal}_days", $ft[$meal]['days'] ?? 'none'); @endphp
+                        <option value="all" @selected($selectedDays === 'all')>All days</option>
+                        <option value="weekdays" @selected($selectedDays === 'weekdays')>Weekdays only (Mon-Fri)</option>
+                        <option value="weekends" @selected($selectedDays === 'weekends')>Weekends only (Sat-Sun)</option>
+                        <option value="none" @selected($selectedDays === 'none')>Not served</option>
+                    </select>
+                </div>
+            @endforeach
+        </div>
+        <p class="text-xs text-ink-900/50 mt-1">Example: Mon–Fri breakfast + dinner only, Sat–Sun sab teen meals — bas Lunch ko "Weekends only" set kar do.</p>
+    </div>
+
+    {{-- Nearby locations — metro, hospital, market, university etc --}}
+    <div>
+        <label class="text-xs font-semibold text-ink-900/60 uppercase mb-1 block">Nearby locations</label>
+        <div id="landmarkRows" class="space-y-2">
+            @php $existingLandmarks = $property->landmarks ?? collect(); @endphp
+            @forelse($existingLandmarks as $lm)
+                <div class="flex flex-col sm:flex-row gap-2 landmark-row">
+                    <select name="landmark_id[]" class="flex-1 px-3 py-2.5 rounded-lg border border-ink-900/15 text-sm">
+                        <option value="">— Select location —</option>
+                        @foreach($landmarks as $l)
+                            <option value="{{ $l->id }}" @selected($l->id === $lm->id)>{{ $l->name }} ({{ ucfirst($l->type) }})</option>
+                        @endforeach
+                    </select>
+                    <input name="landmark_distance[]" type="number" step="0.1" min="0" placeholder="Distance (km)"
+                           value="{{ $lm->pivot->distance_km }}"
+                           class="w-full sm:w-40 px-3 py-2.5 rounded-lg border border-ink-900/15 text-sm">
+                    <button type="button" onclick="this.closest('.landmark-row').remove()"
+                            class="px-3 py-2.5 rounded-lg border border-rose-200 text-rose-600 text-sm shrink-0">✕ Remove</button>
+                </div>
+            @empty
+                <div class="flex flex-col sm:flex-row gap-2 landmark-row">
+                    <select name="landmark_id[]" class="flex-1 px-3 py-2.5 rounded-lg border border-ink-900/15 text-sm">
+                        <option value="">— Select location —</option>
+                        @foreach($landmarks as $l)
+                            <option value="{{ $l->id }}">{{ $l->name }} ({{ ucfirst($l->type) }})</option>
+                        @endforeach
+                    </select>
+                    <input name="landmark_distance[]" type="number" step="0.1" min="0" placeholder="Distance (km)"
+                           class="w-full sm:w-40 px-3 py-2.5 rounded-lg border border-ink-900/15 text-sm">
+                    <button type="button" onclick="this.closest('.landmark-row').remove()"
+                            class="px-3 py-2.5 rounded-lg border border-rose-200 text-rose-600 text-sm shrink-0">✕ Remove</button>
+                </div>
+            @endforelse
+        </div>
+        <button type="button" id="addLandmarkRow" class="mt-2 text-sm font-semibold text-coral-600">+ Add another nearby location</button>
+    </div>
+    <script>
+        document.getElementById('addLandmarkRow')?.addEventListener('click', function () {
+            const rows = document.getElementById('landmarkRows');
+            const first = rows.querySelector('.landmark-row');
+            const clone = first.cloneNode(true);
+            clone.querySelectorAll('select, input').forEach(el => el.value = '');
+            rows.appendChild(clone);
+        });
+    </script>
+
+    <div>
+        <label class="text-xs font-semibold text-ink-900/60 uppercase">Address <span class="text-rose-500">*</span></label>
         <input name="address_line" required value="{{ old('address_line', $property->address_line ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
     </div>
 
@@ -395,5 +492,31 @@
         });
     })();
     </script>
+
+    {{-- Jump to whichever field failed validation and show the exact
+         reason right next to it, instead of only a generic banner at top. --}}
+    @if($errors->any())
+    <script>
+    (function () {
+        const errors = @json($errors->messages());
+        let firstField = null;
+        Object.keys(errors).forEach(function (key) {
+            const base = key.split('.')[0];
+            const field = document.querySelector('[name="' + base + '"]') || document.querySelector('[name="' + base + '[]"]');
+            if (!field) return;
+            field.classList.add('border-rose-500', 'ring-1', 'ring-rose-500');
+            const msg = document.createElement('p');
+            msg.className = 'text-rose-600 text-xs mt-1 font-semibold';
+            msg.textContent = errors[key][0];
+            field.insertAdjacentElement('afterend', msg);
+            if (!firstField) firstField = field;
+        });
+        if (firstField) {
+            firstField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstField.focus();
+        }
+    })();
+    </script>
+    @endif
 
 </form>
