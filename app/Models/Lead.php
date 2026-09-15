@@ -227,7 +227,24 @@ protected $fillable = [
         if (preg_match('/^(Auto-imported from|Backfilled from)/i', $this->message)) {
             return null;
         }
-        return $this->message;
+
+        $text = $this->message;
+
+        // Strip email addresses — a lead's free-text message must never
+        // leak contact info before the owner actually pays to unlock it.
+        // Loose on purpose: people type "demo @gmail" or skip the .com,
+        // so we match anything shaped like "word @ word[.tld]", not just
+        // a strictly well-formed address.
+        $text = preg_replace('/[\w.+-]*\s?@\s?[\w-]+(\.[a-zA-Z]{2,})?/', '[email hidden]', $text);
+
+        // Strip phone numbers — Indian mobiles always start with 6-9 and
+        // run exactly 10 digits, optionally split "98765 43210" or
+        // prefixed "+91-9876543210". Anchored to that shape (not just
+        // "any long run of digits") so a budget range like "8000-10000"
+        // is left alone.
+        $text = preg_replace('/(?:\+?91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}\b/', '[phone hidden]', $text);
+
+        return trim($text);
     }
 
     public function sourceBadge(): array
