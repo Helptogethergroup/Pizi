@@ -289,9 +289,9 @@ class OwnerController extends Controller
 
         'pincode' => 'nullable|string',
 
-        'latitude' => 'nullable|string',
+        'latitude' => 'nullable|numeric',
 
-        'longitude' => 'nullable|string',
+        'longitude' => 'nullable|numeric',
 
         'google_map_link' => 'nullable|string',
 

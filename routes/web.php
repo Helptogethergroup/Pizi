@@ -536,6 +536,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     
     // Blogs
     Route::get('/blogs', [\App\Http\Controllers\Admin\BlogController::class, 'index'])->name('blogs.index');
+    Route::post('/blogs/ai-assist', [\App\Http\Controllers\Admin\BlogController::class, 'aiAssist'])->name('blogs.ai-assist');
     Route::get('/blogs/create', [\App\Http\Controllers\Admin\BlogController::class, 'create'])->name('blogs.create');
     Route::post('/blogs', [\App\Http\Controllers\Admin\BlogController::class, 'store'])->name('blogs.store');
     Route::get('/blogs/{blog}/edit', [\App\Http\Controllers\Admin\BlogController::class, 'edit'])->name('blogs.edit');

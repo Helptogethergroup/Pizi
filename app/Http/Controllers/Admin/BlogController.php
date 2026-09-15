@@ -126,6 +126,67 @@ class BlogController extends Controller
         return redirect()->route('admin.blogs.index')->with('success', '✓ Blog deleted permanently.');
     }
 
+    /**
+     * AI-assist: given a title + plain-text content, auto-draft an
+     * excerpt, SEO meta title/description and keywords via Gemini.
+     * Admin can accept/edit before saving — nothing is auto-saved here.
+     */
+    public function aiAssist(Request $request)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:200',
+            'content_text' => 'required|string',
+        ]);
+
+        $apiKey = env('GEMINI_API_KEY');
+        if (!$apiKey) {
+            return response()->json(['success' => false, 'message' => 'AI not configured on this server.'], 422);
+        }
+
+        $prompt = "You are writing SEO metadata for a PG/hostel-rental blog post (Pizi.in, India).\n"
+            . "Title: {$data['title']}\n"
+            . "Content:\n" . \Illuminate\Support\Str::limit($data['content_text'], 3000) . "\n\n"
+            . "Reply with ONLY a raw JSON object (no markdown fences), exactly these keys:\n"
+            . '{"excerpt": "1-2 sentence summary, max 160 chars", "meta_title": "SEO title, max 60 chars", "meta_description": "SEO meta description, max 160 chars", "keywords": "5-8 comma-separated keywords relevant to PG/hostel search in India"}';
+
+        try {
+            $response = \Illuminate\Support\Facades\Http::timeout(30)->retry(2, 500)->post(
+                'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' . $apiKey,
+                [
+                    'contents' => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
+                    'generationConfig' => [
+                        'temperature' => 0.6,
+                        'maxOutputTokens' => 512,
+                        'thinkingConfig' => ['thinkingBudget' => 0],
+                    ],
+                ]
+            );
+
+            $text = $response->json('candidates.0.content.parts.0.text');
+            if (!$text) {
+                return response()->json(['success' => false, 'message' => 'AI did not return a result. Try again.'], 502);
+            }
+
+            // Strip ```json fences if the model added them anyway.
+            $clean = trim(preg_replace('/^```json\s*|```$/m', '', trim($text)));
+            $parsed = json_decode($clean, true);
+
+            if (!is_array($parsed)) {
+                return response()->json(['success' => false, 'message' => 'AI response could not be parsed.'], 502);
+            }
+
+            return response()->json(['success' => true, 'data' => [
+                'excerpt' => \Illuminate\Support\Str::limit($parsed['excerpt'] ?? '', 160, ''),
+                'meta_title' => \Illuminate\Support\Str::limit($parsed['meta_title'] ?? '', 60, ''),
+                'meta_description' => \Illuminate\Support\Str::limit($parsed['meta_description'] ?? '', 160, ''),
+                'keywords' => $parsed['keywords'] ?? '',
+            ]]);
+        } catch (\Exception $e) {
+            \Log::error('Blog AI-assist failed: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'AI request failed. Try again.'], 500);
+        }
+    }
+
     private function validateBlog(Request $request): array
     {
         return $request->validate([
