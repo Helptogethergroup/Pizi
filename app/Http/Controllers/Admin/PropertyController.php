@@ -250,8 +250,12 @@ public function verify(Property $property)
             return redirect()->back()->withInput()
                 ->withErrors([$field => 'The ' . str_replace('_', ' ', $field) . ' field is required.']);
         }
+        if ($col = $this->unknownColumn($e)) {
+            return redirect()->back()->withInput()
+                ->with('error', "Server needs an update — '{$col}' column is missing on this server's database. Run pending migrations (php artisan migrate), then try again.");
+        }
         return redirect()->back()->withInput()
-            ->with('error', 'Unable to create property. Please try again or contact support.');
+            ->with('error', 'Unable to create property (DB error): ' . \Illuminate\Support\Str::limit($e->getMessage(), 200));
 
     } catch (\Exception $e) {
         \Log::error('Admin property creation failed', [
@@ -274,6 +278,17 @@ private function missingRequiredField(\Illuminate\Database\QueryException $e): ?
 {
     if (preg_match("/Column '([a-zA-Z0-9_]+)' cannot be null/", $e->getMessage(), $m)) return $m[1];
     if (preg_match("/Field '([a-zA-Z0-9_]+)' doesn't have a default value/", $e->getMessage(), $m)) return $m[1];
+    return null;
+}
+
+/**
+ * "Unknown column 'x' in 'field list'" — the app code expects a column
+ * that doesn't exist on this DB yet, almost always because a migration
+ * hasn't been run on this server.
+ */
+private function unknownColumn(\Illuminate\Database\QueryException $e): ?string
+{
+    if (preg_match("/Unknown column '([a-zA-Z0-9_.]+)'/", $e->getMessage(), $m)) return $m[1];
     return null;
 }
     /**
