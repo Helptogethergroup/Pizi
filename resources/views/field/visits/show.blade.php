@@ -2,6 +2,8 @@
 @section('title', 'Visit Details')
 @section('content')
 
+@php $lead = $visit->related_lead; @endphp
+
 <div class="mb-6">
     <a href="{{ route('field.visits.index') }}" class="text-sm text-coral-500 font-bold">← Back to visits</a>
 </div>
@@ -11,19 +13,31 @@
     <div class="lg:col-span-2 space-y-6">
 
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <span class="text-xs font-bold uppercase px-2 py-1 rounded
-                @if($visit->status === 'completed') bg-emerald-100 text-emerald-700
-                @elseif($visit->status === 'in_progress') bg-amber-100 text-amber-700
-                @elseif($visit->status === 'scheduled') bg-blue-100 text-blue-700
-                @else bg-rose-100 text-rose-700 @endif">
-                {{ str_replace('_', ' ', $visit->status) }}
-            </span>
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-bold uppercase px-2 py-1 rounded
+                    @if($visit->status === 'completed') bg-emerald-100 text-emerald-700
+                    @elseif($visit->status === 'in_progress') bg-amber-100 text-amber-700
+                    @elseif($visit->status === 'scheduled') bg-blue-100 text-blue-700
+                    @else bg-rose-100 text-rose-700 @endif">
+                    {{ str_replace('_', ' ', $visit->status) }}
+                </span>
+                @if($visit->is_missed)
+                    <span class="text-xs font-bold uppercase px-2 py-1 rounded bg-rose-600 text-white">🔴 Missed — was due {{ $visit->scheduled_at->diffForHumans() }}</span>
+                @endif
+            </div>
             <h1 class="font-display font-black text-2xl text-ink-950 mt-3">{{ $visit->property->name }}</h1>
             <p class="text-ink-700 mt-1">📍 {{ $visit->property->address_line }}, {{ $visit->property->locality?->name }}, {{ $visit->property->city?->name }}</p>
 
-            @if(!empty($visit->property->google_map_link))
-                <a href="{{ $visit->property->google_map_link }}" target="_blank" class="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold">🧭 Get Directions</a>
-            @endif
+            <div class="flex flex-wrap gap-2 mt-3">
+                @if(!empty($visit->property->google_map_link))
+                    <a href="{{ $visit->property->google_map_link }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold">🧭 Get Directions</a>
+                @elseif($visit->property->latitude && $visit->property->longitude)
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $visit->property->latitude }},{{ $visit->property->longitude }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold">🧭 Get Directions</a>
+                @endif
+                @if($lead?->phone)
+                    <a href="tel:{{ $lead->phone }}" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold">📞 Call {{ $lead->name }}</a>
+                @endif
+            </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5 pt-5 border-t border-ink-100">
                 <div>
@@ -62,28 +76,56 @@
 
         @if(in_array($visit->status, ['in_progress', 'completed']))
             <div class="bg-white p-6 rounded-2xl border border-ink-100">
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center justify-between mb-1 flex-wrap gap-2">
                     <h2 class="font-display font-bold text-xl">✓ Verification Checklist</h2>
-                    <div class="text-sm font-bold text-emerald-700">{{ $visit->verification_progress }}%</div>
+                    <div class="flex items-center gap-3">
+                        <div class="text-sm font-bold text-emerald-700">{{ $visit->verification_progress }}%</div>
+                        @if($visit->status !== 'completed')
+                            <button type="button" onclick="markAllOk()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">✅ All OK</button>
+                        @endif
+                    </div>
                 </div>
+                <p class="text-xs text-ink-500 mb-4">Compare what's on-site against what the property listing declares, then tick each item.</p>
 
                 <div class="w-full bg-ink-100 rounded-full h-2 mb-5">
                     <div class="bg-emerald-500 h-2 rounded-full transition-all" style="width: {{ $visit->verification_progress }}%"></div>
                 </div>
 
-                <form method="POST" action="{{ route('field.visits.verify', $visit) }}" class="space-y-3">
+                <form method="POST" action="{{ route('field.visits.verify', $visit) }}" id="checklistForm" class="space-y-3">
                     @csrf
-                    @foreach([
-                        'address_verified' => ['📍 Address Verified', 'Address matches property location'],
-                        'amenities_verified' => ['✨ Amenities Verified', 'All listed amenities are present'],
-                        'rooms_verified' => ['🛏️ Rooms Verified', 'Room types and counts match'],
-                        'safety_verified' => ['🛡️ Safety Verified', 'Fire safety, CCTV, locks proper'],
-                    ] as $field => $info)
+                    @php
+                        $checklistItems = [
+                            'address_verified' => [
+                                'label' => '📍 Address Verified',
+                                'desc' => 'Address matches property location',
+                                'listed' => $visit->property->address_line,
+                            ],
+                            'amenities_verified' => [
+                                'label' => '✨ Amenities Verified',
+                                'desc' => 'All listed amenities are present',
+                                'listed' => $visit->property->amenities->pluck('name')->implode(', ') ?: 'No amenities listed',
+                            ],
+                            'rooms_verified' => [
+                                'label' => '🛏️ Rooms Verified',
+                                'desc' => 'Room types and counts match',
+                                'listed' => 'Total rooms: ' . ($visit->property->total_rooms ?? '—') . ' · Available: ' . ($visit->property->available_rooms ?? '—'),
+                            ],
+                            'safety_verified' => [
+                                'label' => '🛡️ Safety Verified',
+                                'desc' => 'Fire safety, CCTV, locks proper',
+                                'listed' => null,
+                            ],
+                        ];
+                    @endphp
+                    @foreach($checklistItems as $field => $info)
                         <label class="flex items-start gap-3 p-3 rounded-xl border border-ink-100 cursor-pointer hover:bg-cream">
-                            <input type="checkbox" name="{{ $field }}" value="1" @checked($visit->{$field}) class="mt-1 rounded w-5 h-5" {{ $visit->status === 'completed' ? 'disabled' : '' }}>
-                            <div>
-                                <div class="font-bold">{{ $info[0] }}</div>
-                                <div class="text-xs text-ink-700">{{ $info[1] }}</div>
+                            <input type="checkbox" name="{{ $field }}" value="1" @checked($visit->{$field}) class="checklist-box mt-1 rounded w-5 h-5" {{ $visit->status === 'completed' ? 'disabled' : '' }}>
+                            <div class="min-w-0">
+                                <div class="font-bold">{{ $info['label'] }}</div>
+                                <div class="text-xs text-ink-700">{{ $info['desc'] }}</div>
+                                @if($info['listed'])
+                                    <div class="text-xs text-ink-900/50 mt-1 bg-cream rounded px-2 py-1 inline-block">📋 Listed: {{ $info['listed'] }}</div>
+                                @endif
                             </div>
                         </label>
                     @endforeach
@@ -100,11 +142,12 @@
                 <h2 class="font-display font-bold text-xl mb-4">📸 Photos & Videos</h2>
 
                 @if($visit->status !== 'completed')
-                    <form method="POST" action="{{ route('field.visits.media', $visit) }}" enctype="multipart/form-data" class="space-y-3 mb-5">
+                    <form method="POST" action="{{ route('field.visits.media', $visit) }}" enctype="multipart/form-data" class="space-y-3 mb-5" id="mediaForm">
                         @csrf
-                        <input type="file" name="media[]" multiple accept="image/*,video/*" capture="environment" class="w-full text-sm" required>
+                        <input type="file" name="media[]" id="mediaInput" multiple accept="image/*,video/*" capture="environment" class="w-full text-sm" required>
+                        <p id="compressStatus" class="text-xs text-ink-500 h-4"></p>
                         <input type="text" name="caption" placeholder="Caption (optional)" class="w-full px-4 py-2 rounded-xl border border-ink-200 text-sm">
-                        <button type="submit" class="px-5 py-2.5 bg-coral-500 text-white rounded-xl font-bold text-sm">📤 Upload</button>
+                        <button type="submit" id="uploadBtn" class="px-5 py-2.5 bg-coral-500 text-white rounded-xl font-bold text-sm">📤 Upload</button>
                     </form>
                 @endif
 
@@ -150,31 +193,51 @@
     </div>
 
     <div class="lg:col-span-1">
-        <div class="lg:sticky lg:top-24 bg-white p-5 rounded-2xl border border-ink-100">
-            <h3 class="font-display font-bold text-lg mb-3">🏠 Property Info</h3>
-            <div class="space-y-2 text-sm">
-                <div><span class="text-ink-500">Type:</span> <strong class="capitalize">{{ $visit->property->property_type }}</strong></div>
-                <div><span class="text-ink-500">Gender:</span> <strong class="capitalize">{{ $visit->property->gender }}</strong></div>
-                <div><span class="text-ink-500">Rent:</span> <strong>₹{{ number_format($visit->property->rent_min) }}+</strong></div>
-                <div><span class="text-ink-500">Rooms:</span> <strong>{{ $visit->property->total_rooms ?? '—' }}</strong></div>
-            </div>
-
-            @if($visit->property->amenities->count())
-                <div class="mt-4 pt-4 border-t border-ink-100">
-                    <div class="text-xs font-bold uppercase text-ink-500 mb-2">Amenities</div>
-                    <div class="flex flex-wrap gap-1.5">
-                        @foreach($visit->property->amenities as $a)
-                            <span class="px-2 py-0.5 rounded-full bg-cream text-xs">{{ $a->icon ?? '✨' }} {{ $a->name }}</span>
-                        @endforeach
+        <div class="lg:sticky lg:top-24 space-y-6">
+            @if($lead)
+                <div class="bg-white p-5 rounded-2xl border border-ink-100">
+                    <h3 class="font-display font-bold text-lg mb-3">👤 Tenant</h3>
+                    <div class="space-y-2 text-sm">
+                        <div><span class="text-ink-500">Name:</span> <strong>{{ $lead->name }}</strong></div>
+                        @if($lead->phone)
+                            <div><span class="text-ink-500">Phone:</span> <a href="tel:{{ $lead->phone }}" class="font-bold text-emerald-700">{{ $lead->phone }}</a></div>
+                        @endif
                     </div>
+                    @if($lead->phone)
+                        <div class="grid grid-cols-2 gap-2 mt-3">
+                            <a href="tel:{{ $lead->phone }}" class="text-center py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold">📞 Call</a>
+                            <a href="https://wa.me/{{ preg_replace('/\D/', '', $lead->phone) }}" target="_blank" class="text-center py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold">💬 WhatsApp</a>
+                        </div>
+                    @endif
                 </div>
             @endif
 
-            @if($visit->assignedBy)
-                <div class="mt-4 pt-4 border-t border-ink-100 text-xs">
-                    Assigned by: <strong>{{ $visit->assignedBy->name }}</strong>
+            <div class="bg-white p-5 rounded-2xl border border-ink-100">
+                <h3 class="font-display font-bold text-lg mb-3">🏠 Property Info</h3>
+                <div class="space-y-2 text-sm">
+                    <div><span class="text-ink-500">Type:</span> <strong class="capitalize">{{ $visit->property->property_type }}</strong></div>
+                    <div><span class="text-ink-500">Gender:</span> <strong class="capitalize">{{ $visit->property->gender }}</strong></div>
+                    <div><span class="text-ink-500">Rent:</span> <strong>₹{{ number_format($visit->property->rent_min) }}+</strong></div>
+                    <div><span class="text-ink-500">Rooms:</span> <strong>{{ $visit->property->total_rooms ?? '—' }}</strong></div>
                 </div>
-            @endif
+
+                @if($visit->property->amenities->count())
+                    <div class="mt-4 pt-4 border-t border-ink-100">
+                        <div class="text-xs font-bold uppercase text-ink-500 mb-2">Amenities</div>
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach($visit->property->amenities as $a)
+                                <span class="px-2 py-0.5 rounded-full bg-cream text-xs">{{ $a->icon ?? '✨' }} {{ $a->name }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
+                @if($visit->assignedBy)
+                    <div class="mt-4 pt-4 border-t border-ink-100 text-xs">
+                        Assigned by: <strong>{{ $visit->assignedBy->name }}</strong>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>
@@ -202,6 +265,77 @@ function completeVisit() {
         document.getElementById('completeForm').submit();
     });
 }
+
+// Quick "All OK" — ticks every checklist box at once when the property
+// checks out fine, instead of tapping each one individually.
+function markAllOk() {
+    document.querySelectorAll('.checklist-box').forEach(box => { if (!box.disabled) box.checked = true; });
+}
+
+// Client-side photo compression before upload — field visits often happen
+// on weak PG-area mobile networks, so a full-res photo can fail to upload
+// entirely. Videos are left as-is (can't easily compress in-browser).
+(function () {
+    const input = document.getElementById('mediaInput');
+    const form = document.getElementById('mediaForm');
+    const status = document.getElementById('compressStatus');
+    const uploadBtn = document.getElementById('uploadBtn');
+    if (!input || !form) return;
+
+    const MAX_DIMENSION = 1600;
+    const JPEG_QUALITY = 0.7;
+
+    function compressImage(file) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            const reader = new FileReader();
+            reader.onload = (e) => { img.src = e.target.result; };
+            reader.onerror = () => resolve(file);
+            img.onload = () => {
+                let { width, height } = img;
+                if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+                    const scale = MAX_DIMENSION / Math.max(width, height);
+                    width = Math.round(width * scale);
+                    height = Math.round(height * scale);
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                canvas.toBlob((blob) => {
+                    if (!blob) { resolve(file); return; }
+                    resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+                }, 'image/jpeg', JPEG_QUALITY);
+            };
+            img.onerror = () => resolve(file);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    form.addEventListener('submit', async function (e) {
+        const files = Array.from(input.files || []);
+        if (!files.length) return;
+
+        const hasImage = files.some(f => f.type.startsWith('image/'));
+        if (!hasImage) return; // nothing to compress, let it submit normally
+
+        e.preventDefault();
+        uploadBtn.disabled = true;
+        status.textContent = '⏳ Optimizing photos for upload...';
+
+        const dt = new DataTransfer();
+        for (const file of files) {
+            if (file.type.startsWith('image/')) {
+                dt.items.add(await compressImage(file));
+            } else {
+                dt.items.add(file); // videos: uploaded as-is
+            }
+        }
+        input.files = dt.files;
+        status.textContent = '✓ Ready — uploading...';
+        form.submit();
+    });
+})();
 </script>
 
 @endsection

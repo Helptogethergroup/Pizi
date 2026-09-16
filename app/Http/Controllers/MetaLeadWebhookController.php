@@ -108,8 +108,10 @@ class MetaLeadWebhookController extends Controller
             }
 
             // Owner vs. tenant is known from WHICH lead form they filled —
-            // if this form_id hasn't been registered yet, falls back to 'unknown'.
-            $inquiryType = \App\Models\AdLeadFormType::typeFor('meta', $formId) ?? 'unknown';
+            // if this form_id hasn't been registered yet, default to
+            // 'tenant' (the vast majority of ad leads are) rather than
+            // 'unknown', which never reaches any owner's dashboard at all.
+            $inquiryType = \App\Models\AdLeadFormType::typeFor('meta', $formId) ?? 'tenant';
 
             $this->createLead($name, $phone, $email, 'meta_ads', $leadgenId, $inquiryType, $preferredCity);
         } catch (\Exception $e) {
@@ -121,7 +123,7 @@ class MetaLeadWebhookController extends Controller
      * Shared with GoogleAdsLeadWebhookController — kept here as a private
      * method since it's only a few lines; not worth a shared trait yet.
      */
-    private function createLead(string $name, string $phone, ?string $email, string $source, string $externalId, string $inquiryType = 'unknown', ?string $preferredCity = null): void
+    private function createLead(string $name, string $phone, ?string $email, string $source, string $externalId, string $inquiryType = 'tenant', ?string $preferredCity = null): void
     {
         $phone = preg_replace('/[^0-9]/', '', $phone);
 

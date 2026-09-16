@@ -48,15 +48,17 @@ class GoogleAdsLeadWebhookController extends Controller
         }
 
         // Owner vs. tenant is known from WHICH lead form they filled —
-        // if this form_id hasn't been registered yet, falls back to 'unknown'.
-        $inquiryType = \App\Models\AdLeadFormType::typeFor('google', $payload['form_id'] ?? null) ?? 'unknown';
+        // if this form_id hasn't been registered yet, default to 'tenant'
+        // (the vast majority of ad leads are) rather than 'unknown',
+        // which never reaches any owner's dashboard at all.
+        $inquiryType = \App\Models\AdLeadFormType::typeFor('google', $payload['form_id'] ?? null) ?? 'tenant';
 
         $this->createLead($name, $phone, $email, 'google_ads', $payload['lead_id'] ?? 'unknown', $inquiryType);
 
         return response('OK', 200);
     }
 
-    private function createLead(string $name, string $phone, ?string $email, string $source, string $externalId, string $inquiryType = 'unknown'): void
+    private function createLead(string $name, string $phone, ?string $email, string $source, string $externalId, string $inquiryType = 'tenant'): void
     {
         $phone = preg_replace('/[^0-9]/', '', $phone);
 

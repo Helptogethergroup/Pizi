@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Models\Visit;
+use App\Models\FieldVisit;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -11,7 +11,7 @@ class VisitScheduled extends Notification
 {
     use Queueable;
 
-    public function __construct(public Visit $visit) {}
+    public function __construct(public FieldVisit $visit) {}
 
     public function via(object $notifiable): array
     {
@@ -20,11 +20,13 @@ class VisitScheduled extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
+        $lead = $this->visit->related_lead;
+
         return (new MailMessage)
             ->subject('📅 New site visit scheduled')
             ->greeting("Hi {$notifiable->name},")
             ->line("A new visit has been assigned to you:")
-            ->line("**Tenant:** {$this->visit->lead?->name} ({$this->visit->lead?->phone})")
+            ->line("**Tenant:** " . ($lead?->name ?? 'N/A') . ($lead?->phone ? " ({$lead->phone})" : ''))
             ->line("**Property:** {$this->visit->property?->name}")
             ->line("**When:** " . $this->visit->scheduled_at->format('d M Y, h:i A'))
             ->action('View Visit Details', url('/field/visits/' . $this->visit->id));

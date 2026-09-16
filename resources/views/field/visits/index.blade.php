@@ -24,9 +24,10 @@
 @else
     <div class="space-y-3">
         @foreach($visits as $visit)
-            <a href="{{ route('field.visits.show', $visit) }}" class="block bg-white p-5 rounded-2xl border border-ink-100 hover:border-coral-500 hover:shadow-md transition">
+            @php $lead = $visit->related_lead; @endphp
+            <div class="bg-white p-5 rounded-2xl border {{ $visit->is_missed ? 'border-rose-300 bg-rose-50/30' : 'border-ink-100 hover:border-coral-500 hover:shadow-md' }} transition">
                 <div class="flex items-start justify-between gap-3 flex-wrap">
-                    <div class="flex-1 min-w-0">
+                    <a href="{{ route('field.visits.show', $visit) }}" class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1 flex-wrap">
                             <span class="text-xs font-bold uppercase px-2 py-0.5 rounded
                                 @if($visit->status === 'completed') bg-emerald-100 text-emerald-700
@@ -35,16 +36,24 @@
                                 @else bg-rose-100 text-rose-700 @endif">
                                 {{ str_replace('_', ' ', $visit->status) }}
                             </span>
+                            @if($visit->is_missed)
+                                <span class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-rose-600 text-white">🔴 Missed</span>
+                            @endif
                         </div>
                         <h3 class="font-display font-bold text-lg text-ink-950">{{ $visit->property?->name ?? '—' }}</h3>
-                        <p class="text-sm text-ink-700 mt-1">📍 {{ $visit->property?->name ?? '-'}}</p>
-                    </div>
-                    <div class="text-right">
-                        <div class="text-xs text-ink-500 uppercase">When</div>
-                        <div class="font-bold text-ink-950">{{ $visit->scheduled_at->format('d M, h:i A') }}</div>
+                        <p class="text-sm text-ink-700 mt-1">📍 {{ $visit->property?->locality?->name }}, {{ $visit->property?->city?->name }}</p>
+                    </a>
+                    <div class="text-right flex flex-col items-end gap-2">
+                        <div>
+                            <div class="text-xs text-ink-500 uppercase">When</div>
+                            <div class="font-bold text-ink-950">{{ $visit->scheduled_at->format('d M, h:i A') }}</div>
+                        </div>
+                        @if($lead?->phone)
+                            <a href="tel:{{ $lead->phone }}" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">📞 Call</a>
+                        @endif
                     </div>
                 </div>
-            </a>
+            </div>
         @endforeach
     </div>
     <div class="mt-6">{{ $visits->links() }}</div>

@@ -153,7 +153,10 @@ public function index()
             'message' => $data['message'],
             'preferred_city' => $data['preferred_city'] ?? null,
             'source' => 'website',
-            'inquiry_type' => $data['inquiry_type'] ?? 'unknown',
+            // Default to tenant, not unknown — an "unknown" lead never
+            // reaches any owner's dashboard, and the vast majority of
+            // contact-form submissions are someone looking for a PG.
+            'inquiry_type' => $data['inquiry_type'] ?? 'tenant',
             'status' => 'new',
         ]);
 

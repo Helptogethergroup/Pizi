@@ -284,7 +284,7 @@ class LeadController extends Controller
         ]);
 
         try {
-            $visit->load('lead', 'property');
+            $visit->load('property');
             $fe->notify(new \App\Notifications\VisitScheduled($visit));
         } catch (\Exception $e) {
             \Log::warning('Visit notification failed: ' . $e->getMessage());

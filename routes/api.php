@@ -308,17 +308,26 @@ Route::prefix('chat')->group(function () {
 
 
 
-// Simple routes (no auth required for now)
-Route::get('/leads', [LeadController::class, 'all']);
-Route::get('/leads/{id}/edit', [LeadController::class, 'edit']);
-Route::post('/leads/{id}/release-lock', [LeadController::class, 'releaseLock']);
-Route::put('/leads/{id}', [LeadController::class, 'update']);
-Route::delete('/leads/{id}', [LeadController::class, 'destroy']);
+// Admin/telecaller lead management (edit modal, remarks) — used from the
+// logged-in web dashboard only. SECURITY: previously had no auth check at
+// all ("Simple routes (no auth required for now)"), meaning anyone on the
+// internet could dump/edit/delete every lead's name, phone and email
+// without logging in. Now requires a real admin/telecaller web session,
+// same as the pages that call these.
+Route::middleware(['web', 'auth', 'role:admin,telecaller'])->group(function () {
+    Route::get('/leads', [LeadController::class, 'all']);
+    Route::get('/leads/{id}/edit', [LeadController::class, 'edit']);
+    Route::post('/leads/{id}/release-lock', [LeadController::class, 'releaseLock']);
+    Route::put('/leads/{id}', [LeadController::class, 'update']);
+    Route::delete('/leads/{id}', [LeadController::class, 'destroy']);
+    Route::post('/leads/{id}/remark', [LeadController::class, 'addRemark']);
+    Route::get('/leads/{id}/remarks', [LeadController::class, 'getRemarks']);
+});
+
+// Public — the property enquiry widget / lead-capture form posts a new
+// lead without being logged in. Left open by design (no PII is exposed,
+// only accepts new data).
 Route::post('/leads', [LeadController::class, 'store']);
-
-
-Route::post('/leads/{id}/remark', [LeadController::class, 'addRemark']);
-Route::get('/leads/{id}/remarks', [LeadController::class, 'getRemarks']);
 
 // ── Ad-platform lead webhooks (Meta + Google Ads) ────────────────────
 // Public, unauthenticated by design — external platforms call these.

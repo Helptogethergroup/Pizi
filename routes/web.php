@@ -214,7 +214,6 @@ use App\Http\Controllers\Admin\AdminReviewController;
 use App\Http\Controllers\ChatController;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Http\Controllers\FieldExec\TokenController as FieldTokenController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -875,23 +874,6 @@ Route::middleware(['auth'])->group(function () {
     // Resolves short Google Maps links (share.google, maps.app.goo.gl) into
     // real lat/lng — used by the property location map picker (owner + admin).
     Route::post('/resolve-map-link', [App\Http\Controllers\MapLinkController::class, 'resolve'])->name('map.resolve');
-});
-
-// ---- FIELD EXEC TOKEN ----
-Route::middleware(['auth'])->prefix('field')->name('field.')->group(function () {
-    Route::get('/token-collection',         [FieldTokenController::class, 'index'])->name('token.collection');
-    Route::post('/token-collection/set',    [FieldTokenController::class, 'setToken'])->name('token.set');
-    Route::post('/token-collection/collect',[FieldTokenController::class, 'collectCash'])->name('token.collect');
-});
-
-// ---- ADMIN TOKEN ----
-Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/tokens', [App\Http\Controllers\Admin\TokenReportController::class, 'index'])->name('tokens');
-});
-
-// ---- OWNER TOKEN ----
-Route::middleware(['auth'])->prefix('owner')->name('owner.')->group(function () {
-    Route::get('/tokens', [App\Http\Controllers\Owner\TokenReportController::class, 'index'])->name('tokens');
 });
 
 

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') Pizi</title>
     <link rel="icon" type="image/png" href="{{ asset('assets/images/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -95,7 +96,6 @@
                 <a href="{{ route('admin.pricing.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.pricing.*') ? 'bg-cream/10 text-coral-500' : '' }}">💲 Pricing</a>
                 <a href="{{ route('admin.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}">📝 Blogs</a>
                 <a href="{{ route('admin.field-tracker.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.field-tracker.*') ? 'bg-cream/10 text-coral-500' : '' }}">🚗 Field Tracker</a>
-                  <a href="{{ route('admin.tokens') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.tokens') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Token Payments</a>
                 <a href="{{ route('admin.packages.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.packages.*') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Packages</a>
 
                 <div class="mt-4 mb-2 px-3 text-xs font-bold uppercase text-cream/40">PG Management</div>
@@ -151,7 +151,6 @@
                 <a href="{{ route('owner.packages') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.packages') || request()->routeIs('owner.checkout') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Buy Credits</a>
                 <a href="{{ route('owner.invoices.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.invoices.*') ? 'bg-cream/10 text-coral-500' : '' }}">🧾 My Invoices</a>
                 <a href="{{ route('owner.billing.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.billing.*') ? 'bg-cream/10 text-coral-500' : '' }}">🏢 Billing & GST Info</a>
-                <a href="{{ route('owner.tokens') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.tokens') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Token Payments</a>
                 <a href="{{ route('owner.reviews.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.reviews.*') ? 'bg-cream/10 text-coral-500' : '' }}">⭐ Reviews</a>
                 @endif
 
@@ -168,7 +167,6 @@
             @elseif($role === 'field_executive')
                 <a href="{{ route('field.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('field.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Dashboard</a>
                 <a href="{{ route('field.visits.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('field.visits.*') ? 'bg-cream/10 text-coral-500' : '' }}">📅 My Visits</a>
-                <a href="{{ route('field.token.collection') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('field.token.*') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Token Collection</a>
                 <a href="{{ route('field.visits.index', ['status' => 'scheduled']) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">⏳ Pending</a>
                 <a href="{{ route('field.visits.index', ['status' => 'completed']) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">✅ Completed</a>
 

@@ -67,7 +67,7 @@ class ImportMetaHistoricalLeads extends Command
         foreach ($forms as $form) {
             $formId = $form['id'];
             $formName = $form['name'] ?? $formId;
-            $inquiryType = AdLeadFormType::typeFor('meta', $formId) ?? 'unknown';
+            $inquiryType = AdLeadFormType::typeFor('meta', $formId) ?? 'tenant';
 
             $this->line("\nForm: {$formName} ({$formId}) — mapped type: {$inquiryType}");
 

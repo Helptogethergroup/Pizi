@@ -91,16 +91,23 @@
                 </td>
                 <td class="text-xs text-ink-900/60">{{ $lead->last_contacted_at?->diffForHumans() ?? '—' }}</td>
                 <td class="px-4 py-3">
-                    <div class="flex gap-1">
-                        <button 
+                    <div class="flex gap-1 flex-wrap">
+                        <button
+                            onclick="openEditModal({{ $lead->id }})"
+                            class="text-xs px-2 py-1 rounded bg-blue-500 text-white font-semibold hover:bg-blue-600"
+                        >
+                            ✏️ Edit
+                        </button>
+
+                        <button
                             onclick="openRemarkModal({{ $lead->id }})"
                             class="text-xs px-2 py-1 rounded bg-purple-500 text-white font-semibold hover:bg-purple-600"
                         >
                             💬 Remark
                         </button>
-                        
+
                         <a href="{{ route('telecaller.leads.show', $lead) }}" class="text-xs px-2 py-1 rounded bg-ink-900 text-cream font-semibold">Open</a>
-                        
+
                         <a href="tel:{{ $lead->phone }}" class="text-xs px-2 py-1 rounded bg-emerald-500 text-white font-semibold">📞 Call</a>
                     </div>
                 </td>
@@ -123,6 +130,83 @@
 </div>
 
 <div class="mt-6">{{ $leads->links() }}</div>
+
+<!-- ===== EDIT MODAL ===== -->
+<div id="editModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl p-6 w-96 max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-display font-black text-2xl">Edit Lead</h2>
+            <button onclick="closeEditModal()" class="text-2xl text-ink-900/50 hover:text-ink-900">×</button>
+        </div>
+
+        <form id="editForm" class="space-y-3">
+            @csrf
+            @method('PUT')
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Name</label>
+                <input type="text" id="editName" name="name" required class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Phone</label>
+                <input type="text" id="editPhone" name="phone" required class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Email</label>
+                <input type="email" id="editEmail" name="email" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Inquiry Type</label>
+                <select id="editInquiryType" name="inquiry_type" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+                    <option value="tenant">🧳 Tenant — looking for a PG</option>
+                    <option value="owner">🏠 Owner — wants to list a PG</option>
+                    <option value="unknown">❓ Unknown</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Status</label>
+                <select id="editStatus" name="status" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+                    @foreach(['new','contacted','interested','follow_up','visit_scheduled','visit_done','closed_won','closed_lost','junk'] as $s)
+                        <option value="{{ $s }}">{{ str_replace('_',' ',$s) }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">City</label>
+                <input type="text" id="editCity" name="preferred_city" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Budget Min</label>
+                <input type="number" id="editBudgetMin" name="budget_min" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Budget Max</label>
+                <input type="number" id="editBudgetMax" name="budget_max" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
+            </div>
+
+            <div>
+                <label class="block text-xs uppercase text-ink-900/60 mb-1">Notes</label>
+                <textarea id="editNotes" name="notes" rows="2" class="w-full px-3 py-2 rounded-lg border border-ink-900/15"></textarea>
+            </div>
+
+            <div class="flex gap-2 mt-6">
+                <button type="button" onclick="closeEditModal()" class="flex-1 px-4 py-2 rounded-lg border border-ink-900/15 text-ink-900 font-semibold hover:bg-ink-900/5">
+                    Cancel
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2 rounded-lg bg-ink-900 text-cream font-semibold hover:bg-ink-900/90">
+                    Update Lead
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <!-- ===== REMARK MODAL ===== -->
 <div id="remarkModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -171,7 +255,84 @@
 
 <script>
     let currentRemarkId = null;
+    let currentEditId = null;
     const apiUrl = '/api/leads';
+
+    // ===== EDIT MODAL FUNCTIONS =====
+    function openEditModal(id) {
+        fetch(`${apiUrl}/${id}/edit`)
+        .then(r => r.json())
+        .then(res => {
+            if (res.locked) {
+                alert(res.message);
+                return;
+            }
+            if (res.success) {
+                const lead = res.data;
+                currentEditId = lead.id;
+
+                document.getElementById('editName').value = lead.name || '';
+                document.getElementById('editPhone').value = lead.phone || '';
+                document.getElementById('editEmail').value = lead.email || '';
+                document.getElementById('editStatus').value = lead.status || 'new';
+                document.getElementById('editInquiryType').value = lead.inquiry_type || 'unknown';
+                document.getElementById('editCity').value = lead.preferred_city || '';
+                document.getElementById('editBudgetMin').value = lead.budget_min || '';
+                document.getElementById('editBudgetMax').value = lead.budget_max || '';
+                document.getElementById('editNotes').value = lead.notes || '';
+
+                document.getElementById('editModal').classList.remove('hidden');
+            }
+        })
+        .catch(e => alert('Error loading lead: ' + e));
+    }
+
+    function closeEditModal() {
+        if (currentEditId) {
+            fetch(`${apiUrl}/${currentEditId}/release-lock`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            });
+        }
+        document.getElementById('editModal').classList.add('hidden');
+        currentEditId = null;
+    }
+
+    document.getElementById('editForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        if (!currentEditId) return;
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData);
+
+        fetch(`${apiUrl}/${currentEditId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            body: JSON.stringify(data)
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res.success) {
+                alert('Lead updated successfully!');
+                closeEditModal();
+                location.reload();
+            } else {
+                alert('Error: ' + res.message);
+            }
+        })
+        .catch(e => alert('Error updating lead: ' + e));
+    });
+
+    document.getElementById('editModal').addEventListener('click', function (e) {
+        if (e.target === this) closeEditModal();
+    });
 
     function openRemarkModal(id) {
         currentRemarkId = id;
