@@ -589,140 +589,104 @@ class OwnerController extends Controller
     // ═══════════════════════════════════════════════════════════════
     //  LEADS
     // ═══════════════════════════════════════════════════════════════
-    public function leads(Request $request)
+    /**
+     * Same matching this owner sees on the website (LeadMatchingService) —
+     * previously this only returned leads with `leads.property_id`
+     * literally pointing at one of the owner's own properties, which
+     * missed almost everything: general "no property yet" leads matched
+     * by city/locality text, and same-city leads tied to a DIFFERENT
+     * owner's property that this owner can still unlock. That's why the
+     * app showed 2-3 leads while the website showed 100+ for the same
+     * owner — two different queries answering the same question.
+     */
+    public function leads(Request $request, \App\Services\LeadMatchingService $matcher)
     {
-        $oid = $this->ownerId($request);
+        $owner = $request->user();
 
-        $query = DB::table('leads')
-            ->leftJoin('properties', 'leads.property_id', '=', 'properties.id')
-            ->leftJoin('cities', 'properties.city_id', '=', 'cities.id')
-            ->leftJoin('localities', 'properties.locality_id', '=', 'localities.id')
-            ->where('properties.owner_id', $oid)
-            ->whereNull('leads.deleted_at')
-            ->select(
-                'leads.id',
-                'leads.name',
-                'leads.phone',
-                'leads.email',
-                'leads.preferred_locality',
-                'leads.preferred_city',
-                'leads.preferred_gender',
-                'leads.budget_min',
-                'leads.budget_max',
-                'leads.move_in_date',
-                'leads.message',
-                'leads.source',
-                'leads.lead_type',
-                'leads.status',
-                'leads.is_locked',
-                'leads.locked_at',
-                'leads.created_at',
-                'leads.updated_at',
-                // NOTE: the `leads.is_locked` DB column is misleadingly named —
-                // it is actually set to TRUE once the owner has PAID/unlocked
-                // the lead (see leadUnlock()). So "is_locked = 1" really means
-                // "unlocked", which is why phone/email are revealed on that
-                // condition. We don't rename the DB column (too many other
-                // places depend on it) — instead we expose it to the app as
-                // the correctly-named `is_unlocked` field below.
-                DB::raw("CASE WHEN leads.is_locked = 1 THEN leads.phone ELSE NULL END as phone_visible"),
-                DB::raw("CASE WHEN leads.is_locked = 1 THEN leads.email ELSE NULL END as email_visible"),
-                'properties.id as property_id',
-                'properties.name as property_name',
-                'properties.slug as property_slug',
-                'properties.cover_image as property_cover_image',
-                'properties.property_type',
-                'properties.gender as property_gender',
-                'properties.rent_min',
-                'properties.rent_max',
-                'properties.security_deposit',
-                'properties.address_line',
-                'properties.landmark',
-                'properties.pincode',
-                'properties.latitude',
-                'properties.longitude',
-                'properties.is_verified',
-                'properties.rating_avg',
-                'properties.rating_count',
-                'properties.total_rooms',
-                'properties.available_rooms',
-                'cities.name as city_name',
-                'localities.name as locality_name'
-            )
-            ->orderBy('leads.created_at', 'desc');
+        $allMatched = $matcher->leadsForOwner($owner, 300);
 
-        if ($request->status) $query->where('leads.status', $request->status);
-        if ($request->property_id) $query->where('leads.property_id', $request->property_id);
+        if ($request->filled('status')) {
+            $allMatched = $allMatched->where('status', $request->status);
+        }
+        if ($request->filled('property_id')) {
+            $allMatched = $allMatched->filter(fn ($l) => $l->matched_property?->id == $request->property_id);
+        }
 
-        $paginated = $query->paginate(20);
+        $allMatched = $allMatched->values();
+
+        $page = (int) $request->get('page', 1);
+        $perPage = 20;
+        $pageItems = $allMatched->forPage($page, $perPage);
 
         // credit_cost per lead_type (direct/verified/converted/manual) — used
         // below to tell the app exactly how many credits unlocking THIS lead
         // will cost, without it having to know the pricing table itself.
         $pricing = DB::table('lead_pricing')->where('is_active', true)->pluck('credit_cost', 'lead_type');
 
-        // Reshape into a clean structure — lead fields + a full "property" object,
-        // instead of a flat row with only property_name.
-        $paginated->getCollection()->transform(function ($row) use ($pricing) {
+        $items = $pageItems->map(function ($lead) use ($pricing) {
+            // The property this lead was actually submitted for, if any —
+            // otherwise the best-matching one among the owner's own
+            // properties, so the app still has something useful to show
+            // instead of a blank property card.
+            $property = $lead->property ?: $lead->matched_property;
+
             return [
-                'id' => $row->id,
-                'name' => $row->name,
-                // phone/email stay masked (null) until the owner unlocks this lead —
-                // that business rule is unchanged, just applied consistently here.
-                'phone' => $row->phone_visible,
-                'email' => $row->email_visible,
-                // Correctly-named field — true once the owner has paid to
-                // unlock this lead (phone/email become visible above).
-                'is_unlocked' => (bool) $row->is_locked,
-                'unlocked_at' => $row->locked_at,
-                // Set by admin/telecaller when they verify a lead's genuineness
-                // (Owner\LeadController::markVerified() / telecaller equivalent) —
-                // NOT related to unlock/payment status above.
-                'is_lead_verified' => $row->lead_type === 'verified',
-                // Credits it costs THIS owner to unlock this specific lead —
-                // varies by lead_type (verified leads cost more, e.g. 40 vs 20).
-                'credit_value' => (int) ($pricing[$row->lead_type] ?? $pricing['direct'] ?? 20),
-                'preferred_locality' => $row->preferred_locality,
-                'preferred_city' => $row->preferred_city,
-                'preferred_gender' => $row->preferred_gender,
-                'budget_min' => $row->budget_min,
-                'budget_max' => $row->budget_max,
-                'move_in_date' => $row->move_in_date,
-                'message' => $row->message,
-                'source' => $row->source,
-                'lead_type' => $row->lead_type,
-                'status' => $row->status,
-                'created_at' => $row->created_at,
-                'updated_at' => $row->updated_at,
-                'property' => $row->property_id ? [
-                    'id' => $row->property_id,
-                    'name' => $row->property_name,
-                    'slug' => $row->property_slug,
-                    'cover_image_url' => $row->property_cover_image
-                        ? (str_starts_with($row->property_cover_image, 'http')
-                            ? $row->property_cover_image
-                            : asset('storage/' . $row->property_cover_image))
-                        : null,
-                    'property_type' => $row->property_type,
-                    'gender' => $row->property_gender,
-                    'rent_min' => $row->rent_min,
-                    'rent_max' => $row->rent_max,
-                    'security_deposit' => $row->security_deposit,
-                    'address_line' => $row->address_line,
-                    'landmark' => $row->landmark,
-                    'city' => $row->city_name,
-                    'locality' => $row->locality_name,
-                    'pincode' => $row->pincode,
-                    'latitude' => $row->latitude,
-                    'longitude' => $row->longitude,
-                    'is_verified' => (bool) $row->is_verified,
-                    'rating_avg' => $row->rating_avg,
-                    'rating_count' => $row->rating_count,
-                    'total_rooms' => $row->total_rooms,
-                    'available_rooms' => $row->available_rooms,
+                'id' => $lead->id,
+                'name' => $lead->name,
+                // phone/email stay masked (null) until the owner unlocks this lead.
+                'phone' => $lead->is_unlocked ? $lead->phone : null,
+                'email' => $lead->is_unlocked ? $lead->email : null,
+                'is_unlocked' => (bool) $lead->is_unlocked,
+                'unlocked_at' => $lead->locked_at,
+                'is_lead_verified' => $lead->lead_type === 'verified',
+                'credit_value' => (int) ($pricing[$lead->lead_type ?? 'direct'] ?? $pricing['direct'] ?? 20),
+                'match_score' => $lead->match_score,
+                'area_match' => (bool) $lead->area_match,
+                'preferred_locality' => $lead->preferred_locality,
+                'preferred_city' => $lead->preferred_city,
+                'preferred_gender' => $lead->preferred_gender,
+                'budget_min' => $lead->budget_min,
+                'budget_max' => $lead->budget_max,
+                'move_in_date' => $lead->move_in_date,
+                'message' => $lead->owner_safe_message,
+                'source' => $lead->source,
+                'lead_type' => $lead->lead_type,
+                'status' => $lead->status,
+                'created_at' => $lead->created_at,
+                'updated_at' => $lead->updated_at,
+                'property' => $property ? [
+                    'id' => $property->id,
+                    'name' => $property->name,
+                    'slug' => $property->slug,
+                    'cover_image_url' => $this->resolveUrl($property->cover_image ?? null),
+                    'property_type' => $property->property_type,
+                    'gender' => $property->gender,
+                    'rent_min' => $property->rent_min,
+                    'rent_max' => $property->rent_max,
+                    'security_deposit' => $property->security_deposit,
+                    'address_line' => $property->address_line,
+                    'landmark' => $property->landmark,
+                    'city' => $property->city?->name,
+                    'locality' => $property->locality?->name,
+                    'pincode' => $property->pincode,
+                    'latitude' => $property->latitude,
+                    'longitude' => $property->longitude,
+                    'is_verified' => (bool) $property->is_verified,
+                    'rating_avg' => $property->rating_avg,
+                    'rating_count' => $property->rating_count,
+                    'total_rooms' => $property->total_rooms,
+                    'available_rooms' => $property->available_rooms,
                 ] : null,
             ];
-        });
+        })->values();
+
+        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $allMatched->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
 
         return $this->ok($paginated);
     }
