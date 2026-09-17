@@ -88,7 +88,12 @@
                 </td>
                <td class="text-xs">
                     @if($lead->is_locked && $lead->locked_by_user_id)
-                        <span class="text-green-600 font-semibold">🔓 Owner claimed</span>
+                        @php $claimedAt = $lead->unlocks->firstWhere('user_id', $lead->locked_by_user_id)?->created_at; @endphp
+                        <span class="text-green-600 font-semibold block">🔓 Claimed</span>
+                        <span class="text-ink-900/60 block">{{ $lead->lockedBy?->name ?? 'Owner #' . $lead->locked_by_user_id }}</span>
+                        @if($claimedAt)
+                            <span class="text-ink-900/40 block">{{ $claimedAt->format('d M, h:i A') }}</span>
+                        @endif
                     @elseif($lead->edit_locked_by)
                         <span class="text-red-600 font-semibold">✏️ Being edited</span>
                     @endif
@@ -161,10 +166,12 @@
             <button onclick="closeEditModal()" class="text-2xl text-ink-900/50 hover:text-ink-900">×</button>
         </div>
 
+        <div id="editClaimBanner" class="hidden mb-3 px-3 py-2 rounded-lg bg-green-50 border border-green-200 text-xs text-green-800"></div>
+
         <form id="editForm" class="space-y-3">
             @csrf
             @method('PUT')
-            
+
             <div>
                 <label class="block text-xs uppercase text-ink-900/60 mb-1">Name</label>
                 <input type="text" id="editName" name="name" required class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
@@ -292,7 +299,15 @@
             if(res.success) {
                 const lead = res.data;
                 currentEditId = lead.id;
-                
+
+                const banner = document.getElementById('editClaimBanner');
+                if (res.claim) {
+                    banner.textContent = '🔓 Claimed by ' + (res.claim.owner_name || 'an owner') + (res.claim.claimed_at ? ' on ' + res.claim.claimed_at : '') + ' — editing as admin.';
+                    banner.classList.remove('hidden');
+                } else {
+                    banner.classList.add('hidden');
+                }
+
                 document.getElementById('editName').value = lead.name || '';
                 document.getElementById('editPhone').value = lead.phone || '';
                 document.getElementById('editEmail').value = lead.email || '';

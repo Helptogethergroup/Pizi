@@ -88,6 +88,12 @@ class SubmitWhatsAppTemplates extends Command
                 'example' => ['Rajesh', '500'],
                 'button' => ['text' => 'Login to Pizi', 'url' => 'https://pizi.in/login'],
             ],
+            'owner_daily_lead_count' => [
+                'category' => 'UTILITY',
+                'body' => "Hi {{1}}, you received {{2}} new tenant lead(s) today on Pizi ({{3}}).\n\nLogin to your dashboard to view and unlock them before another owner does.",
+                'example' => ['Rajesh', '5', '17 Sep 2026'],
+                'button' => ['text' => 'Login to Pizi', 'url' => 'https://pizi.in/login'],
+            ],
         ];
     }
 

@@ -603,7 +603,14 @@ class OwnerController extends Controller
     {
         $owner = $request->user();
 
-        $allMatched = $matcher->leadsForOwner($owner, 300);
+        // per_page defaults to 20 (matches the website) but the app can
+        // ask for more in one call — e.g. ?per_page=500 — instead of
+        // implementing page-by-page loading. Capped at 500 so a request
+        // can't force scoring an unbounded number of leads.
+        $perPage = (int) $request->get('per_page', 20);
+        $perPage = max(1, min($perPage, 500));
+
+        $allMatched = $matcher->leadsForOwner($owner, max(300, $perPage));
 
         if ($request->filled('status')) {
             $allMatched = $allMatched->where('status', $request->status);
@@ -615,7 +622,6 @@ class OwnerController extends Controller
         $allMatched = $allMatched->values();
 
         $page = (int) $request->get('page', 1);
-        $perPage = 20;
         $pageItems = $allMatched->forPage($page, $perPage);
 
         // credit_cost per lead_type (direct/verified/converted/manual) — used
@@ -634,8 +640,11 @@ class OwnerController extends Controller
                 'id' => $lead->id,
                 'name' => $lead->name,
                 // phone/email stay masked (null) until the owner unlocks this lead.
-                'phone' => $lead->is_unlocked ? $lead->phone : null,
+                'phone' => $lead->is_unlocked ? $this->formatPhoneForApp($lead->phone) : null,
                 'email' => $lead->is_unlocked ? $lead->email : null,
+                // Both names kept for app compatibility — see the note in
+                // formatLeadForApp() below.
+                'is_locked' => (bool) $lead->is_unlocked,
                 'is_unlocked' => (bool) $lead->is_unlocked,
                 'unlocked_at' => $lead->locked_at,
                 'is_lead_verified' => $lead->lead_type === 'verified',
@@ -649,7 +658,9 @@ class OwnerController extends Controller
                 'budget_max' => $lead->budget_max,
                 'move_in_date' => $lead->move_in_date,
                 'message' => $lead->owner_safe_message,
-                'source' => $lead->source,
+                // 'source' (website/meta_ads/google_ads/...) deliberately
+                // not sent to the app — same as the website, an owner sees
+                // the lead itself, not which channel it came through.
                 'lead_type' => $lead->lead_type,
                 'status' => $lead->status,
                 'created_at' => $lead->created_at,
@@ -691,60 +702,33 @@ class OwnerController extends Controller
         return $this->ok($paginated);
     }
 
-    public function leadUnlock(Request $request, $id)
+    /**
+     * Leads are a shared per-city pool, not owned by a specific property —
+     * WalletService::unlockLead() (same one the website uses) already
+     * enforces the real rules (not already taken by someone else, enough
+     * credits). This used to ALSO require lead.property_id to literally
+     * belong to this owner, which rejected the exact same leads the
+     * (now-fixed) leads() list legitimately shows — every unlock attempt
+     * on a general/other-property lead failed with 403.
+     */
+    public function leadUnlock(Request $request, $id, \App\Services\WalletService $walletService)
     {
-        $oid = $this->ownerId($request);
-        $lead = DB::table('leads')->where('id', $id)->first();
+        $owner = $request->user();
+        $lead = \App\Models\Lead::find($id);
         if (!$lead) return $this->notFound();
 
-        // A lead must either belong to one of this owner's own properties,
-        // or have no property_id yet (unmatched pool lead) — otherwise any
-        // owner could pay to unlock a lead that was never actually theirs.
-        if ($lead->property_id) {
-            $ownsProperty = DB::table('properties')->where('id', $lead->property_id)->where('owner_id', $oid)->exists();
-            if (!$ownsProperty) return response()->json(['success' => false, 'message' => 'Forbidden'], 403);
+        try {
+            $result = $walletService->unlockLead($owner, $lead);
+        } catch (\RuntimeException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 402);
         }
 
-        if ($lead->is_locked) {
-            return $this->ok(['message' => 'Already unlocked', 'lead' => $this->formatLeadForApp($lead)]);
-        }
-
-        $wallet = DB::table('wallets')->where('user_id', $oid)->first();
-        $leadType = $lead->lead_type ?? 'direct';
-        $cost = DB::table('lead_pricing')->where('lead_type', $leadType)->where('is_active', true)->value('credit_cost') ?? 1;
-
-        if (!$wallet || $wallet->balance < $cost) {
-            return response()->json(['success' => false, 'message' => 'Insufficient credits'], 402);
-        }
-
-        DB::transaction(function () use ($oid, $id, $cost, $wallet, $lead) {
-            $newBalance = $wallet->balance - $cost;
-            DB::table('wallets')->where('user_id', $oid)->update([
-                'balance'        => $newBalance,
-                'lifetime_spent' => $wallet->lifetime_spent + $cost,
-                'updated_at'     => now(),
-            ]);
-            DB::table('wallet_transactions')->insert([
-                'wallet_id'     => $wallet->id,
-                'user_id'       => $oid,
-                'type'          => 'debit',
-                'amount'        => $cost,
-                'balance_after' => $newBalance,
-                'source'        => 'lead_unlock',
-                'lead_id'       => $id,
-                'notes'         => 'Lead unlock #' . $id,
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ]);
-            DB::table('leads')->where('id', $id)->update([
-                'is_locked' => true,
-                'locked_by_user_id' => $oid,
-                'locked_at' => now(),
-                'updated_at'  => now(),
-            ]);
-        });
-
-        return $this->ok(['message' => 'Unlocked', 'lead' => $this->formatLeadForApp(DB::table('leads')->where('id', $id)->first())]);
+        return $this->ok([
+            'message' => $result['message'],
+            'credits_spent' => $result['credits_spent'],
+            'balance_remaining' => $result['balance_remaining'],
+            'lead' => $this->formatLeadForApp(DB::table('leads')->where('id', $id)->first()),
+        ]);
     }
 
     /**
@@ -757,12 +741,24 @@ class OwnerController extends Controller
     {
         $lead = (array) $lead;
         $unlocked = (bool) ($lead['is_locked'] ?? false);
+        // Keep BOTH field names in the response — is_unlocked is the
+        // correctly-named one going forward, but is_locked is kept too
+        // (same true=unlocked value as the raw DB column) since existing
+        // app code reads that field name and a lead can look "still
+        // locked" in the app despite the unlock/credit-deduct succeeding.
+        $lead['is_locked'] = $unlocked;
         $lead['is_unlocked'] = $unlocked;
-        $lead['unlocked_at'] = $lead['locked_at'] ?? null;
-        unset($lead['is_locked'], $lead['locked_at']);
+        // WalletService::unlockLead() doesn't set locked_at, only
+        // updated_at — fall back to that so unlocked_at isn't always null.
+        $lead['unlocked_at'] = $lead['locked_at'] ?? $lead['updated_at'] ?? null;
+        // Same as leads() — owner sees the lead, not which channel/source
+        // (website/meta_ads/google_ads) it came through.
+        unset($lead['locked_at'], $lead['source']);
         if (!$unlocked) {
             $lead['phone'] = null;
             $lead['email'] = null;
+        } else {
+            $lead['phone'] = $this->formatPhoneForApp($lead['phone'] ?? null);
         }
 
         // Same verified-flag + per-lead credit cost as the leads() list —
@@ -773,6 +769,23 @@ class OwnerController extends Controller
         $lead['credit_value'] = (int) (DB::table('lead_pricing')->where('lead_type', $leadType)->where('is_active', true)->value('credit_cost') ?? 20);
 
         return (object) $lead;
+    }
+
+    /**
+     * DB stores numbers inconsistently — sometimes 10 digits
+     * ("9535083895"), sometimes with the 91 country code already
+     * ("917764080076"). Normalize both to "+91 7764080076".
+     */
+    private function formatPhoneForApp($phone)
+    {
+        if (!$phone) return $phone;
+        $digits = preg_replace('/\D/', '', $phone);
+
+        if (strlen($digits) === 12 && str_starts_with($digits, '91')) {
+            $digits = substr($digits, 2);
+        }
+
+        return '+91 ' . $digits;
     }
 
     // ═══════════════════════════════════════════════════════════════

@@ -15,7 +15,7 @@ class LeadController extends Controller
         $tenantCount = Lead::where('inquiry_type', 'tenant')->count();
         $ownerCount = Lead::where('inquiry_type', 'owner')->count();
 
-        $q = Lead::with(['property.locality', 'property.city', 'telecaller']);
+        $q = Lead::with(['property.locality', 'property.city', 'telecaller', 'lockedBy', 'unlocks']);
 
         if ($request->filled('status')) {
             $q->where('status', $request->status);

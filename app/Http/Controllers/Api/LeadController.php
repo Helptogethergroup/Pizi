@@ -51,19 +51,35 @@ public function edit($id)
                 return response()->json(['success' => false, 'message' => 'Lead not found'], 404);
             }
 
-            // PERMANENT check — owner ne credits kharch karke le liya hai
+            $currentUser = auth()->user();
+            $currentUserId = $currentUser?->id;
+
+            // PERMANENT check — owner ne credits kharch karke le liya hai.
+            // Admins can still see/edit a claimed lead (e.g. to fix a typo
+            // in the phone number) — only telecallers are blocked, so they
+            // can't quietly overwrite what a paying owner already unlocked.
+            $claimInfo = null;
             if ($lead->is_locked && $lead->locked_by_user_id) {
                 $ownerUser = DB::table('users')->where('id', $lead->locked_by_user_id)->first();
                 if ($ownerUser && $ownerUser->role === 'owner') {
-                    return response()->json([
-                        'success' => false,
-                        'locked' => true,
-                        'message' => '🔒 This lead has been claimed by PG owner: ' . $ownerUser->name . '. Editing disabled.',
-                    ], 423);
+                    $unlockRecord = DB::table('lead_unlocks')
+                        ->where('lead_id', $id)->where('user_id', $lead->locked_by_user_id)->first();
+                    $claimInfo = [
+                        'owner_name' => $ownerUser->name,
+                        'claimed_at' => $unlockRecord?->created_at
+                            ? \Carbon\Carbon::parse($unlockRecord->created_at)->format('d M Y, h:i A')
+                            : null,
+                    ];
+
+                    if (!$currentUser || $currentUser->role !== 'admin') {
+                        return response()->json([
+                            'success' => false,
+                            'locked' => true,
+                            'message' => '🔒 This lead has been claimed by PG owner: ' . $ownerUser->name . '. Editing disabled.',
+                        ], 423);
+                    }
                 }
             }
-
-            $currentUserId = auth()->id();
             $lockExpired = !$lead->edit_locked_at || now()->diffInMinutes($lead->edit_locked_at) > 15;
 
             // TEMPORARY check — koi doosra admin/telecaller edit kar raha hai
@@ -81,7 +97,7 @@ public function edit($id)
                 'edit_locked_at' => now(),
             ]);
             
-            return response()->json(['success' => true, 'data' => $lead]);
+            return response()->json(['success' => true, 'data' => $lead, 'claim' => $claimInfo]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Error: ' . $e->getMessage()], 500);
         }

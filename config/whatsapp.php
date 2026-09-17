@@ -42,5 +42,9 @@ return [
         // Sent when admin manually credits an owner's wallet (e.g. the
         // one-time 500-credit free bonus rollout).
         'free_credit_bonus'                => ['name' => 'credit_wallet_update', 'lang' => 'en'],
+
+        // Daily end-of-day count of leads an owner received — only sent to
+        // owners who got at least 1 lead that day (see SendOwnerDailyLeadCount).
+        'owner_daily_lead_count'           => ['name' => 'owner_daily_lead_count', 'lang' => 'en'],
     ],
 ];
