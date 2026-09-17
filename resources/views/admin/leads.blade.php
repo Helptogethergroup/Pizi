@@ -94,7 +94,7 @@
                         @if($claimedAt)
                             <span class="text-ink-900/40 block">{{ $claimedAt->format('d M, h:i A') }}</span>
                         @endif
-                    @elseif($lead->edit_locked_by && $lead->edit_locked_at && $lead->edit_locked_at->diffInMinutes(now()) <= 15)
+                    @elseif($lead->edit_locked_by && $lead->edit_locked_at && \Carbon\Carbon::parse($lead->edit_locked_at)->diffInMinutes(now()) <= 15)
                         <span class="text-red-600 font-semibold block">✏️ Being edited</span>
                         <span class="text-ink-900/50 block">{{ optional(\App\Models\User::find($lead->edit_locked_by))->name ?? 'Someone' }}</span>
                     @endif

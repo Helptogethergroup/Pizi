@@ -31,6 +31,7 @@ protected $fillable = [
         'last_contacted_at' => 'datetime',
         'next_follow_up_at' => 'datetime',
          'called_at' => 'datetime',
+        'edit_locked_at' => 'datetime',
         'budget_min' => 'float',
         'budget_max' => 'float',
     ];
