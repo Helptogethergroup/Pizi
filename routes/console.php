@@ -19,5 +19,5 @@ Schedule::command('properties:send-vacant-alerts --days=15')->dailyAt('11:30');
 Schedule::command('agreements:send-renewal-reminders --days=15')->dailyAt('11:00');
 Schedule::command('rent:send-overdue-owner-alerts --days=5')->dailyAt('10:30');
 Schedule::command('admin:send-daily-summary')->dailyAt('21:00');
-Schedule::command('owner:send-daily-lead-count')->dailyAt('21:30');
+Schedule::command('owner:send-daily-lead-count')->dailyAt('11:30');
 Schedule::command('visits:send-reminders --minutes=30')->everyFifteenMinutes();
