@@ -94,8 +94,9 @@
                         @if($claimedAt)
                             <span class="text-ink-900/40 block">{{ $claimedAt->format('d M, h:i A') }}</span>
                         @endif
-                    @elseif($lead->edit_locked_by)
-                        <span class="text-red-600 font-semibold">✏️ Being edited</span>
+                    @elseif($lead->edit_locked_by && $lead->edit_locked_at && $lead->edit_locked_at->diffInMinutes(now()) <= 15)
+                        <span class="text-red-600 font-semibold block">✏️ Being edited</span>
+                        <span class="text-ink-900/50 block">{{ optional(\App\Models\User::find($lead->edit_locked_by))->name ?? 'Someone' }}</span>
                     @endif
                 </td>
                 <td class="text-xs">{{ $lead->telecaller?->name ?? '—' }}</td>
