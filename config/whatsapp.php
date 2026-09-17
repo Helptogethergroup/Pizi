@@ -45,6 +45,10 @@ return [
 
         // Daily end-of-day count of leads an owner received — only sent to
         // owners who got at least 1 lead that day (see SendOwnerDailyLeadCount).
+        // The very first submit attempt actually succeeded on Meta's side
+        // (the later "category"/"already exists" errors were just Meta
+        // rejecting duplicate re-submissions of this same, already-created
+        // template) — it's APPROVED under this exact name, no _v2 needed.
         'owner_daily_lead_count'           => ['name' => 'owner_daily_lead_count', 'lang' => 'en'],
     ],
 ];
