@@ -172,31 +172,13 @@
 @else
     @php
         $pageItems = collect($paginated->items());
-        $cityMatched = $pageItems->reject(fn($l) => $l->city_unknown ?? false)->values();
-        $cityUnknownLeads = $pageItems->filter(fn($l) => $l->city_unknown ?? false)->values();
     @endphp
 
-    @if($cityMatched->isNotEmpty())
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            @foreach($cityMatched as $lead)
-                @include('owner.leads._card', ['lead' => $lead])
-            @endforeach
-        </div>
-    @endif
-
-    @if($cityUnknownLeads->isNotEmpty())
-        <div class="mt-8">
-            <div class="flex items-center gap-2 mb-3">
-                <h2 class="font-display font-bold text-lg">❓ These leads have not specified a city ({{ $cityUnknownLeads->count() }})</h2>
-                <span class="text-xs text-ink-900/50">— shown to all owners since we don't know which city they belong to</span>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                @foreach($cityUnknownLeads as $lead)
-                    @include('owner.leads._card', ['lead' => $lead])
-                @endforeach
-            </div>
-        </div>
-    @endif
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        @foreach($pageItems as $lead)
+            @include('owner.leads._card', ['lead' => $lead])
+        @endforeach
+    </div>
 
     <div class="mt-6">{{ $paginated->links() }}</div>
 @endif

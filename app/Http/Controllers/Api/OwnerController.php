@@ -665,9 +665,21 @@ class OwnerController extends Controller
                 'status' => $lead->status,
                 'created_at' => $lead->created_at,
                 'updated_at' => $lead->updated_at,
+                // name/address/city/locality deliberately left out —
+                // the app was showing the OWNER'S OWN property name +
+                // address right under the tenant's name (e.g. "NOD- 13
+                // Vizima Kosmos — Sector 126, Noida"), which read as if it
+                // was the tenant's info and confused owners. The lead's
+                // own preferred_city/preferred_locality above already
+                // cover what the owner actually needs to know.
                 'property' => $property ? [
                     'id' => $property->id,
-                    'name' => $property->name,
+                    // name/address_line/city/locality kept as null (not
+                    // removed — avoids breaking app JSON parsing) so the
+                    // owner's own property name/address no longer shows
+                    // under the tenant's name (it read as the tenant's
+                    // info and confused owners).
+                    'name' => null,
                     'slug' => $property->slug,
                     'cover_image_url' => $this->resolveUrl($property->cover_image ?? null),
                     'property_type' => $property->property_type,
@@ -675,10 +687,10 @@ class OwnerController extends Controller
                     'rent_min' => $property->rent_min,
                     'rent_max' => $property->rent_max,
                     'security_deposit' => $property->security_deposit,
-                    'address_line' => $property->address_line,
+                    'address_line' => null,
                     'landmark' => $property->landmark,
-                    'city' => $property->city?->name,
-                    'locality' => $property->locality?->name,
+                    'city' => null,
+                    'locality' => null,
                     'pincode' => $property->pincode,
                     'latitude' => $property->latitude,
                     'longitude' => $property->longitude,

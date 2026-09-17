@@ -184,6 +184,14 @@ protected $fillable = [
             return trim(($this->property->locality?->name ?? '') . ', ' . ($this->property->city?->name ?? ''), ', ');
         }
         if ($this->preferred_locality || $this->preferred_city) {
+            // preferred_locality is free-typed text (from ad forms, chat
+            // widgets) and often already contains the city name, e.g.
+            // "Sector 126, Noida" — appending preferred_city ("Noida")
+            // again then reads as "Sector 126, Noida, Noida".
+            if ($this->preferred_locality && $this->preferred_city
+                && stripos($this->preferred_locality, $this->preferred_city) !== false) {
+                return $this->preferred_locality;
+            }
             return trim(($this->preferred_locality ?? '') . ', ' . ($this->preferred_city ?? ''), ', ');
         }
         return '—';

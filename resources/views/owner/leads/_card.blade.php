@@ -20,12 +20,7 @@
                 <h3 class="font-display font-bold text-lg">{{ $lead->name }}</h3>
                 @if($lead->area_match ?? false)
                     <span class="px-2 py-0.5 rounded-full text-xs bg-coral-500 text-white font-bold">📍 Your Area</span>
-                @elseif($lead->city_unknown ?? false)
-                    <span class="px-2 py-0.5 rounded-full text-xs bg-slate-200 text-slate-700 font-bold">❓ City not specified</span>
                 @endif
-            </div>
-            <div class="text-xs text-ink-900/60">
-                {{ $lead->matched_property?->name ?? '—' }} · 📍 {{ $lead->display_location }}
             </div>
         </div>
         <div class="text-right flex-shrink-0">
