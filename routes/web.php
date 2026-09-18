@@ -473,10 +473,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/invoices/{invoice}/download', [\App\Http\Controllers\InvoiceDownloadController::class, 'download'])->name('invoices.download');
 
     Route::get('/leads', [\App\Http\Controllers\Admin\LeadController::class, 'index'])->name('leads.index');
+    Route::get('/leads/export', [\App\Http\Controllers\Admin\LeadController::class, 'export'])->name('leads.export');
     Route::patch('/leads/{lead}/assign', [\App\Http\Controllers\Admin\LeadController::class, 'assign'])->name('leads.assign');
     Route::patch('/leads/{lead}/verify', [\App\Http\Controllers\Admin\LeadController::class, 'markVerified'])->name('leads.verify');
+    Route::patch('/leads/{lead}/junk', [\App\Http\Controllers\Admin\LeadController::class, 'markJunk'])->name('leads.junk');
     Route::delete('/leads/{lead}', [\App\Http\Controllers\Admin\LeadController::class, 'destroy'])->name('leads.destroy');
-   
+    Route::post('/leads/bulk-assign', [\App\Http\Controllers\Admin\LeadController::class, 'bulkAssign'])->name('leads.bulk-assign');
+    Route::post('/leads/bulk-verify', [\App\Http\Controllers\Admin\LeadController::class, 'bulkVerify'])->name('leads.bulk-verify');
+    Route::post('/leads/bulk-junk', [\App\Http\Controllers\Admin\LeadController::class, 'bulkJunk'])->name('leads.bulk-junk');
+    Route::post('/leads/bulk-delete', [\App\Http\Controllers\Admin\LeadController::class, 'bulkDelete'])->name('leads.bulk-delete');
+
 
     Route::get('/users', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::post('/users', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');

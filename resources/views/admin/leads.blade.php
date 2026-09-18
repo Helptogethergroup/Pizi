@@ -2,12 +2,13 @@
 @section('title', 'Leads — Admin')
 @section('content')
 
-<div class="flex items-center justify-between mb-6">
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
      <div class="flex items-center gap-3">
         <h1 class="font-display font-black text-3xl">All leads</h1>
         <a href="{{ route('leads.manual.create') }}" class="px-4 py-2 bg-coral-500 text-white rounded-lg font-semibold text-sm">+ Add Manual</a>
+        <a href="{{ route('admin.leads.export', request()->query()) }}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold text-sm">📥 Export CSV</a>
     </div>
-    <form class="flex gap-2">
+    <form class="flex gap-2 flex-wrap items-center">
         <input name="search" value="{{ request('search') }}" placeholder="Name / phone…" class="px-3 py-2 rounded-lg border border-ink-900/15">
         <select name="status" class="px-3 py-2 rounded-lg border border-ink-900/15">
             <option value="">All status</option>
@@ -26,6 +27,21 @@
             <option value="owner" @selected(request('inquiry_type') == 'owner')>🏠 Owner</option>
             <option value="unknown" @selected(request('inquiry_type') == 'unknown')>❓ Unknown</option>
         </select>
+        <select name="source" class="px-3 py-2 rounded-lg border border-ink-900/15">
+            <option value="">All Sources</option>
+            @foreach($sourceCounts as $src => $cnt)
+                <option value="{{ $src }}" @selected(request('source') === $src)>{{ $src }} ({{ $cnt }})</option>
+            @endforeach
+        </select>
+        <select name="per_page" class="px-3 py-2 rounded-lg border border-ink-900/15">
+            @foreach([25, 50, 100] as $pp)
+                <option value="{{ $pp }}" @selected($perPage == $pp)>{{ $pp }} / page</option>
+            @endforeach
+        </select>
+        <label class="flex items-center gap-1.5 text-sm px-2">
+            <input type="checkbox" name="duplicates_only" value="1" @checked(request()->boolean('duplicates_only'))>
+            🔁 Duplicates only
+        </label>
         <button class="px-4 py-2 bg-ink-900 text-cream rounded-lg">Filter</button>
     </form>
 </div>
@@ -55,38 +71,72 @@
     </div>
 @endif
 
+<div id="bulkBar" class="hidden mb-3 p-3 rounded-xl bg-ink-900 text-cream flex items-center gap-3 flex-wrap text-sm">
+    <span id="bulkCount" class="font-semibold">0 selected</span>
+    <select id="bulkTelecaller" class="px-2 py-1.5 rounded-lg text-ink-900 text-sm">
+        <option value="">Assign to…</option>
+        @foreach($telecallers as $tc)
+            <option value="{{ $tc->id }}">{{ $tc->name }}</option>
+        @endforeach
+    </select>
+    <button type="button" onclick="submitBulk('{{ route('admin.leads.bulk-assign') }}', true)" class="px-3 py-1.5 rounded-lg bg-blue-500 font-semibold">Assign</button>
+    <button type="button" onclick="submitBulk('{{ route('admin.leads.bulk-verify') }}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 font-semibold">✓ Verify</button>
+    <button type="button" onclick="submitBulk('{{ route('admin.leads.bulk-junk') }}')" class="px-3 py-1.5 rounded-lg bg-amber-500 font-semibold">🚩 Junk</button>
+    <button type="button" onclick="if(confirm('Delete selected leads? This cannot be undone.')) submitBulk('{{ route('admin.leads.bulk-delete') }}')" class="px-3 py-1.5 rounded-lg bg-red-500 font-semibold">🗑 Delete</button>
+</div>
+
+<form id="bulkForm" method="POST">
+    @csrf
+</form>
+
 <div class="bg-white rounded-2xl border border-ink-900/10 overflow-hidden">
-    <table class="w-full text-sm">
+    <table class="w-full text-sm border-collapse">
         <thead class="bg-ink-900/5 text-left text-ink-900/60 text-xs uppercase">
             <tr>
-                <th class="px-4 py-3">Lead</th>
-                <th>Type</th>
-                <th>Property / City</th>
-                <th>Status</th>
-                <th>Lock</th>
-                <th>Assigned to</th>
-                <th>When</th>
-                <th>Action</th>
+                <th class="px-3 py-3 border border-ink-900/10"><input type="checkbox" onclick="toggleAll(this)"></th>
+                <th class="px-4 py-3 border border-ink-900/10">Lead</th>
+                <th class="px-3 py-3 border border-ink-900/10">Type</th>
+                <th class="px-3 py-3 border border-ink-900/10">Property / City</th>
+                <th class="px-3 py-3 border border-ink-900/10">
+                    <a href="{{ route('admin.leads.index', array_merge(request()->except('page'), ['sort' => 'status', 'dir' => $sort === 'status' && $dir === 'asc' ? 'desc' : 'asc'])) }}" class="hover:text-ink-900">Status {{ $sort === 'status' ? ($dir === 'asc' ? '↑' : '↓') : '' }}</a>
+                </th>
+                <th class="px-3 py-3 border border-ink-900/10">Lock</th>
+                <th class="px-3 py-3 border border-ink-900/10">Assigned to</th>
+                <th class="px-3 py-3 border border-ink-900/10">
+                    <a href="{{ route('admin.leads.index', array_merge(request()->except('page'), ['sort' => 'created_at', 'dir' => $sort === 'created_at' && $dir === 'asc' ? 'desc' : 'asc'])) }}" class="hover:text-ink-900">When {{ $sort === 'created_at' ? ($dir === 'asc' ? '↑' : '↓') : '' }}</a>
+                </th>
+                <th class="px-3 py-3 border border-ink-900/10">Action</th>
             </tr>
         </thead>
         <tbody>
         @foreach($leads as $lead)
-            <tr class="border-t border-ink-900/5 hover:bg-ink-900/2">
-                <td class="px-4 py-3">
+            <tr class="hover:bg-ink-900/2 {{ $lead->is_duplicate_phone ? 'bg-amber-50' : '' }}">
+                <td class="px-3 py-3 border border-ink-900/10">
+                    <input type="checkbox" class="lead-checkbox" value="{{ $lead->id }}" onchange="updateBulkBar()">
+                </td>
+                <td class="px-4 py-3 border border-ink-900/10">
                     <div class="font-semibold">{{ $lead->name }}</div>
-                    <div class="text-xs text-ink-900/50 mt-1">{{ $lead->phone }}</div>
+                    <div class="text-xs text-ink-900/50 mt-1">
+                        {{ $lead->phone }}
+                        @if($lead->is_duplicate_phone)
+                            <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px] font-bold">🔁 DUPLICATE</span>
+                        @endif
+                    </div>
                     @php $srcBadge = $lead->sourceBadge(); @endphp
                     <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap {{ $srcBadge['class'] }}">{{ $srcBadge['label'] }}</span>
                 </td>
-                <td class="text-xs">
+                <td class="px-3 py-3 border border-ink-900/10 text-xs">
                     @php $badge = $lead->inquiryTypeBadge(); @endphp
                     <span class="px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap {{ $badge['class'] }}">{{ $badge['label'] }}</span>
                 </td>
-                <td class="text-xs">
+                <td class="px-3 py-3 border border-ink-900/10 text-xs">
                     {{ $lead->property?->name ?? 'General inquiry' }}
                     <div class="text-ink-900/50">📍 {{ $lead->display_location }}</div>
                 </td>
-               <td class="text-xs">
+                <td class="px-3 py-3 border border-ink-900/10 text-xs">
+                    <span class="px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-ink-900/5 text-ink-900/70">{{ str_replace('_', ' ', $lead->status ?? 'new') }}</span>
+                </td>
+               <td class="px-3 py-3 border border-ink-900/10 text-xs">
                     @if($lead->is_locked && $lead->locked_by_user_id)
                         @php $claimedAt = $lead->unlocks->firstWhere('user_id', $lead->locked_by_user_id)?->created_at; @endphp
                         <span class="text-green-600 font-semibold block">🔓 Claimed</span>
@@ -99,12 +149,12 @@
                         <span class="text-ink-900/50 block">{{ optional(\App\Models\User::find($lead->edit_locked_by))->name ?? 'Someone' }}</span>
                     @endif
                 </td>
-                <td class="text-xs">{{ $lead->telecaller?->name ?? '—' }}</td>
-                <td class="text-xs text-ink-900/60">
+                <td class="px-3 py-3 border border-ink-900/10 text-xs">{{ $lead->telecaller?->name ?? '—' }}</td>
+                <td class="px-3 py-3 border border-ink-900/10 text-xs text-ink-900/60">
                     {{ $lead->created_at->diffForHumans() }}
                     <div class="text-ink-900/40">{{ $lead->created_at->format('D, d M Y · h:i A') }}</div>
                 </td>
-                <td class="px-4 py-3">
+                <td class="px-4 py-3 border border-ink-900/10">
                     <div class="flex gap-1 items-center flex-wrap">
                         <button 
                             onclick="openEditModal({{ $lead->id }})" 
@@ -141,6 +191,15 @@
                         </form>
                     @else
                         <span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded font-semibold">✓ Verified</span>
+                        @endif
+
+                        @if($lead->status !== 'junk')
+                        <form method="POST" action="{{ route('admin.leads.junk', $lead) }}" class="inline">
+                            @csrf @method('PATCH')
+                            <button class="px-2 py-1 bg-amber-500 text-white text-xs rounded font-semibold hover:bg-amber-600">
+                                🚩 Junk
+                            </button>
+                        </form>
                         @endif
 
                         <form method="POST" action="{{ route('admin.leads.destroy', $lead) }}" class="inline" onsubmit="return confirm('Delete this lead? This cannot be undone.')">
@@ -287,6 +346,37 @@
     let currentEditId = null;
     let currentRemarkId = null;
     const apiUrl = '/api/leads';
+
+    // ===== BULK ACTIONS =====
+    function toggleAll(source) {
+        document.querySelectorAll('.lead-checkbox').forEach(cb => cb.checked = source.checked);
+        updateBulkBar();
+    }
+
+    function updateBulkBar() {
+        const checked = document.querySelectorAll('.lead-checkbox:checked');
+        document.getElementById('bulkBar').classList.toggle('hidden', checked.length === 0);
+        document.getElementById('bulkCount').textContent = checked.length + ' selected';
+    }
+
+    function submitBulk(url, needsTelecaller = false) {
+        const checked = [...document.querySelectorAll('.lead-checkbox:checked')].map(cb => cb.value);
+        if (checked.length === 0) return;
+
+        if (needsTelecaller) {
+            const tc = document.getElementById('bulkTelecaller').value;
+            if (!tc) { alert('Pick a telecaller to assign to first.'); return; }
+            var hidden = `<input type="hidden" name="telecaller_id" value="${tc}">`;
+        } else {
+            var hidden = '';
+        }
+
+        const form = document.getElementById('bulkForm');
+        form.action = url;
+        form.innerHTML = document.querySelector('#bulkForm input[name="_token"]').outerHTML + hidden
+            + checked.map(id => `<input type="hidden" name="lead_ids[]" value="${id}">`).join('');
+        form.submit();
+    }
 
     // ===== EDIT MODAL FUNCTIONS =====
    function openEditModal(id) {
