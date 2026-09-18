@@ -172,25 +172,25 @@
 
         <div class="grid md:grid-cols-2 gap-6">
             <div class="reveal group p-8 rounded-2xl bg-white border border-ink-900/10 hover:border-coral-300 hover:shadow-xl transition-all hover:-translate-y-1">
-                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition">🛡️</div>
+                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.5c0 4.6-3 8.1-7 9.5-4-1.4-7-4.9-7-9.5V6l7-3z"/></svg>️</div>
                 <h3 class="font-display font-bold text-2xl">Verified properties</h3>
                 <p class="text-ink-900/70 mt-3 leading-relaxed">Every PG on Pizi is physically visited by our field team. We check the photos, the amenities, and the owner — before it ever goes live.</p>
             </div>
 
             <div class="reveal delay-1 group p-8 rounded-2xl bg-white border border-ink-900/10 hover:border-coral-300 hover:shadow-xl transition-all hover:-translate-y-1">
-                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition">🤝</div>
+                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12l3-3 3 3 2.5-2.5a2 2 0 0 1 2.8 0l1 1a2 2 0 0 1 0 2.8L14 19.6a2.8 2.8 0 0 1-4 0l-6.3-6.3"/><path d="M6.5 15.5l-2-2a2 2 0 0 1 0-2.8l2-2"/></svg></div>
                 <h3 class="font-display font-bold text-2xl">Owner-direct</h3>
                 <p class="text-ink-900/70 mt-3 leading-relaxed">No brokers in the middle. You talk to the owner. You visit. You decide. Zero brokerage to tenants — ever.</p>
             </div>
 
             <div class="reveal delay-2 group p-8 rounded-2xl bg-white border border-ink-900/10 hover:border-coral-300 hover:shadow-xl transition-all hover:-translate-y-1">
-                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition">📸</div>
+                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="14" r="3.5"/></svg></div>
                 <h3 class="font-display font-bold text-2xl">Real photos only</h3>
                 <p class="text-ink-900/70 mt-3 leading-relaxed">What you see is what you get. Our team uploads honest photos of every room, common area, and bathroom — no filters, no fakes.</p>
             </div>
 
             <div class="reveal delay-3 group p-8 rounded-2xl bg-white border border-ink-900/10 hover:border-coral-300 hover:shadow-xl transition-all hover:-translate-y-1">
-                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition">🚶</div>
+                <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4" r="1.8"/><path d="M10 8l3 1 2.5 4.5-1.5 6M13 9l-3 2-2 5.5M10 11l-4 2"/></svg></div>
                 <h3 class="font-display font-bold text-2xl">Free site visits</h3>
                 <p class="text-ink-900/70 mt-3 leading-relaxed">Schedule a visit and our field executive shows you around and helps you negotiate. Completely free — no strings attached.</p>
             </div>
@@ -203,32 +203,32 @@
     <div class="absolute -top-20 left-1/4 w-96 h-96 bg-coral-500/10 rounded-full blur-3xl"></div>
     <div class="relative max-w-5xl mx-auto px-4 lg:px-8">
         <div class="text-center mb-14">
-            <span class="reveal text-coral-400 font-semibold text-sm tracking-wider uppercase">Behind every ✓ Verified badge</span>
+            <span class="reveal text-coral-400 font-semibold text-sm tracking-wider uppercase">Behind every <svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg> Verified badge</span>
             <h2 class="reveal delay-1 font-display font-black text-3xl lg:text-4xl mt-3">How we verify every PG.</h2>
             <p class="reveal delay-2 text-cream/60 mt-4 max-w-2xl mx-auto text-lg">No property goes live on Pizi until it clears every one of these checks.</p>
         </div>
 
         <div class="grid md:grid-cols-4 gap-6">
             <div class="reveal p-6 rounded-2xl bg-white/5 border border-cream/10">
-                <div class="text-4xl mb-3">📍</div>
+                <div class="text-4xl mb-3"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
                 <div class="text-xs font-bold text-coral-400 uppercase tracking-wider mb-1">Step 1</div>
                 <h3 class="font-display font-bold text-lg">Site visit</h3>
                 <p class="text-cream/60 text-sm mt-2 leading-relaxed">Our field team physically visits the property — no listing goes up from a phone call alone.</p>
             </div>
             <div class="reveal delay-1 p-6 rounded-2xl bg-white/5 border border-cream/10">
-                <div class="text-4xl mb-3">📸</div>
+                <div class="text-4xl mb-3"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="14" r="3.5"/></svg></div>
                 <div class="text-xs font-bold text-coral-400 uppercase tracking-wider mb-1">Step 2</div>
                 <h3 class="font-display font-bold text-lg">Real photos</h3>
                 <p class="text-cream/60 text-sm mt-2 leading-relaxed">Every room, bathroom &amp; common area is shot on-site the same day — no stock images, no filters.</p>
             </div>
             <div class="reveal delay-2 p-6 rounded-2xl bg-white/5 border border-cream/10">
-                <div class="text-4xl mb-3">✅</div>
+                <div class="text-4xl mb-3"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke-width="2.2"/></svg></div>
                 <div class="text-xs font-bold text-coral-400 uppercase tracking-wider mb-1">Step 3</div>
                 <h3 class="font-display font-bold text-lg">Amenity check</h3>
                 <p class="text-cream/60 text-sm mt-2 leading-relaxed">WiFi, food, security, power backup — every claimed amenity is checked in person before it's listed.</p>
             </div>
             <div class="reveal delay-3 p-6 rounded-2xl bg-white/5 border border-cream/10">
-                <div class="text-4xl mb-3">🤝</div>
+                <div class="text-4xl mb-3"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 12l3-3 3 3 2.5-2.5a2 2 0 0 1 2.8 0l1 1a2 2 0 0 1 0 2.8L14 19.6a2.8 2.8 0 0 1-4 0l-6.3-6.3"/><path d="M6.5 15.5l-2-2a2 2 0 0 1 0-2.8l2-2"/></svg></div>
                 <div class="text-xs font-bold text-coral-400 uppercase tracking-wider mb-1">Step 4</div>
                 <h3 class="font-display font-bold text-lg">Owner verification</h3>
                 <p class="text-cream/60 text-sm mt-2 leading-relaxed">We confirm the owner's identity and ownership before publishing — so you always know who you're renting from.</p>
@@ -296,22 +296,22 @@
         </div>
         <div class="reveal delay-1 grid grid-cols-2 gap-4">
             <div class="p-6 rounded-2xl bg-white border border-ink-900/10">
-                <div class="text-3xl mb-2">🎯</div>
+                <div class="text-3xl mb-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/></svg></div>
                 <p class="font-bold text-ink-950">Verified Leads</p>
                 <p class="text-sm text-ink-900/60 mt-1">Only serious tenants</p>
             </div>
             <div class="p-6 rounded-2xl bg-white border border-ink-900/10">
-                <div class="text-3xl mb-2">💰</div>
+                <div class="text-3xl mb-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="14.2" r="1.1" fill="currentColor" stroke="none"/></svg></div>
                 <p class="font-bold text-ink-950">No Commission</p>
                 <p class="text-sm text-ink-900/60 mt-1">Keep all earnings</p>
             </div>
             <div class="p-6 rounded-2xl bg-white border border-ink-900/10">
-                <div class="text-3xl mb-2">📱</div>
+                <div class="text-3xl mb-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></div>
                 <p class="font-bold text-ink-950">Direct Contact</p>
                 <p class="text-sm text-ink-900/60 mt-1">Talk to tenants</p>
             </div>
             <div class="p-6 rounded-2xl bg-white border border-ink-900/10">
-                <div class="text-3xl mb-2">⚡</div>
+                <div class="text-3xl mb-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></div>
                 <p class="font-bold text-ink-950">Instant Listing</p>
                 <p class="text-sm text-ink-900/60 mt-1">Go live in minutes</p>
             </div>
@@ -332,7 +332,7 @@
                 Browse Verified PGs →
             </a>
             <a href="tel:8006680092" class="px-8 py-4 rounded-full border-2 border-cream/20 font-semibold hover:border-coral-400 hover:text-coral-400 transition">
-                📞 Talk to us
+                <svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.4 21 3 12.6 3 2.3 3 1.7 3.4 1.3 4 1.3h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg> Talk to us
             </a>
         </div>
     </div>

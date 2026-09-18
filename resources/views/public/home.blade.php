@@ -47,6 +47,15 @@
     .pz-reveal { opacity: 0; transform: translateY(48px); transition: opacity .8s cubic-bezier(.16,1,.3,1), transform .8s cubic-bezier(.16,1,.3,1); }
     .pz-reveal.pz-in { opacity: 1; transform: translateY(0); }
 
+    /* Staggered card cascade — each card in a row fades/slides in a beat
+       after the previous one (delay set per-card by JS), instead of the
+       whole row appearing as one flat block like plain .pz-reveal does. */
+    .pz-stagger { opacity: 0; transform: translateY(28px) scale(0.97); transition: opacity .55s cubic-bezier(.16,1,.3,1), transform .55s cubic-bezier(.16,1,.3,1); }
+    .pz-stagger.pz-in { opacity: 1; transform: translateY(0) scale(1); }
+    @media (prefers-reduced-motion: reduce) {
+        .pz-stagger { transition: none; opacity: 1; transform: none; }
+    }
+
     /* Pulse dot inside badges */
     @keyframes pziPulseDot {
         0%, 100% { transform: scale(1); opacity: 1; }
@@ -251,17 +260,17 @@
 
                 <!--<div class="pz-anim pz-d5 mt-4 flex flex-wrap items-center gap-2 max-w-xl">-->
                 <!--    <span class="text-xs text-ink-900/50 font-semibold mr-1">Popular:</span>-->
-                <!--    <a href="{{ route('search', ['gender' => 'male']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition">👨 Boys PG</a>-->
-                <!--    <a href="{{ route('search', ['gender' => 'female']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition">👩 Girls PG</a>-->
-                <!--    <a href="{{ route('search', ['budget_max' => '8000']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition">💰 Under ₹8k</a>-->
-                <!--    <a href="{{ route('search', ['gender' => 'unisex']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition">👥 Unisex</a>-->
+                <!--    <a href="{{ route('search', ['gender' => 'male']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg> Boys PG</a>-->
+                <!--    <a href="{{ route('search', ['gender' => 'female']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg> Girls PG</a>-->
+                <!--    <a href="{{ route('search', ['budget_max' => '8000']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="14.2" r="1.1" fill="currentColor" stroke="none"/></svg> Under ₹8k</a>-->
+                <!--    <a href="{{ route('search', ['gender' => 'unisex']) }}" class="px-3 py-1.5 rounded-full bg-white border border-ink-900/10 text-xs font-semibold text-ink-900 hover:border-coral-500 hover:text-coral-600 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.2c2.6.4 4.5 2.3 4.5 4.8v2"/></svg> Unisex</a>-->
                 <!--</div>-->
 
                 <!--<div class="pz-anim pz-d5 mt-6 flex flex-wrap items-center gap-4">-->
                 <!--    <a href="tel:8006680092" class="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-ink-950 text-cream font-semibold hover:bg-ink-900 transition shadow-lg shadow-ink-900/20">-->
-                <!--        <span class="text-lg">📞</span> Call 8006680092-->
+                <!--        <span class="text-lg"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1.1-.2 1.2.4 2.4.6 3.7.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.4 21 3 12.6 3 2.3 3 1.7 3.4 1.3 4 1.3h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.7.1.4 0 .8-.2 1.1l-2.2 2.2z"/></svg></span> Call 8006680092-->
                 <!--    </a>-->
-                <!--    <a href="https://wa.me/918006680092" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700">💬 Or chat on WhatsApp</a>-->
+                <!--    <a href="https://wa.me/918006680092" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.5 9 9 0 0 1-3.6-.7L3 21l1.7-5.5A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg> Or chat on WhatsApp</a>-->
                 <!--</div>-->
 
                 <div class="pz-anim pz-d6 mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-xl">
@@ -296,11 +305,11 @@
                     </div>
                 </div>
                 <div class="pz-float2 hidden lg:flex absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-2xl shadow-ink-900/15 px-4 py-3 items-center gap-3 max-w-[240px] z-20">
-                    <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">✓</div>
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg></div>
                     <div><div class="font-semibold text-sm">Free site visit</div><div class="text-xs text-ink-900/60">Our team accompanies you</div></div>
                 </div>
                 <div class="pz-float-slow hidden lg:flex absolute top-3 right-3 bg-white rounded-2xl shadow-2xl shadow-ink-900/15 px-4 py-3 items-center gap-3 max-w-[220px] z-20">
-                    <div class="w-10 h-10 rounded-full bg-coral-100 flex items-center justify-center text-coral-600 flex-shrink-0">⚡</div>
+                    <div class="w-10 h-10 rounded-full bg-coral-100 flex items-center justify-center text-coral-600 flex-shrink-0"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg></div>
                     <div><div class="font-semibold text-sm">30 min response</div><div class="text-xs text-ink-900/60">Telecaller calls fast</div></div>
                 </div>
             </div>
@@ -313,19 +322,19 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8 py-4">
         <div class="flex flex-wrap items-center justify-center sm:justify-between gap-x-8 gap-y-3 text-sm">
             <div class="flex items-center gap-2 text-ink-900/70 font-semibold">
-                <span class="text-emerald-600">✓</span> No Brokerage
+                <span class="text-emerald-600"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg></span> No Brokerage
             </div>
             <div class="flex items-center gap-2 text-ink-900/70 font-semibold">
-                <span class="text-emerald-600">✓</span> Verified Owners
+                <span class="text-emerald-600"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg></span> Verified Owners
             </div>
             <div class="flex items-center gap-2 text-ink-900/70 font-semibold">
-                <span class="text-emerald-600">✓</span> Free Site Visit
+                <span class="text-emerald-600"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg></span> Free Site Visit
             </div>
             <div class="flex items-center gap-2 text-ink-900/70 font-semibold">
-                <span class="text-emerald-600">✓</span> 24x7 Support
+                <span class="text-emerald-600"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg></span> 24x7 Support
             </div>
             <div class="flex items-center gap-2 text-ink-900/70 font-semibold">
-                <span class="text-emerald-600">✓</span> Real Photos Only       
+                <span class="text-emerald-600"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg></span> Real Photos Only       
             </div>
         </div>
     </div>
@@ -362,7 +371,7 @@
 
             {{-- ===== BOX 1: BY BUDGET ===== --}}
             <div class="bg-white border border-gray-200 shadow-lg rounded-3xl p-6 lg:p-8 shadow-xl shadow-black/20">
-                <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2">💰 By Budget</h3>
+                <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="14.2" r="1.1" fill="currentColor" stroke="none"/></svg> By Budget</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 lg:gap-4">
                    @foreach([
     ['budget-8000rs-img.jpeg', 'Under ₹8,000', '8000', 'Popular choice'],
@@ -386,7 +395,7 @@
 
             {{-- ===== BOX 2: BY TYPE ===== --}}
             <div class="bg-white/[0.06] backdrop-blur border border-white/10 rounded-3xl p-6 lg:p-8 shadow-xl shadow-black/20">
-                <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2">🏠 By Type</h3>
+                <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg> By Type</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 lg:gap-4">
                   @foreach([
     ['boys-img.jpeg', 'Boys PG', 'PGs for men', ['gender' => 'male']],
@@ -396,7 +405,7 @@
                         <a href="{{ route('search', $params) }}"
                            class="group relative overflow-hidden rounded-2xl bg-white border border-gray-200 p-6 flex items-center gap-4  hover:border-coral-400/60 hover:bg-white/10 hover:-translate-y-1 transition duration-300">
                       <div class="flex-shrink-0">
-                     <img src="{{ asset('assets/images/' . $image) }}"
+                     <img loading="lazy" src="{{ asset('assets/images/' . $image) }}"
                       alt="{{ $title }}"
                       class="w-32 h-32 object-contain group-hover:scale-110 transition duration-300">
 </div>
@@ -412,7 +421,7 @@
 
             {{-- ===== BOX 3: BY CITY ===== --}}
             <div class="bg-white/[0.06] backdrop-blur border border-white/10 rounded-3xl p-6 lg:p-8 shadow-xl shadow-black/20">
-                <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2">📍 By City</h3>
+                <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> By City</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
                   @foreach([
     ['Delhi', 'delhi', 'delhi-img.jpeg'],
@@ -425,7 +434,7 @@
    class="group bg-white border border-gray-200 rounded-2xl p-6 text-center hover:border-coral-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
 
    <div class="flex justify-center mb-4">
-    <img src="{{ asset('assets/images/' . $image) }}"
+    <img loading="lazy" src="{{ asset('assets/images/' . $image) }}"
          alt="{{ $cityName }}"
          class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
 </div>
@@ -455,7 +464,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="pzi-headbox pzi-headbox-coral flex items-center justify-between mb-5 px-5 py-4 rounded-2xl">
             <div class="flex items-center gap-4">
-                <span class="pzi-icon-circle bg-coral-500">🏆</span>
+                <span class="pzi-icon-circle bg-coral-500"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 5H5a3 3 0 0 0 3 4M16 5h3a3 3 0 0 1-3 4"/><path d="M10 16h4v2h-4zM9 21h6M12 16v2"/></svg></span>
                 <div>
                     <span class="inline-flex items-center gap-1.5 text-coral-100 font-bold text-xs tracking-widest uppercase">
                         <span class="w-1.5 h-1.5 rounded-full bg-white pzi-pulse"></span>
@@ -474,18 +483,18 @@
                     : null;
             @endphp
             <a href="{{ route('property.show', $property->slug) }}"
-               class="pz-tilt-card group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
+               class="pz-tilt-card pz-stagger group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
                 <div class="h-36 bg-cream relative overflow-hidden">
                     @if($cover)
-                        <img src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img loading="lazy" src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream">🏠</div>
+                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>
                     @endif
                     @if($property->is_verified)
-                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700 flex items-center gap-1">✓ Verified</span>
+                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700 flex items-center gap-1"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg> Verified</span>
                     @endif
                     @if($property->is_featured)
-                        <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-coral-500 text-white text-xs font-semibold">⭐</span>
+                        <span class="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-coral-500 text-white text-xs font-semibold"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.6 5.6 6.2.5-4.7 4.1 1.4 6.1L12 16.2 6.5 19.3l1.4-6.1L3.2 9.1l6.2-.5L12 3z"/></svg></span>
                     @endif
                 </div>
                 <div class="p-3">
@@ -493,7 +502,7 @@
                         <h3 class="font-bold text-sm leading-tight line-clamp-1 group-hover:text-coral-600 transition">{{ $property->name }}</h3>
                         <span class="text-xs px-1.5 py-0.5 rounded bg-ink-100 text-ink-700 capitalize whitespace-nowrap">{{ $property->gender }}</span>
                     </div>
-                    <div class="text-xs text-ink-900/60 mt-1 truncate">📍 {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
+                    <div class="text-xs text-ink-900/60 mt-1 truncate"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
                     @if($property->rent_min)
                         <div class="mt-2 flex items-center justify-between">
                             <span class="font-black text-base text-ink-950">₹{{ number_format($property->rent_min) }}<span class="text-xs font-normal text-ink-900/50">/mo</span></span>
@@ -522,7 +531,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="pzi-headbox pzi-headbox-emerald flex items-center justify-between mb-5 px-5 py-4 rounded-2xl">
             <div class="flex items-center gap-4">
-                <span class="pzi-icon-circle bg-emerald-500">✨</span>
+                <span class="pzi-icon-circle bg-emerald-500"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg></span>
                 <div>
                     <span class="inline-flex items-center gap-1.5 text-emerald-100 font-bold text-xs tracking-widest uppercase">
                         <span class="w-1.5 h-1.5 rounded-full bg-white pzi-pulse"></span>
@@ -541,15 +550,15 @@
                     : null;
             @endphp
             <a href="{{ route('property.show', $property->slug) }}"
-               class="pz-tilt-card group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
+               class="pz-tilt-card pz-stagger group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
                 <div class="h-36 bg-cream relative overflow-hidden">
                     @if($cover)
-                        <img src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img loading="lazy" src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream">🏠</div>
+                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>
                     @endif
                     @if($property->is_verified)
-                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700">✓ Verified</span>
+                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg> Verified</span>
                     @endif
                 </div>
                 <div class="p-3">
@@ -557,7 +566,7 @@
                         <h3 class="font-bold text-sm leading-tight line-clamp-1 group-hover:text-coral-600 transition">{{ $property->name }}</h3>
                         <span class="text-xs px-1.5 py-0.5 rounded bg-ink-100 text-ink-700 capitalize whitespace-nowrap">{{ $property->gender }}</span>
                     </div>
-                    <div class="text-xs text-ink-900/60 mt-1 truncate">📍 {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
+                    <div class="text-xs text-ink-900/60 mt-1 truncate"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
                     @if($property->rent_min)
                         <div class="mt-2 flex items-center justify-between">
                             <span class="font-black text-base text-ink-950">₹{{ number_format($property->rent_min) }}<span class="text-xs font-normal text-ink-900/50">/mo</span></span>
@@ -579,7 +588,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="pzi-headbox pzi-headbox-amber flex items-center justify-between mb-5 px-5 py-4 rounded-2xl">
             <div class="flex items-center gap-4">
-                <span class="pzi-icon-circle bg-amber-500">💰</span>
+                <span class="pzi-icon-circle bg-amber-500"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18"/><circle cx="17" cy="14.2" r="1.1" fill="currentColor" stroke="none"/></svg></span>
                 <div>
                     <span class="inline-flex items-center gap-1.5 text-amber-100 font-bold text-xs tracking-widest uppercase">
                         <span class="w-1.5 h-1.5 rounded-full bg-white pzi-pulse"></span>
@@ -598,15 +607,15 @@
                     : null;
             @endphp
             <a href="{{ route('property.show', $property->slug) }}"
-               class="pz-tilt-card group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
+               class="pz-tilt-card pz-stagger group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
                 <div class="h-36 bg-cream relative overflow-hidden">
                     @if($cover)
-                        <img src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img loading="lazy" src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream">🏠</div>
+                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>
                     @endif
                     @if($property->is_verified)
-                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700">✓ Verified</span>
+                        <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg> Verified</span>
                     @endif
                 </div>
                 <div class="p-3">
@@ -614,7 +623,7 @@
                         <h3 class="font-bold text-sm leading-tight line-clamp-1 group-hover:text-coral-600 transition">{{ $property->name }}</h3>
                         <span class="text-xs px-1.5 py-0.5 rounded bg-ink-100 text-ink-700 capitalize whitespace-nowrap">{{ $property->gender }}</span>
                     </div>
-                    <div class="text-xs text-ink-900/60 mt-1 truncate">📍 {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
+                    <div class="text-xs text-ink-900/60 mt-1 truncate"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
                     @if($property->rent_min)
                         <div class="mt-2 flex items-center justify-between">
                             <span class="font-black text-base text-ink-950">₹{{ number_format($property->rent_min) }}<span class="text-xs font-normal text-ink-900/50">/mo</span></span>
@@ -639,7 +648,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="pzi-headbox pzi-headbox-violet flex items-center justify-between mb-5 px-5 py-4 rounded-2xl">
             <div class="flex items-center gap-4">
-                <span class="pzi-icon-circle bg-violet-500">📍</span>
+                <span class="pzi-icon-circle bg-violet-500"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></span>
                 <div>
                     <span class="inline-flex items-center gap-1.5 text-violet-100 font-bold text-xs tracking-widest uppercase">
                         <span class="w-1.5 h-1.5 rounded-full bg-white pzi-pulse"></span>
@@ -653,7 +662,7 @@
             @foreach($cities as $city)
                 <a href="{{ route('city.show', $city->slug) }}"
                    class="group relative p-5 rounded-2xl bg-white border border-ink-900/10 hover:border-violet-500 hover:shadow-lg transition overflow-hidden">
-                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">🏙️</div>
+                    <div class="text-3xl mb-2 group-hover:scale-110 transition-transform duration-300"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V9l5-4 5 4v12"/><path d="M13 21V13l4-3 4 3v8"/><path d="M7 13h2M7 17h2"/></svg>️</div>
                     <h3 class="font-display font-bold text-lg text-ink-950">{{ $city->name }}</h3>
                     <p class="text-xs text-ink-900/60 mt-1">{{ $city->properties_count ?? 0 }} PGs available</p>
                     <span class="absolute top-4 right-4 text-violet-500 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition">→</span>
@@ -673,7 +682,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="pzi-headbox pzi-headbox-blue flex items-center justify-between mb-5 px-5 py-4 rounded-2xl">
             <div class="flex items-center gap-4">
-                <span class="pzi-icon-circle bg-blue-500">🛡️</span>
+                <span class="pzi-icon-circle bg-blue-500"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.5c0 4.6-3 8.1-7 9.5-4-1.4-7-4.9-7-9.5V6l7-3z"/></svg>️</span>
                 <div>
                     <span class="inline-flex items-center gap-1.5 text-blue-100 font-bold text-xs tracking-widest uppercase">
                         <span class="w-1.5 h-1.5 rounded-full bg-white pzi-pulse"></span>
@@ -692,21 +701,21 @@
                     : null;
             @endphp
             <a href="{{ route('property.show', $property->slug) }}"
-               class="pz-tilt-card group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
+               class="pz-tilt-card pz-stagger group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition">
                 <div class="h-36 bg-cream relative overflow-hidden">
                     @if($cover)
-                        <img src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img loading="lazy" src="{{ $cover }}" alt="{{ $property->name }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream">🏠</div>
+                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-coral-50 to-cream"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>
                     @endif
-                    <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700">✓ Verified</span>
+                    <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-white/95 text-xs font-semibold text-emerald-700"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7" stroke-width="2.5"/></svg> Verified</span>
                 </div>
                 <div class="p-3">
                     <div class="flex items-start justify-between gap-1">
                         <h3 class="font-bold text-sm leading-tight line-clamp-1 group-hover:text-coral-600 transition">{{ $property->name }}</h3>
                         <span class="text-xs px-1.5 py-0.5 rounded bg-ink-100 text-ink-700 capitalize whitespace-nowrap">{{ $property->gender }}</span>
                     </div>
-                    <div class="text-xs text-ink-900/60 mt-1 truncate">📍 {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
+                    <div class="text-xs text-ink-900/60 mt-1 truncate"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
                     @if($property->rent_min)
                         <div class="mt-2 flex items-center justify-between">
                             <span class="font-black text-base text-ink-950">₹{{ number_format($property->rent_min) }}<span class="text-xs font-normal text-ink-900/50">/mo</span></span>
@@ -747,12 +756,12 @@
                     : null;
             @endphp
             <a href="{{ route('property.show', $property->slug) }}"
-               class="pz-tilt-card group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-rose-500 hover:shadow-lg transition">
+               class="pz-tilt-card pz-stagger group flex-shrink-0 w-56 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-rose-500 hover:shadow-lg transition">
                 <div class="h-36 bg-cream relative overflow-hidden">
                     @if($cover)
-                        <img src="{{ $cover }}" alt="{{ $property->name }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <img loading="lazy" src="{{ $cover }}" alt="{{ $property->name }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                     @else
-                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-rose-50 to-cream">🏠</div>
+                        <div class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-rose-50 to-cream"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>
                     @endif
                     <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full bg-rose-500 text-white text-xs font-semibold">New</span>
                 </div>
@@ -761,7 +770,7 @@
                         <h3 class="font-bold text-sm leading-tight line-clamp-1 group-hover:text-rose-600 transition">{{ $property->name }}</h3>
                         <span class="text-xs px-1.5 py-0.5 rounded bg-ink-100 text-ink-700 capitalize whitespace-nowrap">{{ $property->gender }}</span>
                     </div>
-                    <div class="text-xs text-ink-900/60 mt-1 truncate">📍 {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
+                    <div class="text-xs text-ink-900/60 mt-1 truncate"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> {{ $property->locality?->name }}{{ $property->city?->name ? ', '.$property->city->name : '' }}</div>
                     @if($property->rent_min)
                         <div class="mt-2 flex items-center justify-between">
                             <span class="font-black text-base text-ink-950">₹{{ number_format($property->rent_min) }}<span class="text-xs font-normal text-ink-900/50">/mo</span></span>
@@ -783,7 +792,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="pzi-headbox pzi-headbox-amber flex items-center justify-between mb-5 px-5 py-4 rounded-2xl">
             <div class="flex items-center gap-4">
-                <span class="pzi-icon-circle bg-amber-500">💬</span>
+                <span class="pzi-icon-circle bg-amber-500"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.5 9 9 0 0 1-3.6-.7L3 21l1.7-5.5A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg></span>
                 <div>
                     <span class="inline-flex items-center gap-1.5 text-amber-100 font-bold text-xs tracking-widest uppercase">
                         <span class="w-1.5 h-1.5 rounded-full bg-white pzi-pulse"></span>
@@ -798,7 +807,7 @@
             <div class="flex-shrink-0 w-72 snap-start bg-white rounded-xl border border-ink-900/10 p-4">
                 <div class="flex items-center gap-0.5 text-amber-500 text-sm mb-2">
                     @for($i = 0; $i < 5; $i++)
-                        <span>{{ $i < $t->rating ? '★' : '☆' }}</span>
+                        <span>{!! $i < $t->rating ? '<svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l2.6 5.6 6.2.5-4.7 4.1 1.4 6.1L12 16.2 6.5 19.3l1.4-6.1L3.2 9.1l6.2-.5L12 3z"/></svg>' : '<svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.6 5.6 6.2.5-4.7 4.1 1.4 6.1L12 16.2 6.5 19.3l1.4-6.1L3.2 9.1l6.2-.5L12 3z"/></svg>' !!}</span>
                     @endfor
                 </div>
                 <p class="text-sm text-ink-900/80 leading-relaxed line-clamp-4">&ldquo;{{ $t->comment }}&rdquo;</p>
@@ -863,7 +872,7 @@
                     <div class="absolute -top-10 -right-10 w-28 h-28 bg-coral-500/0 group-hover:bg-coral-500/10 rounded-full blur-2xl transition duration-500"></div>
 
               <div class="relative w-30 h-30 flex items-center justify-center">
-    <img src="{{ asset('assets/images/' . $image) }}"
+    <img loading="lazy" src="{{ asset('assets/images/' . $image) }}"
          alt="{{ $title }}"
          class="w-40 h-40 object-contain group-hover:scale-110 transition duration-300">
 </div>
@@ -902,7 +911,7 @@
     ] as [$num, $title, $desc, $image])
               <div class="group p-8 rounded-2xl border border-ink-900/10 hover:border-coral-500 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                    <div class="mb-6 flex justify-center">
-    <img src="{{ asset('assets/images/' . $image) }}"
+    <img loading="lazy" src="{{ asset('assets/images/' . $image) }}"
          alt="{{ $title }}"
          class="w-28 h-28 object-contain group-hover:scale-110 transition duration-300">
                  </div>
@@ -961,9 +970,9 @@
             @foreach($recentBlogs as $blog)
                 <a href="{{ route('blog.show', $blog->slug) }}" class="group block rounded-2xl border border-ink-900/10 overflow-hidden hover:border-coral-500 transition">
                     @if($blog->cover_image)
-                        <img src="{{ str_starts_with($blog->cover_image, 'http') ? $blog->cover_image : asset('storage/' . $blog->cover_image) }}" class="aspect-[16/10] w-full object-cover" alt="">
+                        <img loading="lazy" src="{{ str_starts_with($blog->cover_image, 'http') ? $blog->cover_image : asset('storage/' . $blog->cover_image) }}" class="aspect-[16/10] w-full object-cover" alt="">
                     @else
-                        <div class="aspect-[16/10] bg-gradient-to-br from-coral-100 to-coral-50 flex items-center justify-center text-4xl">📝</div>
+                        <div class="aspect-[16/10] bg-gradient-to-br from-coral-100 to-coral-50 flex items-center justify-center text-4xl"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg></div>
                     @endif
                     <div class="p-6">
                         <div class="text-xs text-coral-600 font-semibold uppercase tracking-wider">{{ $blog->published_at?->format('d M Y') }}</div>
@@ -1043,6 +1052,40 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }, { threshold: 0.12 });
     els.forEach(function (el) { io.observe(el); });
+})();
+
+// Staggered card cascade — groups .pz-stagger cards by their shared
+// parent (each property row) and reveals them one after another instead
+// of all at once, so scrolling a row into view feels like the cards are
+// walking in rather than popping in as a single block.
+(function () {
+    var cards = document.querySelectorAll('.pz-stagger');
+    if (!cards.length) return;
+
+    if (!('IntersectionObserver' in window)) {
+        cards.forEach(function (el) { el.classList.add('pz-in'); });
+        return;
+    }
+
+    var groups = new Map();
+    cards.forEach(function (card) {
+        var parent = card.parentElement;
+        if (!groups.has(parent)) groups.set(parent, []);
+        groups.get(parent).push(card);
+    });
+
+    var staggerIo = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var siblings = groups.get(entry.target.parentElement) || [entry.target];
+            var index = siblings.indexOf(entry.target);
+            entry.target.style.transitionDelay = (Math.max(index, 0) * 70) + 'ms';
+            entry.target.classList.add('pz-in');
+            staggerIo.unobserve(entry.target);
+        });
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+    cards.forEach(function (card) { staggerIo.observe(card); });
 })();
 
 function piziUpdateBudget(val) {
@@ -1160,6 +1203,27 @@ function piziUpdateBudget(val) {
         showNext();
         setInterval(showNext, 7000);
     }, 3000);
+})();
+
+// Back-to-top button — hidden until the visitor scrolls past the hero,
+// then smooth-scrolls the page back up on click.
+(function () {
+    var btn = document.createElement('button');
+    btn.id = 'pziBackToTop';
+    btn.setAttribute('aria-label', 'Back to top');
+    btn.style.cssText = 'position:fixed;bottom:96px;right:16px;z-index:45;width:44px;height:44px;border-radius:9999px;background:#0f2748;color:#fff;box-shadow:0 10px 25px rgba(15,39,72,.3);display:flex;align-items:center;justify-content:center;opacity:0;transform:translateY(12px) scale(.85);pointer-events:none;transition:opacity .3s ease,transform .3s ease,background .2s ease;';
+    btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+    btn.addEventListener('mouseenter', function () { btn.style.background = '#ff6b5b'; });
+    btn.addEventListener('mouseleave', function () { btn.style.background = '#0f2748'; });
+    btn.addEventListener('click', function () { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    document.body.appendChild(btn);
+
+    window.addEventListener('scroll', function () {
+        var show = window.scrollY > 700;
+        btn.style.opacity = show ? '1' : '0';
+        btn.style.transform = show ? 'translateY(0) scale(1)' : 'translateY(12px) scale(.85)';
+        btn.style.pointerEvents = show ? 'auto' : 'none';
+    }, { passive: true });
 })();
 </script>
 

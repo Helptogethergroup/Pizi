@@ -49,7 +49,7 @@
 
             @if($bill->due_amount <= 0)
                 <div class="p-8 text-center">
-                    <div class="text-4xl mb-2">✅</div>
+                    <div class="text-4xl mb-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5" stroke-width="2.2"/></svg></div>
                     <p class="font-bold text-emerald-700">This bill is fully paid.</p>
                     <p class="text-sm text-gray-500 mt-1">Thank you!</p>
                 </div>
@@ -62,7 +62,7 @@
                     <button id="payBtn" class="w-full px-6 py-3.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-bold text-lg">
                         Pay ₹{{ number_format($bill->due_amount, 0) }} Now
                     </button>
-                    <p class="text-xs text-gray-400 mt-3">🔒 Secured by Razorpay — UPI, Cards, Net Banking, Wallets</p>
+                    <p class="text-xs text-gray-400 mt-3"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Secured by Razorpay — UPI, Cards, Net Banking, Wallets</p>
                 </div>
             @endif
         </div>

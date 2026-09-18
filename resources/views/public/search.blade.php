@@ -59,10 +59,10 @@
                         <div>
                             <label class="text-xs font-bold uppercase text-ink-700 block mb-2">Looking for</label>
                             <div class="grid grid-cols-3 gap-1.5">
-                                @foreach(['male'=>'👨 Boys', 'female'=>'👩 Girls', 'unisex'=>'👥 Unisex'] as $val => $label)
+                                @foreach(['male'=>'<svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg> Boys', 'female'=>'<svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg> Girls', 'unisex'=>'<svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 13.2c2.6.4 4.5 2.3 4.5 4.8v2"/></svg> Unisex'] as $val => $label)
                                     <label>
                                         <input type="radio" name="gender" value="{{ $val }}" @checked(request('gender') === $val) class="peer hidden">
-                                        <div class="text-center py-2 text-xs rounded-lg border border-ink-200 cursor-pointer peer-checked:bg-coral-500 peer-checked:text-white peer-checked:border-coral-500">{{ $label }}</div>
+                                        <div class="text-center py-2 text-xs rounded-lg border border-ink-200 cursor-pointer peer-checked:bg-coral-500 peer-checked:text-white peer-checked:border-coral-500">{!! $label !!}</div>
                                     </label>
                                 @endforeach
                             </div>
@@ -101,7 +101,7 @@
                              @foreach($amenities as $a)
     <label class="flex items-center gap-2 cursor-pointer">
         <input type="checkbox" name="amenities[]" value="{{ $a->id }}" @checked(in_array($a->id, (array)request('amenities', []))) class="rounded text-coral-500">
-        <span class="text-sm text-ink-700">{{ $a->icon ?? '✨' }} {{ $a->name }}</span>
+        <span class="text-sm text-ink-700">{!! $a->icon ? e($a->icon) : '<svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M19 15l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/></svg>' !!} {{ $a->name }}</span>
     </label>
 @endforeach
                             </div>
@@ -149,7 +149,7 @@
                     <div class="mt-10">{{ $properties->withQueryString()->links() }}</div>
                 @else
                     <div class="bg-white p-16 rounded-2xl border border-ink-100 text-center">
-                        <div class="text-6xl mb-4">🔍</div>
+                        <div class="text-6xl mb-4"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.5-4.5"/></svg></div>
                         <h3 class="font-display font-bold text-2xl text-ink-950">No PGs found</h3>
                         <p class="text-ink-600 mt-2">Try changing filters or search a different city.</p>
                         <a href="{{ route('search') }}" class="inline-block mt-4 px-6 py-2.5 bg-coral-500 text-white rounded-xl font-bold text-sm">Clear filters</a>

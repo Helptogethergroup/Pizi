@@ -66,7 +66,7 @@
                     <x-property-card :property="$property" />
                     @if($property->landmarks->first())
                         <span class="absolute top-3 left-3 z-10 px-2.5 py-1 rounded-full bg-ink-950/85 text-cream text-xs font-bold">
-                            📍 {{ $property->landmarks->first()->pivot->distance_km }} km away
+                            <svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> {{ $property->landmarks->first()->pivot->distance_km }} km away
                         </span>
                     @endif
                 </div>

@@ -735,6 +735,33 @@ document.getElementById('contactPopupForm').addEventListener('submit', async fun
 </script>
 {{-- ===== END CONTACT POPUP ===== --}}
 
+<script>
+// Property-card hover carousel — auto-cycles the stacked photos while the
+// card is hovered, with a matching dot indicator. Works for however many
+// property-card components are on the page (search results, homepage
+// rows, etc.) without needing per-page wiring.
+(function () {
+    document.querySelectorAll('.pz-card-carousel').forEach(function (card) {
+        var slides = card.querySelectorAll('.pz-carousel-slide');
+        var dots = card.querySelectorAll('.pz-carousel-dots span');
+        if (slides.length < 2) return;
+        var i = 0, timer = null;
+        function show(n) {
+            slides.forEach(function (s, idx) { s.style.opacity = idx === n ? '1' : '0'; });
+            dots.forEach(function (d, idx) { d.style.background = idx === n ? '#fff' : 'rgba(255,255,255,.6)'; });
+        }
+        card.addEventListener('mouseenter', function () {
+            timer = setInterval(function () { i = (i + 1) % slides.length; show(i); }, 900);
+        });
+        card.addEventListener('mouseleave', function () {
+            clearInterval(timer);
+            i = 0;
+            show(0);
+        });
+    });
+})();
+</script>
+
 @stack('scripts')
 
 
