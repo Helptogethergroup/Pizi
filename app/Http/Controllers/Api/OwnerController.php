@@ -602,15 +602,50 @@ class OwnerController extends Controller
     public function leads(Request $request, \App\Services\LeadMatchingService $matcher)
     {
         $owner = $request->user();
+        $allMatched = $matcher->leadsForOwner($owner, 300);
 
-        // per_page defaults to 20 (matches the website) but the app can
-        // ask for more in one call — e.g. ?per_page=500 — instead of
-        // implementing page-by-page loading. Capped at 500 so a request
-        // can't force scoring an unbounded number of leads.
-        $perPage = (int) $request->get('per_page', 20);
-        $perPage = max(1, min($perPage, 500));
+        // "NEW" badge — same logic as the website's owner.leads page.
+        $lastVisit = $owner->leads_last_viewed_at;
+        $allMatched->each(function ($lead) use ($lastVisit) {
+            $lead->is_new = $lastVisit && $lead->created_at && $lead->created_at->gt($lastVisit);
+        });
+        $owner->forceFill(['leads_last_viewed_at' => now()])->saveQuietly();
 
-        $allMatched = $matcher->leadsForOwner($owner, max(300, $perPage));
+        // Tab counts + status counts computed BEFORE filtering, from the
+        // full matched set, so the app can render badge counts that don't
+        // change just because a filter is applied — same as the website.
+        $unlockedLeads = $allMatched->where('is_unlocked', true);
+        $tabCounts = [
+            'all' => $allMatched->count(),
+            'hot' => $allMatched->where('match_score', '>=', 70)->count(),
+            'verified' => $allMatched->where('lead_type', 'verified')->count(),
+            'manual' => $allMatched->where('lead_type', 'manual')->count(),
+            'affordable' => $allMatched->filter(fn ($l) => $l->affordable && !$l->is_unlocked)->count(),
+            'unlocked' => $allMatched->where('is_unlocked', true)->count(),
+        ];
+        $statusCounts = [
+            'new_lead' => $unlockedLeads->filter(fn ($l) => !$l->status || $l->status === 'new_lead')->count(),
+            'open' => $unlockedLeads->where('status', 'open')->count(),
+            'connected' => $unlockedLeads->where('status', 'connected')->count(),
+            'follow_up' => $unlockedLeads->where('status', 'follow_up')->count(),
+            'deal_closed' => $unlockedLeads->where('status', 'deal_closed')->count(),
+            'lost' => $unlockedLeads->where('status', 'lost')->count(),
+        ];
+
+        // "Only my area" quick toggle
+        if ($request->boolean('area_only')) {
+            $allMatched = $allMatched->where('area_match', true);
+        }
+
+        // Tab filter (all/hot/verified/manual/affordable/unlocked)
+        $allMatched = match ($request->get('tab', 'all')) {
+            'hot' => $allMatched->where('match_score', '>=', 70),
+            'verified' => $allMatched->where('lead_type', 'verified'),
+            'manual' => $allMatched->where('lead_type', 'manual'),
+            'affordable' => $allMatched->filter(fn ($l) => $l->affordable && !$l->is_unlocked),
+            'unlocked' => $allMatched->where('is_unlocked', true),
+            default => $allMatched,
+        };
 
         if ($request->filled('status')) {
             $allMatched = $allMatched->where('status', $request->status);
@@ -618,8 +653,53 @@ class OwnerController extends Controller
         if ($request->filled('property_id')) {
             $allMatched = $allMatched->filter(fn ($l) => $l->matched_property?->id == $request->property_id);
         }
+        if ($request->filled('inquiry_type')) {
+            $allMatched = $allMatched->where('inquiry_type', $request->inquiry_type);
+        }
+        if ($request->filled('date_range')) {
+            $allMatched = $allMatched->filter(function ($l) use ($request) {
+                if (!$l->created_at) return false;
+                $created = \Carbon\Carbon::parse($l->created_at);
+                return match ($request->date_range) {
+                    'today' => $created->isToday(),
+                    'yesterday' => $created->isYesterday(),
+                    'week' => $created->isCurrentWeek(),
+                    'month' => $created->isCurrentMonth(),
+                    default => true,
+                };
+            });
+        }
+        if ($request->filled('locality')) {
+            $locality = $request->locality;
+            $allMatched = $allMatched->filter(function ($lead) use ($locality) {
+                if ($lead->matched_property && $lead->matched_property->locality) {
+                    return $lead->matched_property->locality->name === $locality;
+                }
+                return $lead->preferred_locality && stripos($lead->preferred_locality, $locality) !== false;
+            });
+        }
+        if ($request->filled('search')) {
+            $term = strtolower($request->search);
+            $allMatched = $allMatched->filter(fn ($l) => str_contains(strtolower($l->name ?? ''), $term)
+                || str_contains(strtolower($l->phone ?? ''), $term));
+        }
+
+        // Sort — default stays the matcher's own area/score ranking.
+        $allMatched = match ($request->get('sort')) {
+            'newest' => $allMatched->sortByDesc('created_at'),
+            'budget_high' => $allMatched->sortByDesc(fn ($l) => $l->budget_max ?? $l->budget_min ?? 0),
+            'budget_low' => $allMatched->sortBy(fn ($l) => $l->budget_min ?? $l->budget_max ?? PHP_INT_MAX),
+            default => $allMatched,
+        };
 
         $allMatched = $allMatched->values();
+
+        // per_page defaults to 20 (matches the website) but the app can
+        // ask for more in one call — e.g. ?per_page=500 — instead of
+        // implementing page-by-page loading. Capped at 500 so a request
+        // can't force scoring an unbounded number of leads.
+        $perPage = (int) $request->get('per_page', 20);
+        $perPage = max(1, min($perPage, 500));
 
         $page = (int) $request->get('page', 1);
         $pageItems = $allMatched->forPage($page, $perPage);
@@ -639,6 +719,8 @@ class OwnerController extends Controller
             return [
                 'id' => $lead->id,
                 'name' => $lead->name,
+                'is_new' => (bool) ($lead->is_new ?? false),
+                'inquiry_type' => $lead->inquiry_type,
                 // phone/email stay masked (null) until the owner unlocks this lead.
                 'phone' => $lead->is_unlocked ? $this->formatPhoneForApp($lead->phone) : null,
                 'email' => $lead->is_unlocked ? $lead->email : null,
@@ -711,7 +793,150 @@ class OwnerController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return $this->ok($paginated);
+        return response()->json([
+            'success' => true,
+            'data' => $paginated,
+            // Tab/status badge counts — computed from the FULL matched
+            // set (before any filter/tab was applied), so the app can
+            // show "New Lead (3)" etc. that doesn't shift as filters change.
+            'meta' => [
+                'tab_counts' => $tabCounts,
+                'status_counts' => $statusCounts,
+            ],
+        ]);
+    }
+
+    /**
+     * Dropdown data for the app's filter UI — properties/localities/sources
+     * this owner can actually filter by, plus current unlock pricing.
+     * Same data the website's owner.leads page uses to build its filters.
+     */
+    public function leadFilters(Request $request, \App\Services\LeadMatchingService $matcher)
+    {
+        $owner = $request->user();
+        $allMatched = $matcher->leadsForOwner($owner, 300);
+
+        $properties = \App\Models\Property::where('owner_id', $owner->id)->get(['id', 'name']);
+        $sources = $allMatched->pluck('source')->filter()->unique()->values();
+        $localities = $owner->properties()->where('is_active', true)
+            ->with('locality')->get()
+            ->pluck('locality.name')->filter()->unique()->values();
+        $pricing = DB::table('lead_pricing')->where('is_active', true)->get(['lead_type', 'credit_cost']);
+
+        return $this->ok([
+            'properties' => $properties,
+            'localities' => $localities,
+            'sources' => $sources,
+            'pricing' => $pricing,
+        ]);
+    }
+
+    /**
+     * Same status list the website's owner.leads page uses — lets the app
+     * move a lead through New → Open → Connected → Follow Up → Closed/Lost.
+     * Only the owner who actually unlocked the lead can update it.
+     */
+    private const VALID_LEAD_STATUSES = [
+        'new_lead', 'open', 'contacted', 'connected', 'not_connected',
+        'follow_up', 'visit_scheduled', 'visit_completed', 'deal_closed', 'lost', 'cancelled',
+    ];
+
+    public function leadUpdateStatus(Request $request, $id)
+    {
+        $owner = $request->user();
+        $lead = \App\Models\Lead::find($id);
+        if (!$lead) return $this->notFound();
+
+        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where('user_id', $owner->id)->exists();
+        if (!$isUnlocked) {
+            return response()->json(['success' => false, 'message' => 'You must unlock this lead before updating its status.'], 403);
+        }
+
+        $data = $request->validate([
+            'status' => 'required|in:' . implode(',', self::VALID_LEAD_STATUSES),
+            'remark' => 'nullable|string|max:2000',
+            'follow_up_date' => 'nullable|date',
+        ]);
+
+        $oldStatus = $lead->status;
+
+        DB::table('leads')->where('id', $id)->update([
+            'status' => $data['status'],
+            'next_follow_up_at' => $data['follow_up_date'] ?? $lead->next_follow_up_at,
+            'updated_at' => now(),
+        ]);
+
+        DB::table('lead_status_history')->insert([
+            'lead_id' => $id,
+            'updated_by' => $owner->id,
+            'old_status' => $oldStatus,
+            'new_status' => $data['status'],
+            'remark' => $data['remark'] ?? null,
+            'created_at' => now(),
+        ]);
+
+        return $this->ok(['message' => 'Status updated', 'status' => $data['status']]);
+    }
+
+    public function leadAddRemark(Request $request, $id)
+    {
+        $owner = $request->user();
+        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where('user_id', $owner->id)->exists();
+        if (!$isUnlocked) {
+            return response()->json(['success' => false, 'message' => 'You must unlock this lead before adding a remark.'], 403);
+        }
+
+        $data = $request->validate(['remark' => 'required|string|max:2000']);
+        $lead = \App\Models\Lead::find($id);
+        if (!$lead) return $this->notFound();
+
+        DB::table('lead_status_history')->insert([
+            'lead_id' => $id,
+            'updated_by' => $owner->id,
+            'old_status' => $lead->status,
+            'new_status' => $lead->status,
+            'remark' => $data['remark'],
+            'created_at' => now(),
+        ]);
+
+        return $this->ok(['message' => 'Remark added']);
+    }
+
+    public function leadTimeline(Request $request, $id)
+    {
+        $owner = $request->user();
+        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where('user_id', $owner->id)->exists();
+        if (!$isUnlocked) {
+            return response()->json(['success' => false, 'message' => 'You must unlock this lead to view its timeline.'], 403);
+        }
+
+        $history = DB::table('lead_status_history')
+            ->leftJoin('users', 'users.id', '=', 'lead_status_history.updated_by')
+            ->where('lead_id', $id)
+            ->orderByDesc('lead_status_history.created_at')
+            ->select('lead_status_history.*', 'users.name as updated_by_name')
+            ->get();
+
+        return $this->ok($history);
+    }
+
+    /**
+     * Owner self-service junk report — a lead they never unlocked but can
+     * tell is spam/test at a glance. No credit spend needed; hides it from
+     * every owner going forward, same as the website's reportJunk().
+     */
+    public function leadReportJunk(Request $request, $id)
+    {
+        $lead = \App\Models\Lead::find($id);
+        if (!$lead) return $this->notFound();
+
+        if ($lead->is_locked) {
+            return response()->json(['success' => false, 'message' => 'This lead is already unlocked — update its status instead.'], 422);
+        }
+
+        DB::table('leads')->where('id', $id)->update(['status' => 'junk', 'updated_at' => now()]);
+
+        return $this->ok(['message' => 'Reported as junk']);
     }
 
     /**

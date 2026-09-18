@@ -164,7 +164,12 @@ Route::prefix('owner')->middleware('role:owner,admin')->group(function () {
 
     // Leads
     Route::get('/leads',              [OwnerController::class, 'leads']);
+    Route::get('/leads/filters',      [OwnerController::class, 'leadFilters']);
     Route::post('/leads/{id}/unlock', [OwnerController::class, 'leadUnlock']);
+    Route::patch('/leads/{id}/status', [OwnerController::class, 'leadUpdateStatus']);
+    Route::post('/leads/{id}/remark', [OwnerController::class, 'leadAddRemark']);
+    Route::get('/leads/{id}/timeline', [OwnerController::class, 'leadTimeline']);
+    Route::post('/leads/{id}/report-junk', [OwnerController::class, 'leadReportJunk']);
 
     // Wallet / Credits
     Route::get('/wallet',          [OwnerController::class, 'wallet']);
