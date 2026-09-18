@@ -57,6 +57,21 @@ class UserController extends Controller
         $user->save();
         return back()->with('success', 'User status updated.');
     }
+
+    /**
+     * Marks/unmarks an owner as an internal QA/testing account — see the
+     * note on LeadMatchingService::leadsForOwner(). Use this for any
+     * dummy "testuser"-style owner account used to check the unlock flow,
+     * so its unlocks don't permanently remove leads from real owners.
+     */
+    public function toggleTestAccount(User $user)
+    {
+        $user->is_test_account = !$user->is_test_account;
+        $user->save();
+        return back()->with('success', $user->is_test_account
+            ? "🧪 {$user->name} marked as a test account — their lead unlocks no longer block real owners."
+            : "{$user->name} is no longer marked as a test account.");
+    }
     
     
     public function show(User $user)

@@ -103,8 +103,13 @@ public function leadsForOwner($owner, int $limit = 60)
     $unlockedByMe = \App\Models\LeadUnlock::where('user_id', $owner->id)
         ->pluck('lead_id')->toArray();
 
-    // Leads locked by ANYONE (including self)
-    $lockedByAnyone = \App\Models\LeadUnlock::pluck('lead_id')->toArray();
+    // Leads locked by ANYONE (including self) — EXCLUDING internal
+    // QA/testing accounts (users.is_test_account). Without this, a test
+    // owner "unlocking" a lead just to check the flow would permanently
+    // remove that lead from every real owner's pool, since a lead is
+    // considered taken the moment ANY lead_unlocks row exists for it.
+    $lockedByAnyone = \App\Models\LeadUnlock::whereHas('user', fn ($q) => $q->where('is_test_account', false))
+        ->pluck('lead_id')->toArray();
 
     $ownerLocalities = $properties->pluck('locality.name')->filter()->unique()->toArray();
     $ownerCities = $properties->pluck('city.name')->filter()->unique()->toArray();

@@ -12,7 +12,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $fillable = [
-    'name', 'email', 'phone', 'password', 'role', 'is_active', 'avatar', 'signup_type', 'address',
+    'name', 'email', 'phone', 'password', 'role', 'is_active', 'is_test_account', 'avatar', 'signup_type', 'address',
     'owner_id', 'permissions', 'upi_id' ,'dashboard_guide_seen_at',
     'gst_number', 'billing_business_name', 'billing_address', 'billing_state', 'billing_pincode',
 ];
@@ -27,6 +27,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'is_test_account' => 'boolean',
         ];
     }
 

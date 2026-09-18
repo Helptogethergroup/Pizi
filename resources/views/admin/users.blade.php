@@ -88,6 +88,19 @@
                                 <button
                                     class="text-xs px-2 py-1 rounded border border-ink-900/15">{{ $u->is_active ? 'Disable' : 'Enable' }}</button>
                             </form>
+                            @php
+                                $looksLikeTest = $u->is_test_account
+                                    || stripos($u->name, 'test') !== false
+                                    || stripos($u->email, 'test') !== false;
+                            @endphp
+                            @if($u->role === 'owner' && $looksLikeTest)
+                            <form method="POST" action="{{ route('admin.users.toggle-test', $u) }}" class="inline">@csrf
+                                @method('PATCH')
+                                <button
+                                    title="Test accounts' lead unlocks never block real owners"
+                                    class="text-xs px-2 py-1 rounded font-semibold {{ $u->is_test_account ? 'bg-amber-500 text-white' : 'border border-ink-900/15' }}">🧪 {{ $u->is_test_account ? 'Test' : 'Mark Test' }}</button>
+                            </form>
+                            @endif
                             <button type="button" onclick="openDeleteModal({{ $u->id }}, '{{ addslashes($u->name) }}')"
                                 class="text-xs px-2 py-1 rounded bg-rose-600 text-white font-semibold">Delete</button>
                         </td>
