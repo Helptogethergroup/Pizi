@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="font-display font-black text-3xl">🔔 Notifications</h1>
+        <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-bell fa-fw"></i> Notifications</h1>
         <p class="text-ink-900/60 mt-1">Your alerts and updates</p>
     </div>
     @if($notifications->count())
@@ -34,7 +34,7 @@
     <div class="mt-6">{{ $notifications->links() }}</div>
 @else
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">🔔</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-bell fa-fw"></i></div>
         <h2 class="font-bold text-xl">No notifications yet</h2>
         <p class="text-ink-700 mt-2">You'll see new lead alerts, visit updates and more here.</p>
     </div>

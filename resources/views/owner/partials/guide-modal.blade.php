@@ -6,7 +6,7 @@
 
         <div class="p-5 border-b border-ink-100 flex items-center justify-between">
             <div>
-                <h2 class="font-display font-black text-xl">👋 Welcome to your Pizi Dashboard</h2>
+                <h2 class="font-display font-black text-xl"><i class="fa-solid fa-hand fa-fw"></i> Welcome to your Pizi Dashboard</h2>
                 <p class="text-sm text-ink-500 mt-0.5" id="guideSubtitle">Quick guide — what you can do here</p>
             </div>
             <div class="flex items-center gap-2">
@@ -34,7 +34,7 @@
                 Got it, let's go →
             </button>
             <a href="{{ route('owner.guide.show') }}" target="_blank" class="px-5 py-3 border border-ink-200 rounded-xl font-bold text-sm">
-                📄 View as PDF
+                <i class="fa-solid fa-file-lines fa-fw"></i> View as PDF
             </a>
         </div>
     </div>

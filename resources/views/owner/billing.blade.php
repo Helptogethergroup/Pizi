@@ -2,7 +2,7 @@
 @section('title', 'Billing & GST Info')
 @section('content')
 
-<h1 class="font-display font-black text-3xl mb-2">🧾 Billing & GST Info</h1>
+<h1 class="font-display font-black text-3xl mb-2"><i class="fa-solid fa-receipt fa-fw"></i> Billing & GST Info</h1>
 <p class="text-ink-900/60 mb-6">All fields below are optional — fill them in only if you're a GST-registered business. This ensures your invoices show the correct business name/GSTIN, and lets admin generate accurate bills for you.</p>
 
 @if(session('success'))

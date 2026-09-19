@@ -36,13 +36,13 @@
                 <div class="text-xs font-bold uppercase text-ink-900/50">Current Status</div>
                 <div class="font-display font-bold text-xl mt-1">
                     @if($status === 'approved')
-                        <span class="text-emerald-700">✅ Approved</span>
+                        <span class="text-emerald-700"><i class="fa-solid fa-circle-check fa-fw"></i> Approved</span>
                     @elseif($status === 'submitted')
-                        <span class="text-amber-700">⏳ Submitted — Awaiting approval</span>
+                        <span class="text-amber-700"><i class="fa-solid fa-hourglass-half fa-fw"></i> Submitted — Awaiting approval</span>
                     @elseif($status === 'rejected')
-                        <span class="text-rose-700">❌ Rejected — Please re-upload</span>
+                        <span class="text-rose-700"><i class="fa-solid fa-circle-xmark fa-fw"></i> Rejected — Please re-upload</span>
                     @else
-                        <span class="text-ink-900/70">📄 Pending — Upload documents below</span>
+                        <span class="text-ink-900/70"><i class="fa-solid fa-file-lines fa-fw"></i> Pending — Upload documents below</span>
                     @endif
                 </div>
             </div>
@@ -108,7 +108,7 @@
                         @else
                             <a href="{{ $url }}" target="_blank" class="flex items-center justify-center h-48 text-ink-900/70 hover:bg-ink-900/5 transition">
                                 <div class="text-center">
-                                    <div class="text-4xl mb-2">📄</div>
+                                    <div class="text-4xl mb-2"><i class="fa-solid fa-file-lines fa-fw"></i></div>
                                     <div class="text-sm font-bold">View PDF</div>
                                 </div>
                             </a>
@@ -117,7 +117,7 @@
 
                     <div class="flex gap-2">
                         <a href="{{ $url }}" target="_blank" class="flex-1 text-center py-2 bg-ink-900/5 hover:bg-ink-900/10 text-ink-900 rounded-lg text-sm font-bold">
-                            👁 View
+                            <i class="fa-solid fa-eye fa-fw"></i> View
                         </a>
                         @unless($status === 'approved')
                             <form method="POST" action="{{ route('tenant.kyc.delete', $type) }}" class="flex-1"
@@ -125,7 +125,7 @@
                                 @csrf
                                 @method('DELETE')
                                 <button class="w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-lg text-sm font-bold border border-rose-200">
-                                    🗑 Delete
+                                    <i class="fa-solid fa-trash-can fa-fw"></i> Delete
                                 </button>
                             </form>
                         @endunless
@@ -138,7 +138,7 @@
                             <label class="block cursor-pointer">
                                 <input type="file" name="{{ $type }}" accept="image/*,.pdf" class="hidden" onchange="this.form.submit()">
                                 <div class="text-center py-2 border border-dashed border-ink-900/20 hover:border-coral-500 rounded-lg text-xs text-ink-900/60 hover:text-coral-600">
-                                    🔄 Replace document
+                                    <i class="fa-solid fa-rotate fa-fw"></i> Replace document
                                 </div>
                             </label>
                         </form>
@@ -152,7 +152,7 @@
                             <label class="block cursor-pointer">
                                 <input type="file" name="{{ $type }}" accept="image/*,.pdf" class="hidden" required onchange="this.form.submit()">
                                 <div class="text-center py-8 border-2 border-dashed border-ink-900/15 hover:border-coral-500 rounded-xl text-ink-900/60 hover:text-coral-600 transition">
-                                    <div class="text-3xl mb-2">📤</div>
+                                    <div class="text-3xl mb-2"><i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i></div>
                                     <div class="font-bold text-sm">Click to upload</div>
                                     <div class="text-xs mt-1">Image or PDF · max 2MB</div>
                                 </div>

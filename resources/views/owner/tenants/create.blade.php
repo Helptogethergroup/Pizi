@@ -12,7 +12,7 @@
     @csrf
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">🏠 Property &amp; Room Assignment</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-house fa-fw"></i> Property &amp; Room Assignment</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-3">
                 <label class="text-xs font-bold uppercase text-ink-900/60">Select PG *</label>
@@ -65,9 +65,9 @@
                 <label class="text-xs font-bold uppercase text-ink-900/60">Security Deposit Status</label>
                 <select name="security_deposit_status" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
                     <option value="">— Select —</option>
-                    <option value="full">✅ Full Paid</option>
+                    <option value="full">Full Paid</option>
                     <option value="half">◐ Half Paid</option>
-                    <option value="pending">⏳ Pending</option>
+                    <option value="pending">Pending</option>
                 </select>
             </div>
             <div>
@@ -76,7 +76,7 @@
             </div>
 
             <div class="md:col-span-3 border-t border-ink-100 pt-4 mt-1">
-                <h3 class="text-sm font-bold text-ink-900/70 mb-3">💰 Advance Rent (Optional)</h3>
+                <h3 class="text-sm font-bold text-ink-900/70 mb-3"><i class="fa-solid fa-sack-dollar fa-fw"></i> Advance Rent (Optional)</h3>
             </div>
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Advance Rent (Months)</label>
@@ -96,7 +96,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border-2 border-emerald-200 relative overflow-hidden">
-        <h2 class="font-display font-bold text-lg mb-1">🆔 Aadhaar Verification (Instant KYC)</h2>
+        <h2 class="font-display font-bold text-lg mb-1"><i class="fa-solid fa-id-badge fa-fw"></i> Aadhaar Verification (Instant KYC)</h2>
         <p class="text-xs text-ink-900/50 mb-4">Tenant ka Aadhaar number daalo — OTP unke Aadhaar-linked mobile pe jayega. Verify hote hi naam, DOB, gender, address neeche khud bhar jayenge — koi document upload nahi karna padega.</p>
 
         <div id="aadhaarStep0">
@@ -138,7 +138,7 @@
         <p id="aadhaarStatus" class="text-xs mt-2"></p>
 
         <div id="aadhaarVerifiedBadge" class="hidden mt-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 text-emerald-700 text-sm font-bold">
-            ✅ Aadhaar verified — details below auto-filled. KYC will be marked Approved automatically.
+            <i class="fa-solid fa-circle-check fa-fw"></i> Aadhaar verified — details below auto-filled. KYC will be marked Approved automatically.
         </div>
 
         <input type="hidden" name="aadhaar_verified" id="aadhaarVerifiedInput" value="0">
@@ -148,7 +148,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">👤 Personal Details</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-user fa-fw"></i> Personal Details</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Full Name *</label>
@@ -187,7 +187,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">📍 Permanent Address</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-location-dot fa-fw"></i> Permanent Address</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
                 <label class="text-xs font-bold uppercase text-ink-900/60">Address</label>
@@ -209,7 +209,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">🚨 Emergency Contact</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Emergency Contact</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Contact Name</label>
@@ -227,7 +227,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">✅ KYC (Walk-in Verification)</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-circle-check fa-fw"></i> KYC (Walk-in Verification)</h2>
         <label class="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" name="kyc_verified_now" value="1" id="kycCheckbox" class="mt-1 w-5 h-5">
             <span class="text-sm text-ink-900/80">

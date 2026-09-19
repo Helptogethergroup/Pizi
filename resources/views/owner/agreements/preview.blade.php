@@ -18,6 +18,7 @@
     .no-print { display: flex !important; }
 }
     </style>
+@include('partials.emoji-icons')
 </head>
 <body class="py-8">
     <div class="max-w-3xl mx-auto bg-white p-10 rounded-2xl shadow-lg doc">

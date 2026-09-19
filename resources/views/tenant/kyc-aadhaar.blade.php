@@ -5,7 +5,7 @@
 <div class="max-w-lg mx-auto">
     <div class="bg-white rounded-2xl border border-ink-900/10 p-6 lg:p-8">
         <div class="text-center mb-6">
-            <div class="w-16 h-16 rounded-full bg-coral-50 text-3xl flex items-center justify-center mx-auto">🪪</div>
+            <div class="w-16 h-16 rounded-full bg-coral-50 text-3xl flex items-center justify-center mx-auto"><i class="fa-solid fa-id-card fa-fw"></i></div>
             <h1 class="font-display font-black text-2xl mt-4">Verify with Aadhaar</h1>
             <p class="text-ink-900/60 text-sm mt-2">Secure, paperless KYC — powered by Setu's Aadhaar OKYC.</p>
         </div>
@@ -37,7 +37,7 @@
         {{-- STEP 2: Enter OTP --}}
         <div id="stepOtp" class="hidden">
             <div class="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-800">
-                ✅ OTP sent to your Aadhaar-linked mobile number.
+                <i class="fa-solid fa-circle-check fa-fw"></i> OTP sent to your Aadhaar-linked mobile number.
             </div>
 
             <p class="text-xs font-bold uppercase text-ink-900/60 mb-1">Enter OTP</p>
@@ -66,7 +66,7 @@
                 @csrf
                 <button type="submit"
                     class="w-full px-4 py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-800 rounded-xl font-semibold text-sm">
-                    ⚠️ Skip Aadhaar for now (testing only)
+                    <i class="fa-solid fa-triangle-exclamation fa-fw"></i> Skip Aadhaar for now (testing only)
                 </button>
             </form>
             <p class="text-xs text-amber-700/60 mt-1 text-center">Visible only when APP_DEBUG=true. Remove before going live.</p>

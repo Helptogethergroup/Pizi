@@ -9,17 +9,17 @@
 
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
     <div class="bg-white p-5 rounded-2xl border border-ink-100">
-        <div class="text-3xl mb-2">📄</div>
+        <div class="text-3xl mb-2"><i class="fa-solid fa-file-lines fa-fw"></i></div>
         <div class="text-xs text-ink-500 uppercase font-bold">Total Pages</div>
         <div class="font-display font-black text-3xl mt-1">{{ $stats['total_pages'] }}</div>
     </div>
     <div class="bg-white p-5 rounded-2xl border border-emerald-200">
-        <div class="text-3xl mb-2">✅</div>
+        <div class="text-3xl mb-2"><i class="fa-solid fa-circle-check fa-fw"></i></div>
         <div class="text-xs text-emerald-700 uppercase font-bold">Active Pages</div>
         <div class="font-display font-black text-3xl text-emerald-700 mt-1">{{ $stats['active_pages'] }}</div>
     </div>
     <div class="bg-white p-5 rounded-2xl border border-rose-200">
-        <div class="text-3xl mb-2">⚠️</div>
+        <div class="text-3xl mb-2"><i class="fa-solid fa-triangle-exclamation fa-fw"></i></div>
         <div class="text-xs text-rose-700 uppercase font-bold">Missing Meta</div>
         <div class="font-display font-black text-3xl text-rose-700 mt-1">{{ $stats['missing_meta'] }}</div>
     </div>

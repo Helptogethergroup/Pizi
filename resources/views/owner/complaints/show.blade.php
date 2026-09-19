@@ -18,13 +18,13 @@
                     <span class="text-xs bg-cream px-2 py-1 rounded-full font-bold">{{ $complaint->category_label }}</span>
                     
                     @if($complaint->priority === 'urgent')
-                        <span class="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full font-bold">🔴 Urgent</span>
+                        <span class="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#ef4444"></i> Urgent</span>
                     @elseif($complaint->priority === 'high')
-                        <span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-bold">🟠 High</span>
+                        <span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#f97316"></i> High</span>
                     @elseif($complaint->priority === 'medium')
-                        <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-bold">🟡 Medium</span>
+                        <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#eab308"></i> Medium</span>
                     @else
-                        <span class="text-xs bg-ink-100 text-ink-700 px-2 py-1 rounded-full font-bold">🟢 Low</span>
+                        <span class="text-xs bg-ink-100 text-ink-700 px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#22c55e"></i> Low</span>
                     @endif
 
                     <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">{{ $complaint->status_label }}</span>
@@ -72,12 +72,12 @@
 
         {{-- Media --}}
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <h2 class="font-display font-bold text-lg mb-4">📸 Photos & Videos</h2>
+            <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-camera fa-fw"></i> Photos & Videos</h2>
 
             <form method="POST" action="{{ route('owner.complaints.media', $complaint) }}" enctype="multipart/form-data" class="mb-4 flex gap-2 flex-wrap items-center">
                 @csrf
                 <input type="file" name="media[]" multiple accept="image/*,video/mp4" class="flex-1 min-w-[200px] text-sm">
-                <button class="px-4 py-2 bg-coral-500 text-white rounded-lg text-sm font-bold">📤 Upload</button>
+                <button class="px-4 py-2 bg-coral-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i> Upload</button>
             </form>
 
             @if($complaint->media->count())
@@ -105,7 +105,7 @@
 
         {{-- Comments --}}
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <h2 class="font-display font-bold text-lg mb-4">💬 Comments & Updates ({{ $complaint->comments->count() }})</h2>
+            <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-comment-dots fa-fw"></i> Comments & Updates ({{ $complaint->comments->count() }})</h2>
 
             @if($complaint->comments->count())
                 <div class="space-y-3 mb-5">
@@ -115,7 +115,7 @@
                                 <span class="font-bold text-sm">{{ $c->author_name }}</span>
                                 <span class="text-xs text-ink-500 capitalize">({{ $c->author_role }})</span>
                                 @if($c->is_internal)
-                                    <span class="text-xs bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-bold">🔒 Internal</span>
+                                    <span class="text-xs bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-lock fa-fw"></i> Internal</span>
                                 @endif
                                 <span class="text-xs text-ink-500">·</span>
                                 <span class="text-xs text-ink-500">{{ $c->created_at->diffForHumans() }}</span>
@@ -132,7 +132,7 @@
                 <div class="flex items-center justify-between flex-wrap gap-2">
                     <label class="flex items-center gap-2 text-sm cursor-pointer">
                         <input type="checkbox" name="is_internal" value="1" class="rounded">
-                        <span>🔒 Internal note (hidden from tenant)</span>
+                        <span><i class="fa-solid fa-lock fa-fw"></i> Internal note (hidden from tenant)</span>
                     </label>
                     <button class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-lg text-sm font-bold">Post Comment</button>
                 </div>
@@ -147,17 +147,17 @@
 
             {{-- Tenant --}}
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
-                <h3 class="font-display font-bold mb-3">👤 Tenant</h3>
+                <h3 class="font-display font-bold mb-3"><i class="fa-solid fa-user fa-fw"></i> Tenant</h3>
                 <div class="space-y-1 text-sm">
                     <div class="font-bold">{{ $complaint->tenant?->name }}</div>
-                    <div class="text-ink-700">📱 {{ $complaint->tenant?->phone }}</div>
-                    <div class="text-ink-700">🏠 {{ $complaint->property?->name }}</div>
+                    <div class="text-ink-700"><i class="fa-solid fa-mobile-screen fa-fw"></i> {{ $complaint->tenant?->phone }}</div>
+                    <div class="text-ink-700"><i class="fa-solid fa-house fa-fw"></i> {{ $complaint->property?->name }}</div>
                     @if($complaint->tenant?->room_number)
-                        <div class="text-ink-700">🚪 Room {{ $complaint->tenant->room_number }}</div>
+                        <div class="text-ink-700"><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $complaint->tenant->room_number }}</div>
                     @endif
                 </div>
                 @if($complaint->tenant?->phone)
-                    <a href="https://wa.me/91{{ $complaint->tenant->phone }}" target="_blank" class="block mt-3 w-full text-center px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold">💬 WhatsApp Tenant</a>
+                    <a href="https://wa.me/91{{ $complaint->tenant->phone }}" target="_blank" class="block mt-3 w-full text-center px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp Tenant</a>
                 @endif
             </div>
 
@@ -167,12 +167,12 @@
                 <form method="POST" action="{{ route('owner.complaints.status', $complaint) }}" class="space-y-2">
                     @csrf @method('PATCH')
                     <select name="status" class="w-full px-3 py-2.5 rounded-lg border border-ink-200 text-sm">
-                        <option value="open" @selected($complaint->status==='open')>📂 Open</option>
-                        <option value="assigned" @selected($complaint->status==='assigned')>👤 Assigned</option>
-                        <option value="in_progress" @selected($complaint->status==='in_progress')>⏳ In Progress</option>
-                        <option value="resolved" @selected($complaint->status==='resolved')>✅ Resolved</option>
-                        <option value="closed" @selected($complaint->status==='closed')>🏁 Closed</option>
-                        <option value="cancelled" @selected($complaint->status==='cancelled')>❌ Cancelled</option>
+                        <option value="open" @selected($complaint->status==='open')>Open</option>
+                        <option value="assigned" @selected($complaint->status==='assigned')>Assigned</option>
+                        <option value="in_progress" @selected($complaint->status==='in_progress')>In Progress</option>
+                        <option value="resolved" @selected($complaint->status==='resolved')>Resolved</option>
+                        <option value="closed" @selected($complaint->status==='closed')>Closed</option>
+                        <option value="cancelled" @selected($complaint->status==='cancelled')>Cancelled</option>
                     </select>
                     <textarea name="resolution_notes" rows="2" placeholder="Resolution notes (optional)" class="w-full px-3 py-2 rounded-lg border border-ink-200 text-sm">{{ $complaint->resolution_notes }}</textarea>
                     <button class="w-full px-4 py-2 bg-ink-950 text-cream rounded-lg text-sm font-bold">Update Status</button>
@@ -185,17 +185,17 @@
                 <form method="POST" action="{{ route('owner.complaints.priority', $complaint) }}">
                     @csrf @method('PATCH')
                     <select name="priority" onchange="this.form.submit()" class="w-full px-3 py-2.5 rounded-lg border border-ink-200 text-sm">
-                        <option value="low" @selected($complaint->priority==='low')>🟢 Low</option>
-                        <option value="medium" @selected($complaint->priority==='medium')>🟡 Medium</option>
-                        <option value="high" @selected($complaint->priority==='high')>🟠 High</option>
-                        <option value="urgent" @selected($complaint->priority==='urgent')>🔴 Urgent</option>
+                        <option value="low" @selected($complaint->priority==='low')>Low</option>
+                        <option value="medium" @selected($complaint->priority==='medium')>Medium</option>
+                        <option value="high" @selected($complaint->priority==='high')>High</option>
+                        <option value="urgent" @selected($complaint->priority==='urgent')>Urgent</option>
                     </select>
                 </form>
             </div>
 
             {{-- Assign --}}
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
-                <h3 class="font-display font-bold mb-3">👨‍🔧 Assign To</h3>
+                <h3 class="font-display font-bold mb-3"><i class="fa-solid fa-user fa-fw"></i> Assign To</h3>
                 <form method="POST" action="{{ route('owner.complaints.assign', $complaint) }}" class="space-y-2">
                     @csrf @method('PATCH')
                     <input name="assigned_to_name" required value="{{ $complaint->assigned_to_name }}" placeholder="Staff/vendor name" class="w-full px-3 py-2 rounded-lg border border-ink-200 text-sm">
@@ -203,13 +203,13 @@
                     <button class="w-full px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg text-sm font-bold">{{ $complaint->assigned_to_name ? 'Reassign' : 'Assign' }}</button>
                 </form>
                 @if($complaint->assigned_to_phone)
-                    <a href="tel:{{ $complaint->assigned_to_phone }}" class="block mt-2 w-full text-center px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold">📞 Call Assignee</a>
+                    <a href="tel:{{ $complaint->assigned_to_phone }}" class="block mt-2 w-full text-center px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call Assignee</a>
                 @endif
             </div>
 
             <form method="POST" action="{{ route('owner.complaints.destroy', $complaint) }}" onsubmit="return confirm('Delete this complaint?')">
                 @csrf @method('DELETE')
-                <button class="w-full px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold">🗑️ Delete</button>
+                <button class="w-full px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete</button>
             </form>
         </div>
     </div>

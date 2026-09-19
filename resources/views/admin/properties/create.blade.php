@@ -14,7 +14,7 @@
 @if(session('error'))
     <div class="mb-6 bg-rose-50 border-l-4 border-rose-500 px-4 py-3 rounded-xl">
         <p class="text-rose-700 font-bold flex items-center gap-2">
-            <span class="text-lg">❌</span> Error
+            <span class="text-lg"><i class="fa-solid fa-circle-xmark fa-fw"></i></span> Error
         </p>
         <p class="text-rose-600 text-sm mt-1">{{ session('error') }}</p>
     </div>
@@ -24,7 +24,7 @@
 @if(session('success'))
     <div class="mb-6 bg-emerald-50 border-l-4 border-emerald-500 px-4 py-3 rounded-xl">
         <p class="text-emerald-700 font-bold flex items-center gap-2">
-            <span class="text-lg">✅</span> Success
+            <span class="text-lg"><i class="fa-solid fa-circle-check fa-fw"></i></span> Success
         </p>
         <p class="text-emerald-600 text-sm mt-1">{{ session('success') }}</p>
     </div>
@@ -34,7 +34,7 @@
 @if($errors->any())
     <div class="mb-6 bg-amber-50 border-l-4 border-amber-500 px-4 py-3 rounded-xl">
         <p class="text-amber-700 font-bold flex items-center gap-2">
-            <span class="text-lg">⚠️</span> Please fix these fields:
+            <span class="text-lg"><i class="fa-solid fa-triangle-exclamation fa-fw"></i></span> Please fix these fields:
         </p>
         <ul class="list-disc pl-5 text-amber-600 text-sm mt-2 space-y-1">
             @foreach($errors->all() as $error)
@@ -50,7 +50,7 @@
 
     {{-- BASIC INFO --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h3 class="font-display font-bold text-lg mb-4">🏠 Basic info</h3>
+        <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-house fa-fw"></i> Basic info</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
                 <label class="text-xs font-bold uppercase text-ink-900/60">Property name <span class="text-rose-500">*</span></label>
@@ -59,18 +59,18 @@
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Property type <span class="text-rose-500">*</span></label>
                 <select name="property_type" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
-                    <option value="pg" @selected(old('property_type')==='pg')>🏠 PG</option>
-                    <option value="hostel" @selected(old('property_type')==='hostel')>🏨 Hostel</option>
-                    <option value="coliving" @selected(old('property_type')==='coliving')>🛋️ Coliving</option>
-                    <option value="flatmate" @selected(old('property_type')==='flatmate')>👯 Flatmate</option>
+                    <option value="pg" @selected(old('property_type')==='pg')>PG</option>
+                    <option value="hostel" @selected(old('property_type')==='hostel')>Hostel</option>
+                    <option value="coliving" @selected(old('property_type')==='coliving')>Coliving</option>
+                    <option value="flatmate" @selected(old('property_type')==='flatmate')>Flatmate</option>
                 </select>
             </div>
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Gender <span class="text-rose-500">*</span></label>
                 <select name="gender" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
-                    <option value="male" @selected(old('gender')==='male')>👨 Boys only</option>
-                    <option value="female" @selected(old('gender')==='female')>👩 Girls only</option>
-                    <option value="unisex" @selected(old('gender')==='unisex')>👥 Unisex</option>
+                    <option value="male" @selected(old('gender')==='male')>Boys only</option>
+                    <option value="female" @selected(old('gender')==='female')>Girls only</option>
+                    <option value="unisex" @selected(old('gender')==='unisex')>Unisex</option>
                 </select>
             </div>
         </div>
@@ -78,7 +78,7 @@
 
     {{-- LOCATION --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h3 class="font-display font-bold text-lg mb-4">📍 Location</h3>
+        <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-location-dot fa-fw"></i> Location</h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">City <span class="text-rose-500">*</span></label>
@@ -105,7 +105,7 @@
 
                 <div id="manualLocalityWrap" class="hidden mt-2">
                     <input name="locality_name" id="manualLocality" placeholder="Type new locality name (e.g. Sector 62, Mukherjee Nagar)..." class="w-full px-4 py-3 rounded-xl border-2 border-coral-500 bg-coral-50">
-                    <p class="text-xs text-coral-700 mt-1">💡 This locality will be added to the database automatically.</p>
+                    <p class="text-xs text-coral-700 mt-1"><i class="fa-solid fa-lightbulb fa-fw"></i> This locality will be added to the database automatically.</p>
                 </div>
             </div>
 
@@ -123,7 +123,7 @@
                 <input name="landmark" value="{{ old('landmark') }}" placeholder="e.g. Near IIT Delhi gate" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
             </div>
             <div>
-                <label class="text-xs font-bold uppercase text-ink-900/60">🚓 Nearby Police Station</label>
+                <label class="text-xs font-bold uppercase text-ink-900/60"><i class="fa-solid fa-car-side fa-fw"></i> Nearby Police Station</label>
                 <input name="nearby_police_station" value="{{ old('nearby_police_station') }}" placeholder="e.g. Sector 24 Police Station" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15">
                 <p class="text-xs text-ink-900/40 mt-1">Local police station ka naam — tenant safety ke liye display hoga.</p>
             </div>
@@ -134,7 +134,7 @@
 <!-- Nearby University (NEW) -->
 <div class="form-group mb-4">
     <label class="block text-sm font-semibold text-ink-900 mb-2">
-        🎓 Which University/College is this PG near?
+        <i class="fa-solid fa-graduation-cap fa-fw"></i> Which University/College is this PG near?
     </label>
     <div class="flex gap-2">
         <select name="nearby_university_id" id="adminUniversitySelect" class="flex-1 min-w-0 w-full px-4 py-2 border border-ink-900/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-coral-500">
@@ -154,7 +154,7 @@
     <div id="adminManualUniversityWrap" class="hidden mt-2">
         <input name="university_name" id="adminManualUniversity" placeholder="Type university name..." class="w-full px-4 py-2 rounded-lg border-2 border-coral-500 bg-coral-50 mt-1">
         <input name="university_abbreviation" id="adminManualUniversityAbbr" placeholder="Abbreviation (e.g., DU)" class="w-full px-4 py-2 rounded-lg border-2 border-coral-500 bg-coral-50 mt-1">
-        <p class="text-xs text-coral-700 mt-1">💡 New university will be saved automatically.</p>
+        <p class="text-xs text-coral-700 mt-1"><i class="fa-solid fa-lightbulb fa-fw"></i> New university will be saved automatically.</p>
     </div>
     
     <p class="text-xs text-ink-900/50 mt-1">Select the nearest university/college. The PG will automatically show on that university's page.</p>
@@ -182,18 +182,18 @@ function toggleAdminManualUniversity() {
             
 {{-- 📍 INTERACTIVE LOCATION MAP (this is what actually saves lat/lng) --}}
 <div class="md:col-span-2">
-    <label class="text-xs font-bold uppercase text-ink-900/60 mb-2 block">📍 Property Location on Map</label>
+    <label class="text-xs font-bold uppercase text-ink-900/60 mb-2 block"><i class="fa-solid fa-location-dot fa-fw"></i> Property Location on Map</label>
 
     <div class="flex flex-wrap gap-2 mb-3">
         <input type="text" id="mapSearchInput" placeholder="Search address / paste Google Maps coordinates..." class="flex-1 min-w-[200px] px-4 py-3 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500">
-        <button type="button" id="mapSearchBtn" onclick="searchLocation()" class="px-5 py-3 bg-coral-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-coral-600">🔍 Search</button>
-        <button type="button" id="mapMyLocBtn" onclick="useMyLocation()" class="px-4 py-3 bg-emerald-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-emerald-600">📍 My Location</button>
+        <button type="button" id="mapSearchBtn" onclick="searchLocation()" class="px-5 py-3 bg-coral-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-coral-600"><i class="fa-solid fa-magnifying-glass fa-fw"></i> Search</button>
+        <button type="button" id="mapMyLocBtn" onclick="useMyLocation()" class="px-4 py-3 bg-emerald-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-emerald-600"><i class="fa-solid fa-location-dot fa-fw"></i> My Location</button>
     </div>
 
     <div id="locationMap" style="height: 400px; width: 100%; border-radius: 16px; border: 2px solid #e5e7eb; position: relative; z-index:0;"></div>
 
     <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
-        <strong>💡 How to set location:</strong>
+        <strong><i class="fa-solid fa-lightbulb fa-fw"></i> How to set location:</strong>
         <ul class="list-disc ml-5 mt-1 space-y-0.5">
             <li>Map auto-locates as you type the address above — <strong>drag the marker</strong> to fine-tune (most accurate)</li>
             <li>Or type a place and click <strong>Search</strong></li>
@@ -208,7 +208,7 @@ function toggleAdminManualUniversity() {
 
 {{-- Optional: keep the raw share-link too, just as a reference note, not used for coordinates --}}
 <div class="md:col-span-2">
-    <label class="text-xs font-bold uppercase text-ink-900/60 mb-2 block">🗺️ Google Maps Link (optional, reference only)</label>
+    <label class="text-xs font-bold uppercase text-ink-900/60 mb-2 block"><i class="fa-solid fa-map fa-fw"></i> Google Maps Link (optional, reference only)</label>
     <input type="url" name="google_map_link" value="{{ old('google_map_link') }}" placeholder="https://maps.app.goo.gl/... or https://www.google.com/maps/place/..." class="w-full px-4 py-3 rounded-xl border border-ink-900/15 text-sm">
     <p class="text-xs text-ink-900/50 mt-1">This is just saved as text for reference — it does NOT set the map pin. Use the map above to set the actual location.</p>
 </div>
@@ -217,7 +217,7 @@ function toggleAdminManualUniversity() {
 
     {{-- PRICING --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h3 class="font-display font-bold text-lg mb-4">💰 Pricing & Rooms</h3>
+        <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-sack-dollar fa-fw"></i> Pricing & Rooms</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Rent (min) ₹ <span class="text-rose-500">*</span></label>
@@ -242,7 +242,7 @@ function toggleAdminManualUniversity() {
             <div class="col-span-3 flex items-end">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="food_included" value="1" @checked(old('food_included')) class="rounded w-5 h-5">
-                    <span class="font-semibold">🍽️ Food included</span>
+                    <span class="font-semibold"><i class="fa-solid fa-utensils fa-fw"></i> Food included</span>
                 </label>
             </div>
         </div>
@@ -265,11 +265,11 @@ function toggleAdminManualUniversity() {
             <div class="flex flex-col justify-end gap-2 pb-2">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="pet_allowed" value="1" @checked(old('pet_allowed')) class="rounded w-5 h-5">
-                    <span class="font-semibold">🐾 Pets allowed</span>
+                    <span class="font-semibold"><i class="fa-solid fa-paw fa-fw"></i> Pets allowed</span>
                 </label>
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" name="guest_entry_allowed" value="1" @checked(old('guest_entry_allowed')) class="rounded w-5 h-5">
-                    <span class="font-semibold">🚪 Guest entry allowed</span>
+                    <span class="font-semibold"><i class="fa-solid fa-door-open fa-fw"></i> Guest entry allowed</span>
                 </label>
             </div>
         </div>
@@ -328,7 +328,7 @@ function toggleAdminManualUniversity() {
 
     {{-- DESCRIPTION --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h3 class="font-display font-bold text-lg mb-4">📝 About this PG</h3>
+        <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-pen-to-square fa-fw"></i> About this PG</h3>
         <div class="space-y-3">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Description</label>
@@ -344,7 +344,7 @@ function toggleAdminManualUniversity() {
     {{-- AMENITIES --}}
     @if($amenities->count())
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h3 class="font-display font-bold text-lg mb-4">✨ Amenities</h3>
+        <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-wand-magic-sparkles fa-fw"></i> Amenities</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
         @foreach($amenities as $a)
  <label class="flex items-center gap-2 p-3 rounded-xl border border-ink-900/10 cursor-pointer hover:bg-cream-200 hover:border-coral-300 transition min-w-0 overflow-hidden">
@@ -361,7 +361,7 @@ function toggleAdminManualUniversity() {
 
     {{-- IMAGES --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h3 class="font-display font-bold text-lg mb-4">📸 Photos</h3>
+        <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-camera fa-fw"></i> Photos</h3>
         <div class="space-y-3">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Cover image (main photo) <span class="text-rose-500">*</span></label>
@@ -377,7 +377,7 @@ function toggleAdminManualUniversity() {
 
     {{-- STATUS --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h3 class="font-display font-bold text-lg mb-4">⚙️ Status</h3>
+        <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-gear fa-fw"></i> Status</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <label class="flex items-center gap-2 p-4 rounded-xl border-2 border-ink-900/10 cursor-pointer">
                 <input type="checkbox" name="is_active" value="1" checked class="rounded w-5 h-5">
@@ -396,7 +396,7 @@ function toggleAdminManualUniversity() {
             <label class="flex items-center gap-2 p-4 rounded-xl border-2 border-coral-200 cursor-pointer">
                 <input type="checkbox" name="is_featured" value="1" class="rounded w-5 h-5">
                 <div>
-                    <div class="font-bold text-coral-700">⭐ Featured</div>
+                    <div class="font-bold text-coral-700"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Featured</div>
                     <div class="text-xs text-ink-900/60">Top of search results</div>
                 </div>
             </label>

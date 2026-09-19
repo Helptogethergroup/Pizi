@@ -89,8 +89,8 @@
                 @endif
 
                 <div class="mt-4 flex gap-2">
-                    <a href="tel:{{ $lead->phone }}" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition">📞 Call</a>
-                    <a href="https://wa.me/91{{ $lead->phone }}" target="_blank" class="flex-1 text-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-lg text-sm transition">💬 WhatsApp</a>
+                    <a href="tel:{{ $lead->phone }}" class="flex-1 text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition"><i class="fa-solid fa-phone fa-fw"></i> Call</a>
+                    <a href="https://wa.me/91{{ $lead->phone }}" target="_blank" class="flex-1 text-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-2.5 rounded-lg text-sm transition"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp</a>
                 </div>
             </div>
 
@@ -101,9 +101,9 @@
                 <form method="POST" action="{{ route('owner.leads.updateInquiryType', $lead) }}" class="flex flex-wrap gap-3 items-end">
                     @csrf @method('PATCH')
                     <select name="inquiry_type" class="px-4 py-2.5 border border-gray-300 rounded-lg text-sm">
-                        <option value="tenant" @selected($lead->inquiry_type === 'tenant')>🧳 Tenant — looking for a PG</option>
-                        <option value="owner" @selected($lead->inquiry_type === 'owner')>🏠 Owner — wants to list a PG</option>
-                        <option value="unknown" @selected($lead->inquiry_type === 'unknown')>❓ Unknown</option>
+                        <option value="tenant" @selected($lead->inquiry_type === 'tenant')>Tenant — looking for a PG</option>
+                        <option value="owner" @selected($lead->inquiry_type === 'owner')>Owner — wants to list a PG</option>
+                        <option value="unknown" @selected($lead->inquiry_type === 'unknown')>Unknown</option>
                     </select>
                     <button class="bg-ink-950 text-white font-bold px-5 py-2.5 rounded-lg text-sm">Save</button>
                 </form>

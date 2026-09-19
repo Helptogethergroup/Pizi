@@ -39,7 +39,7 @@
 
 @if($properties->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">📋</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-clipboard-list fa-fw"></i></div>
         <p class="text-ink-700">No properties found.</p>
     </div>
 @else
@@ -53,7 +53,7 @@
                         @if($property->cover_image)
                             <img src="{{ str_starts_with($property->cover_image, 'http') ? $property->cover_image : asset('storage/' . $property->cover_image) }}" class="w-full h-full object-cover">
                         @else
-                            <div class="w-full h-full flex items-center justify-center text-3xl">🏠</div>
+                            <div class="w-full h-full flex items-center justify-center text-3xl"><i class="fa-solid fa-house fa-fw"></i></div>
                         @endif
                     </div>
 
@@ -64,16 +64,16 @@
                                 <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">✓ Verified</span>
                             @endif
                             @if($property->is_featured)
-                                <span class="text-xs bg-coral-500 text-white px-2 py-0.5 rounded-full font-bold">⭐ Featured</span>
+                                <span class="text-xs bg-coral-500 text-white px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Featured</span>
                             @endif
                             @if(!$property->is_active)
-                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">⏸ Paused</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-pause fa-fw"></i> Paused</span>
                             @endif
                         </div>
 
                         <h3 class="font-display font-bold text-base text-ink-950">{{ $property->name }}</h3>
                         <div class="flex items-center gap-3 text-xs text-ink-700 mt-0.5 flex-wrap">
-                            <span>📍 {{ $property->locality?->name }}, {{ $property->city?->name }}</span>
+                            <span><i class="fa-solid fa-location-dot fa-fw"></i> {{ $property->locality?->name }}, {{ $property->city?->name }}</span>
                             <span class="font-bold text-coral-600">₹{{ number_format($property->rent_min) }} - ₹{{ number_format($property->rent_max) }}</span>
                         </div>
 
@@ -86,17 +86,17 @@
                                 @foreach($allOwners as $o)
                                     <option value="{{ $o->id }}" @selected($property->owner_id == $o->id)>
                                         @if($o->id === auth()->id())
-                                            🏠 Me (Admin)
+                                            Me (Admin)
                                         @elseif($o->role === 'admin')
-                                            🛡️ {{ $o->name }} (Admin)
+                                            {{ $o->name }} (Admin)
                                         @else
-                                            👤 {{ $o->name }} {{ $o->phone ? '('.$o->phone.')' : '' }}
+                                            {{ $o->name }} {{ $o->phone ? '('.$o->phone.')' : '' }}
                                         @endif
                                     </option>
                                 @endforeach
                             </select>
                             @if(!$property->owner_id)
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⚠️ No owner</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> No owner</span>
                             @endif
                         </form>
                     </div>
@@ -104,11 +104,11 @@
                     {{-- Compact Action Buttons --}}
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <a href="{{ route('property.show', $property->slug) }}" target="_blank" class="px-3 py-2 bg-ink-100 hover:bg-ink-200 text-ink-950 rounded-lg text-xs font-bold whitespace-nowrap">
-                            👁 View
+                            <i class="fa-solid fa-eye fa-fw"></i> View
                         </a>
                         <a href="{{ route('owner.properties.edit', $property->slug) }}"
                            class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-bold whitespace-nowrap">
-                            ✏ Edit
+                            <i class="fa-solid fa-pencil fa-fw"></i> Edit
                         </a>
 
                         <form method="POST" action="{{ route('admin.properties.verify', $property) }}" class="inline-block">
@@ -135,7 +135,7 @@
                         <form method="POST" action="{{ route('admin.properties.destroy', $property) }}" onsubmit="return confirm('Delete this property?')" class="inline-block">
                             @csrf @method('DELETE')
                             <button class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold whitespace-nowrap">
-                                🗑️
+                                <i class="fa-solid fa-trash-can fa-fw"></i>
                             </button>
                         </form>
                     </div>

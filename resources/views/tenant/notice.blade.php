@@ -7,7 +7,7 @@
 
 @if(!$tenant->property_id)
     <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-8 text-center max-w-2xl">
-        <div class="text-5xl mb-3">📤</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i></div>
         <h3 class="font-bold text-lg">No PG assigned yet</h3>
         <p class="text-amber-800 mt-2">You need to complete the PG move-in process first. After that, you can use the notice period feature..</p>
     </div>
@@ -15,7 +15,7 @@
 
     @if($tenant->notice_date)
         <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-6 max-w-2xl">
-            <h3 class="font-bold text-lg">⏳ Notice Active</h3>
+            <h3 class="font-bold text-lg"><i class="fa-solid fa-hourglass-half fa-fw"></i> Notice Active</h3>
             <p class="text-sm mt-1">Your notice has already been submitted.. Move-out date: <strong>{{ \Carbon\Carbon::parse($tenant->notice_date)->format('d M Y') }}</strong></p>
             @if($tenant->notice_reason)
                 <p class="text-sm mt-2 italic">Reason: {{ $tenant->notice_reason }}</p>
@@ -28,7 +28,7 @@
         @csrf
 
         <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900">
-            <strong>📌 Note:</strong> Standard Notice Period: 30 Days  Please refer to your agreement for the exact notice period and applicable terms.
+            <strong><i class="fa-solid fa-thumbtack fa-fw"></i> Note:</strong> Standard Notice Period: 30 Days  Please refer to your agreement for the exact notice period and applicable terms.
 
 
         </div>
@@ -45,7 +45,7 @@
         </div>
 
         <button type="submit" class="px-8 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold" onclick="return confirm('Sure? Owner will be notified.')">
-            📤 Submit Notice
+            <i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i> Submit Notice
         </button>
     </form>
 

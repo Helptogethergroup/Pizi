@@ -41,7 +41,7 @@
     </div>
 
     <div class="pt-4 border-t border-ink-100">
-        <h3 class="font-bold mb-3">📱 Open Graph (Social Sharing)</h3>
+        <h3 class="font-bold mb-3"><i class="fa-solid fa-mobile-screen fa-fw"></i> Open Graph (Social Sharing)</h3>
         <div class="space-y-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">OG Title</label>

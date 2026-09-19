@@ -2,7 +2,7 @@
 @section('title', 'My Invoices')
 @section('content')
 
-<h1 class="font-display font-black text-3xl mb-2">🧾 My Invoices</h1>
+<h1 class="font-display font-black text-3xl mb-2"><i class="fa-solid fa-receipt fa-fw"></i> My Invoices</h1>
 <p class="text-ink-900/60 mb-6">Aapke package-purchases ki saari invoices yahan milengi.</p>
 
 <div class="bg-white rounded-2xl border border-ink-100 overflow-x-auto">

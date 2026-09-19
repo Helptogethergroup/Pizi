@@ -8,14 +8,14 @@
 
         @if(session('status'))
             <div class="mt-6 mb-4 p-4 bg-emerald-100 text-emerald-700 rounded-lg text-sm">
-                ✅ {{ session('status') }}
+                <i class="fa-solid fa-circle-check fa-fw"></i> {{ session('status') }}
             </div>
         @endif
 
         @if($errors->any())
             <div class="mt-6 mb-4 p-4 bg-rose-100 text-rose-700 rounded-lg text-sm">
                 @foreach($errors->all() as $error)
-                    <p>❌ {{ $error }}</p>
+                    <p><i class="fa-solid fa-circle-xmark fa-fw"></i> {{ $error }}</p>
                 @endforeach
             </div>
         @endif

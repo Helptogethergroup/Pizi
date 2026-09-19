@@ -8,7 +8,7 @@
         <p class="text-ink-900/60 mt-1">Manage rent bills, payments, and receipts</p>
     </div>
     <div class="flex gap-2 flex-wrap">
-        <button onclick="document.getElementById('genAllModal').classList.remove('hidden')" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-bold">⚡ Generate All Bills</button>
+        <button onclick="document.getElementById('genAllModal').classList.remove('hidden')" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-bolt fa-fw"></i> Generate All Bills</button>
         <a href="{{ route('owner.rent.create') }}" class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-coral-500/30">+ New Bill</a>
     </div>
 </div>
@@ -58,16 +58,16 @@
     <input name="month" type="month" value="{{ request('month') }}" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
       <select name="payment_method" onchange="this.form.submit()" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
         <option value="">All Payment Methods</option>
-        <option value="cash" @selected(request('payment_method') === 'cash')>💵 Cash</option>
-        <option value="upi" @selected(request('payment_method') === 'upi')>📱 UPI</option>
-        <option value="razorpay" @selected(request('payment_method') === 'razorpay')>💳 Razorpay</option>
+        <option value="cash" @selected(request('payment_method') === 'cash')>Cash</option>
+        <option value="upi" @selected(request('payment_method') === 'upi')>UPI</option>
+        <option value="razorpay" @selected(request('payment_method') === 'razorpay')>Razorpay</option>
     </select>
     <button class="px-5 py-2.5 bg-ink-950 text-cream rounded-lg text-sm font-bold">Filter</button>
 </form>
 
 @if($bills->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">💰</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-sack-dollar fa-fw"></i></div>
         <p class="text-ink-700 mb-4">No rent bills yet.</p>
         <a href="{{ route('owner.rent.create') }}" class="inline-block px-5 py-3 bg-coral-500 text-white rounded-xl font-bold">+ Create First Bill</a>
     </div>
@@ -87,15 +87,15 @@
                             @elseif($bill->status === 'partial')
                                 <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">Partial</span>
                             @elseif($bill->status === 'overdue')
-                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">⚠️ Overdue</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Overdue</span>
                             @else
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⏳ Pending</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> Pending</span>
                             @endif
                         </div>
                                                <div class="flex items-center gap-3 text-xs text-ink-700 flex-wrap">
-                            <span>📱 {{ $bill->tenant?->phone }}</span>
-                            @if($bill->tenant?->room_number)<span>🚪 Room {{ $bill->tenant->room_number }}</span>@endif
-                            <span>📅 Due: {{ $bill->due_date->format('d M Y') }}</span>
+                            <span><i class="fa-solid fa-mobile-screen fa-fw"></i> {{ $bill->tenant?->phone }}</span>
+                            @if($bill->tenant?->room_number)<span><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $bill->tenant->room_number }}</span>@endif
+                            <span><i class="fa-solid fa-calendar-days fa-fw"></i> Due: {{ $bill->due_date->format('d M Y') }}</span>
                             <span class="font-mono">#{{ $bill->bill_number }}</span>
                         </div>
                         @if($bill->payments->count())
@@ -138,7 +138,7 @@
                             id="wa-btn-{{ $bill->id }}"
                             title="Send WhatsApp Reminder"
                             class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">
-                            💬
+                            <i class="fa-solid fa-comment-dots fa-fw"></i>
                         </button>
                     </div>
                 </div>
@@ -152,7 +152,7 @@
 <div id="genAllModal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl p-6 max-w-md w-full">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="font-display font-bold text-xl">⚡ Generate All Bills</h2>
+            <h2 class="font-display font-bold text-xl"><i class="fa-solid fa-bolt fa-fw"></i> Generate All Bills</h2>
             <button type="button" onclick="document.getElementById('genAllModal').classList.add('hidden')" class="text-2xl">×</button>
         </div>
 

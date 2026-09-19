@@ -24,11 +24,11 @@
                         <a href="{{ route('tenant.agreement.preview', $a->id) }}"
                            target="_blank"
                            style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; background:#0f2748; color:white; border-radius:10px; font-weight:700; font-size:13px; text-decoration:none;">
-                            👁 View
+                            <i class="fa-solid fa-eye fa-fw"></i> View
                         </a>
                         <a href="{{ route('tenant.agreement.download', $a->id) }}"
                            style="display:inline-flex; align-items:center; gap:6px; padding:8px 16px; background:#ff6b5b; color:white; border-radius:10px; font-weight:700; font-size:13px; text-decoration:none;">
-                            ⬇️ Download PDF
+                            <i class="fa-solid fa-arrow-down fa-fw"></i> Download PDF
                         </a>
                     </div>
                 </div>
@@ -36,7 +36,7 @@
         @endforeach
     @else
         <div class="bg-white rounded-2xl border border-ink-900/10 p-12 text-center">
-            <div class="text-6xl mb-3">📄</div>
+            <div class="text-6xl mb-3"><i class="fa-solid fa-file-lines fa-fw"></i></div>
             <h3 class="font-bold text-lg">No Agreement yet</h3>
             <p class="text-ink-900/60 text-sm mt-1">
                 @if(!$tenant->property_id)
@@ -46,7 +46,7 @@
                 @endif
             </p>
             @if(!$tenant->property_id)
-                <a href="{{ route('search') }}" class="inline-block mt-4 px-6 py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold">🔍 Browse PGs</a>
+                <a href="{{ route('search') }}" class="inline-block mt-4 px-6 py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold"><i class="fa-solid fa-magnifying-glass fa-fw"></i> Browse PGs</a>
             @endif
         </div>
     @endif

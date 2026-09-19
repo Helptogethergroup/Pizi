@@ -9,10 +9,10 @@
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="font-display font-black text-3xl">💬 Chat Analytics</h1>
+        <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-comment-dots fa-fw"></i> Chat Analytics</h1>
         <p class="text-ink-900/60 mt-1">Pizi AI Assistant — usage &amp; conversations</p>
     </div>
-    <button onclick="window.location.reload()" class="px-4 py-2 bg-ink-900 text-cream rounded-lg text-sm">🔄 Refresh</button>
+    <button onclick="window.location.reload()" class="px-4 py-2 bg-ink-900 text-cream rounded-lg text-sm"><i class="fa-solid fa-rotate fa-fw"></i> Refresh</button>
 </div>
 
 {{-- KPI cards --}}

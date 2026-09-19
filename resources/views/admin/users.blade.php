@@ -69,7 +69,7 @@
                             @if($u->role === 'owner' && $u->properties_count > 0)
                                 <a href="{{ route('admin.properties.index', ['owner' => $u->id]) }}"
                                    class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700 font-bold hover:bg-blue-200">
-                                    🏠 {{ $u->properties_count }}
+                                    <i class="fa-solid fa-house fa-fw"></i> {{ $u->properties_count }}
                                 </a>
                             @elseif($u->role === 'owner')
                                 <span class="text-xs text-ink-900/40">0 PGs</span>
@@ -98,7 +98,7 @@
                                 @method('PATCH')
                                 <button
                                     title="Test accounts' lead unlocks never block real owners"
-                                    class="text-xs px-2 py-1 rounded font-semibold {{ $u->is_test_account ? 'bg-amber-500 text-white' : 'border border-ink-900/15' }}">🧪 {{ $u->is_test_account ? 'Test' : 'Mark Test' }}</button>
+                                    class="text-xs px-2 py-1 rounded font-semibold {{ $u->is_test_account ? 'bg-amber-500 text-white' : 'border border-ink-900/15' }}"><i class="fa-solid fa-flask fa-fw"></i> {{ $u->is_test_account ? 'Test' : 'Mark Test' }}</button>
                             </form>
                             @endif
                             <button type="button" onclick="openDeleteModal({{ $u->id }}, '{{ addslashes($u->name) }}')"

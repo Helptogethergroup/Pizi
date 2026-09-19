@@ -169,7 +169,7 @@
 
             {{-- Office Hours --}}
             <div class="pz-reveal2 p-6 rounded-2xl bg-ink-950 text-cream" style="animation-delay:.05s">
-                <h3 class="font-display font-bold text-lg mb-3">⏰ Office Hours</h3>
+                <h3 class="font-display font-bold text-lg mb-3"><i class="fa-solid fa-clock fa-fw"></i> Office Hours</h3>
                 <div class="space-y-1.5 text-sm text-cream/80">
                     <div class="flex justify-between">
                         <span>Mon – Sat</span>

@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="mb-6">
-    <h1 class="font-display font-black text-3xl">📄 All Rent Agreements</h1>
+    <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-file-lines fa-fw"></i> All Rent Agreements</h1>
     <p class="text-ink-900/60 mt-1">Platform-wide agreement tracking</p>
 </div>
 
@@ -46,7 +46,7 @@
 
 @if($agreements->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">📄</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-file-lines fa-fw"></i></div>
         <p class="text-ink-700">No agreements found.</p>
     </div>
 @else
@@ -67,9 +67,9 @@
                         </div>
                         <h3 class="font-bold">{{ $agreement->tenant?->name }}</h3>
                         <div class="flex items-center gap-3 text-xs text-ink-700 mt-1 flex-wrap">
-                            <span>👤 Owner: <strong>{{ $agreement->owner?->name }}</strong></span>
-                            <span>🏠 {{ $agreement->property?->name }}</span>
-                            <span>📅 {{ $agreement->start_date->format('d/m/y') }} → {{ $agreement->end_date->format('d/m/y') }}</span>
+                            <span><i class="fa-solid fa-user fa-fw"></i> Owner: <strong>{{ $agreement->owner?->name }}</strong></span>
+                            <span><i class="fa-solid fa-house fa-fw"></i> {{ $agreement->property?->name }}</span>
+                            <span><i class="fa-solid fa-calendar-days fa-fw"></i> {{ $agreement->start_date->format('d/m/y') }} → {{ $agreement->end_date->format('d/m/y') }}</span>
                             <span class="font-bold text-coral-600">₹{{ number_format($agreement->monthly_rent) }}</span>
                         </div>
                     </div>

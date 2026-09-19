@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
     <div>
-        <h1 class="font-display font-black text-3xl">📞 Telecaller Monitoring</h1>
+        <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-phone fa-fw"></i> Telecaller Monitoring</h1>
         <p class="text-ink-900/60 mt-1">Every telecaller's daily activity — live, straight from their own dashboard use.</p>
     </div>
     <form method="GET" class="flex items-center gap-2">
@@ -67,7 +67,7 @@
             </div>
 
             <div class="pt-4 border-t border-ink-100">
-                <p class="text-xs font-bold uppercase text-ink-900/50 mb-2">🏠 Owner outreach (B2B onboarding calls)</p>
+                <p class="text-xs font-bold uppercase text-ink-900/50 mb-2"><i class="fa-solid fa-house fa-fw"></i> Owner outreach (B2B onboarding calls)</p>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                     <div class="p-3 rounded-xl bg-ink-50">
                         <div class="text-xs text-ink-900/50">Pending</div>
@@ -127,7 +127,7 @@
 @endif
 
 <div class="mt-10">
-    <h2 class="font-display font-bold text-xl mb-4">📝 Recent status updates (live)</h2>
+    <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-pen-to-square fa-fw"></i> Recent status updates (live)</h2>
     <p class="text-xs text-ink-900/50 mb-3">Every time a telecaller changes a lead's status or call outcome, it shows up here immediately.</p>
     <div class="bg-white rounded-2xl border border-ink-100 overflow-x-auto">
         <table class="w-full text-sm min-w-[600px]">
@@ -147,7 +147,7 @@
                         <td class="p-3">{{ $log->lead?->name ?? '—' }}</td>
                         <td class="p-3 text-ink-900/60">
                             @if($log->field === 'status') Status
-                            @elseif($log->field === 'lead_type') 🏆 Verification
+                            @elseif($log->field === 'lead_type') <i class="fa-solid fa-trophy fa-fw"></i> Verification
                             @else Call outcome
                             @endif
                         </td>
@@ -167,7 +167,7 @@
 </div>
 
 <div class="mt-10">
-    <h2 class="font-display font-bold text-xl mb-4">🔄 Recent lead reassignments</h2>
+    <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-rotate fa-fw"></i> Recent lead reassignments</h2>
     <div class="bg-white rounded-2xl border border-ink-100 overflow-x-auto">
         <table class="w-full text-sm min-w-[600px]">
             <thead class="bg-cream text-left">

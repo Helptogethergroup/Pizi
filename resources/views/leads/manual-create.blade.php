@@ -19,7 +19,7 @@
         @php $dup = session('duplicate'); @endphp
         <div class="mt-6 p-5 rounded-2xl bg-amber-50 border-2 border-amber-300">
             <div class="flex items-start gap-3">
-                <span class="text-2xl">⚠️</span>
+                <span class="text-2xl"><i class="fa-solid fa-triangle-exclamation fa-fw"></i></span>
                 <div class="flex-1">
                     <h3 class="font-bold text-amber-900">Possible duplicate detected</h3>
                     <p class="text-sm text-amber-900/80 mt-1">
@@ -45,11 +45,11 @@
             <div class="grid grid-cols-2 gap-3 mt-1">
                 <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-ink-900/15 cursor-pointer has-[:checked]:border-coral-500 has-[:checked]:bg-coral-50">
                     <input type="radio" name="inquiry_type" value="tenant" @checked(old('inquiry_type', 'tenant') === 'tenant') class="accent-coral-500">
-                    <span class="text-sm font-semibold">🧳 Tenant (looking for a PG)</span>
+                    <span class="text-sm font-semibold"><i class="fa-solid fa-suitcase-rolling fa-fw"></i> Tenant (looking for a PG)</span>
                 </label>
                 <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-ink-900/15 cursor-pointer has-[:checked]:border-coral-500 has-[:checked]:bg-coral-50">
                     <input type="radio" name="inquiry_type" value="owner" @checked(old('inquiry_type') === 'owner') class="accent-coral-500">
-                    <span class="text-sm font-semibold">🏠 Owner (wants to list a PG)</span>
+                    <span class="text-sm font-semibold"><i class="fa-solid fa-house fa-fw"></i> Owner (wants to list a PG)</span>
                 </label>
             </div>
         </div>
@@ -169,7 +169,7 @@
                 <label class="flex items-start gap-3 cursor-pointer">
                     <input type="checkbox" name="mark_as_verified" value="1" class="mt-1 rounded">
                     <div>
-                        <div class="font-semibold text-emerald-900">Mark as Verified Lead 🎯</div>
+                        <div class="font-semibold text-emerald-900">Mark as Verified Lead <i class="fa-solid fa-bullseye fa-fw"></i></div>
                         <p class="text-sm text-emerald-900/70 mt-1">If you've spoken to this person and qualified them (budget, intent, timeline), tick this box. Verified leads cost owners more credits to unlock — only mark if confident.</p>
                     </div>
                 </label>

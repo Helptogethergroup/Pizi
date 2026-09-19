@@ -14,6 +14,7 @@
             .print-area { box-shadow: none !important; }
         }
     </style>
+@include('partials.emoji-icons')
 </head>
 <body class="py-8">
     <div class="max-w-2xl mx-auto bg-white p-8 rounded-2xl shadow-lg print-area">
@@ -92,11 +93,11 @@
         <div class="mt-8 pt-6 border-t border-ink-100 text-center text-xs text-ink-700">
             <p>This is a computer-generated receipt. No signature required.</p>
             <p class="mt-1">For queries, contact: contact@pizi.in · 9999999999</p>
-            <p class="mt-2 font-bold">Thank you for your payment! 🙏</p>
+            <p class="mt-2 font-bold">Thank you for your payment! <i class="fa-solid fa-hands-praying fa-fw"></i></p>
         </div>
 
         <div class="no-print mt-6 flex gap-3">
-            <button onclick="window.print()" class="flex-1 px-5 py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold">🖨 Print / Save as PDF</button>
+            <button onclick="window.print()" class="flex-1 px-5 py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold"><i class="fa-solid fa-print fa-fw"></i> Print / Save as PDF</button>
             <a href="{{ route('owner.rent.show', $payment->bill) }}" class="px-5 py-3 border border-ink-200 rounded-xl font-bold">Close</a>
         </div>
     </div>

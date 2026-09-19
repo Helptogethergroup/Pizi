@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="font-display font-black text-3xl mb-2">🧾 Invoices</h1>
+        <h1 class="font-display font-black text-3xl mb-2"><i class="fa-solid fa-receipt fa-fw"></i> Invoices</h1>
         <p class="text-ink-900/60">All owner invoices — auto-generated (on package purchase) and manual (created by you).</p>
     </div>
     <a href="{{ route('admin.invoices.create') }}" class="px-5 py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold">+ New Invoice</a>

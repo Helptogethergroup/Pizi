@@ -17,7 +17,7 @@
         <div class="relative max-w-6xl mx-auto text-center">
             <div class="mb-6 inline-block">
                 <span class="px-4 py-2 bg-coral-100 text-coral-700 rounded-full text-sm font-bold">
-                    🎓 FIND YOUR HOME NEAR TOP UNIVERSITIES
+                    <i class="fa-solid fa-graduation-cap fa-fw"></i> FIND YOUR HOME NEAR TOP UNIVERSITIES
                 </span>
             </div>
 
@@ -38,7 +38,7 @@
                     ↓ Browse Universities
                 </a>
                 <a href="{{ route('search') }}" class="px-8 py-4 bg-white border-2 border-ink/20 text-ink rounded-2xl font-bold hover:border-coral-500 hover:bg-coral-50 transition-all inline-flex items-center justify-center gap-2">
-                    🔍 Search All PGs
+                    <i class="fa-solid fa-magnifying-glass fa-fw"></i> Search All PGs
                 </a>
             </div>
 
@@ -63,7 +63,7 @@
     {{-- ===== FILTER SECTION ===== --}}
     <div class="max-w-6xl mx-auto px-4 -mt-8 relative z-10">
         <div class="bg-white rounded-3xl shadow-2xl shadow-ink/10 border border-ink/5 p-8 backdrop-blur-sm">
-            <h3 class="font-bold text-ink text-lg mb-6">🔍 Smart Filter</h3>
+            <h3 class="font-bold text-ink text-lg mb-6"><i class="fa-solid fa-magnifying-glass fa-fw"></i> Smart Filter</h3>
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <!-- Min Budget -->
                 <div>
@@ -143,9 +143,9 @@
                             </div>
                             <div class="text-4xl opacity-60 group-hover:opacity-100 transition-transform group-hover:scale-110">
                                 @if($uni->type === 'university')
-                                    🎓
+                                    <i class="fa-solid fa-graduation-cap fa-fw"></i>
                                 @else
-                                    🏫
+                                    <i class="fa-solid fa-school fa-fw"></i>
                                 @endif
                             </div>
                         </div>
@@ -153,16 +153,16 @@
                         {{-- Info Grid --}}
                         <div class="space-y-2 text-sm mb-6 pb-6 border-b border-ink/10">
                             <div class="flex items-center gap-2 text-ink/70">
-                                <span class="text-xs">📍</span>
+                                <span class="text-xs"><i class="fa-solid fa-location-dot fa-fw"></i></span>
                                 <span><strong>{{ ucfirst($uni->city) }}</strong></span>
                             </div>
                             <div class="flex items-center gap-2 text-ink/70">
-                                <span class="text-xs">📚</span>
+                                <span class="text-xs"><i class="fa-solid fa-book fa-fw"></i></span>
                                 <span><strong>{{ ucfirst($uni->type) }}</strong></span>
                             </div>
                             @if($uni->address)
                                 <div class="flex items-start gap-2 text-ink/60 text-xs leading-snug">
-                                    <span class="mt-0.5">📌</span>
+                                    <span class="mt-0.5"><i class="fa-solid fa-thumbtack fa-fw"></i></span>
                                     <span>{{ Str::limit($uni->address, 50) }}</span>
                                 </div>
                             @endif
@@ -207,7 +207,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="text-center">
                     <div class="w-16 h-16 rounded-2xl bg-coral-500/20 border border-coral-500/50 flex items-center justify-center mx-auto mb-4">
-                        <span class="text-3xl">🎓</span>
+                        <span class="text-3xl"><i class="fa-solid fa-graduation-cap fa-fw"></i></span>
                     </div>
                     <h3 class="font-bold text-xl mb-2">Pick Your University</h3>
                     <p class="text-white/70 text-sm leading-relaxed">Choose from 30+ top institutions in Delhi NCR</p>
@@ -215,7 +215,7 @@
 
                 <div class="text-center">
                     <div class="w-16 h-16 rounded-2xl bg-coral-500/20 border border-coral-500/50 flex items-center justify-center mx-auto mb-4">
-                        <span class="text-3xl">🏠</span>
+                        <span class="text-3xl"><i class="fa-solid fa-house fa-fw"></i></span>
                     </div>
                     <h3 class="font-bold text-xl mb-2">Browse Nearby PGs</h3>
                     <p class="text-white/70 text-sm leading-relaxed">See all verified PGs within 3km of your university</p>
@@ -223,7 +223,7 @@
 
                 <div class="text-center">
                     <div class="w-16 h-16 rounded-2xl bg-coral-500/20 border border-coral-500/50 flex items-center justify-center mx-auto mb-4">
-                        <span class="text-3xl">📞</span>
+                        <span class="text-3xl"><i class="fa-solid fa-phone fa-fw"></i></span>
                     </div>
                     <h3 class="font-bold text-xl mb-2">Schedule a Visit</h3>
                     <p class="text-white/70 text-sm leading-relaxed">Call us for free site visits with zero brokerage</p>
@@ -242,10 +242,10 @@
             <div class="flex flex-col sm:flex-row justify-center gap-4">
                 <a href="https://wa.me/918006680092?text=Hi%20Pizi%2C%20I%27m%20looking%20for%20a%20PG%20near%20a%20university"
                    target="_blank" class="px-8 py-4 bg-white text-coral-600 rounded-2xl font-bold hover:bg-coral-50 transition-all hover:scale-105 inline-flex items-center justify-center gap-2">
-                    💬 WhatsApp: 8006680092
+                    <i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp: 8006680092
                 </a>
                 <a href="tel:8006680092" class="px-8 py-4 bg-white/20 border-2 border-white text-white rounded-2xl font-bold hover:bg-white/30 transition-all inline-flex items-center justify-center gap-2">
-                    📞 Call: 8006680092
+                    <i class="fa-solid fa-phone fa-fw"></i> Call: 8006680092
                 </a>
             </div>
         </div>

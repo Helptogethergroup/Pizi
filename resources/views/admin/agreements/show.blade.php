@@ -62,7 +62,7 @@
             <h2 class="font-display font-bold text-lg mb-4">Signatures</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="p-4 rounded-xl border-2 {{ $agreement->ownerSigned() ? 'border-emerald-300 bg-emerald-50' : 'border-amber-200 bg-amber-50' }}">
-                    <div class="font-bold">🏠 Owner: {{ $agreement->owner?->name }}</div>
+                    <div class="font-bold"><i class="fa-solid fa-house fa-fw"></i> Owner: {{ $agreement->owner?->name }}</div>
                     @if($agreement->ownerSigned())
                         @php $sig = $agreement->signatures->firstWhere('signer_type', 'owner'); @endphp
                         <div class="text-xs text-emerald-700 mt-1">✓ Signed: {{ $sig->signed_at->format('d M Y, h:i A') }}</div>
@@ -71,7 +71,7 @@
                     @endif
                 </div>
                 <div class="p-4 rounded-xl border-2 {{ $agreement->tenantSigned() ? 'border-emerald-300 bg-emerald-50' : 'border-amber-200 bg-amber-50' }}">
-                    <div class="font-bold">👤 Tenant: {{ $agreement->tenant?->name }}</div>
+                    <div class="font-bold"><i class="fa-solid fa-user fa-fw"></i> Tenant: {{ $agreement->tenant?->name }}</div>
                     @if($agreement->tenantSigned())
                         @php $sig = $agreement->signatures->firstWhere('signer_type', 'tenant'); @endphp
                         <div class="text-xs text-emerald-700 mt-1">✓ Signed: {{ $sig->signed_at->format('d M Y, h:i A') }}</div>
@@ -86,13 +86,13 @@
 
     <div class="lg:col-span-1">
         <div class="lg:sticky lg:top-24 space-y-4">
-            <a href="{{ route('admin.agreements.preview', $agreement) }}" target="_blank" class="block w-full text-center px-4 py-3 bg-blue-500 text-white rounded-xl font-bold">📄 Print / PDF</a>
+            <a href="{{ route('admin.agreements.preview', $agreement) }}" target="_blank" class="block w-full text-center px-4 py-3 bg-blue-500 text-white rounded-xl font-bold"><i class="fa-solid fa-file-lines fa-fw"></i> Print / PDF</a>
 
             <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200">
-                <h3 class="font-display font-bold text-amber-900 mb-3">⚡ Admin Override</h3>
+                <h3 class="font-display font-bold text-amber-900 mb-3"><i class="fa-solid fa-bolt fa-fw"></i> Admin Override</h3>
                 <form method="POST" action="{{ route('admin.agreements.destroy', $agreement) }}" onsubmit="return confirm('Delete?')">
                     @csrf @method('DELETE')
-                    <button class="w-full px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold">🗑️ Delete</button>
+                    <button class="w-full px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete</button>
                 </form>
             </div>
         </div>

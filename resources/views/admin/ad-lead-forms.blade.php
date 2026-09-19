@@ -2,7 +2,7 @@
 @section('title', 'Ad Lead Form Mapping — Admin')
 @section('content')
 
-<h1 class="font-display font-black text-3xl mb-2">📋 Ad Lead Form Mapping</h1>
+<h1 class="font-display font-black text-3xl mb-2"><i class="fa-solid fa-clipboard-list fa-fw"></i> Ad Lead Form Mapping</h1>
 <p class="text-ink-900/60 mb-6">Register each Meta/Google Ads lead-form ID here — mark which form is for Owners, which is for Tenants. Leads coming from that form will then be classified automatically (no more "Unknown").</p>
 
 @if(session('success'))
@@ -31,8 +31,8 @@
         <div>
             <label class="text-xs font-bold uppercase text-ink-900/60">This form is for</label>
             <select name="inquiry_type" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
-                <option value="tenant">🧳 Tenant</option>
-                <option value="owner">🏠 Owner</option>
+                <option value="tenant">Tenant</option>
+                <option value="owner">Owner</option>
             </select>
         </div>
         <div class="md:col-span-4">

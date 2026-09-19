@@ -2,7 +2,7 @@
 @section('title', 'New Invoice — Admin')
 @section('content')
 
-<h1 class="font-display font-black text-3xl mb-6">🧾 New Manual Invoice</h1>
+<h1 class="font-display font-black text-3xl mb-6"><i class="fa-solid fa-receipt fa-fw"></i> New Manual Invoice</h1>
 
 <div class="bg-white p-6 rounded-2xl border border-ink-100 max-w-2xl">
     <form method="POST" action="{{ route('admin.invoices.store') }}" class="space-y-5">

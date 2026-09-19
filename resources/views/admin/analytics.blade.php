@@ -9,10 +9,10 @@
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="font-display font-black text-3xl">📊 Analytics</h1>
+        <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-chart-column fa-fw"></i> Analytics</h1>
         <p class="text-ink-900/60 mt-1">Business insights · Last 30 days</p>
     </div>
-    <button onclick="window.location.reload()" class="px-4 py-2 bg-ink-900 text-cream rounded-lg text-sm">🔄 Refresh</button>
+    <button onclick="window.location.reload()" class="px-4 py-2 bg-ink-900 text-cream rounded-lg text-sm"><i class="fa-solid fa-rotate fa-fw"></i> Refresh</button>
 </div>
 
 {{-- Top KPI cards --}}
@@ -100,7 +100,7 @@
 {{-- Leaderboards --}}
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">💰 Top spending owners</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-sack-dollar fa-fw"></i> Top spending owners</h2>
         @forelse($topSpenders as $i => $owner)
             <div class="flex items-center justify-between py-3 border-b border-ink-900/5 last:border-0">
                 <div class="flex items-center gap-3">
@@ -121,7 +121,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">🏆 Top performing owners</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-trophy fa-fw"></i> Top performing owners</h2>
         @forelse($topPerformers as $i => $owner)
             <div class="flex items-center justify-between py-3 border-b border-ink-900/5 last:border-0">
                 <div class="flex items-center gap-3">
@@ -145,7 +145,7 @@
 {{-- Field exec performance --}}
 @if(count($fieldExecs))
 <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-    <h2 class="font-display font-bold text-xl mb-4">🚗 Field executive performance (this month)</h2>
+    <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-car fa-fw"></i> Field executive performance (this month)</h2>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         @foreach($fieldExecs as $exec)
             <div class="p-4 bg-cream rounded-xl border border-ink-900/10">

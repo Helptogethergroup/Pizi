@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="mb-6">
-    <h1 class="font-display font-black text-3xl">🛏️ All Rooms & Beds</h1>
+    <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-bed fa-fw"></i> All Rooms & Beds</h1>
     <p class="text-ink-900/60 mt-1">Platform-wide room inventory</p>
 </div>
 
@@ -45,7 +45,7 @@
 
 @if($rooms->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">🛏️</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-bed fa-fw"></i></div>
         <p class="text-ink-700">No rooms found.</p>
     </div>
 @else
@@ -60,9 +60,9 @@
                             <span class="text-xs bg-cream px-2 py-0.5 rounded-full font-bold capitalize">{{ $room->gender }}</span>
                         </div>
                         <div class="flex items-center gap-3 text-xs text-ink-700 flex-wrap">
-                            <span>🏠 {{ $room->property?->name }}</span>
-                            <span>👤 Owner: <strong>{{ $room->owner?->name }}</strong></span>
-                            @if($room->floor)<span>📍 Floor: {{ $room->floor }}</span>@endif
+                            <span><i class="fa-solid fa-house fa-fw"></i> {{ $room->property?->name }}</span>
+                            <span><i class="fa-solid fa-user fa-fw"></i> Owner: <strong>{{ $room->owner?->name }}</strong></span>
+                            @if($room->floor)<span><i class="fa-solid fa-location-dot fa-fw"></i> Floor: {{ $room->floor }}</span>@endif
                         </div>
                     </div>
 

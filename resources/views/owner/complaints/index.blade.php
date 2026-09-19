@@ -41,22 +41,22 @@
     </select>
     <select name="priority" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
         <option value="">All Priority</option>
-        <option value="urgent" @selected(request('priority')==='urgent')>🔴 Urgent</option>
-        <option value="high" @selected(request('priority')==='high')>🟠 High</option>
-        <option value="medium" @selected(request('priority')==='medium')>🟡 Medium</option>
-        <option value="low" @selected(request('priority')==='low')>🟢 Low</option>
+        <option value="urgent" @selected(request('priority')==='urgent')>Urgent</option>
+        <option value="high" @selected(request('priority')==='high')>High</option>
+        <option value="medium" @selected(request('priority')==='medium')>Medium</option>
+        <option value="low" @selected(request('priority')==='low')>Low</option>
     </select>
     <select name="category" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
         <option value="">All Categories</option>
-        <option value="plumbing">🚿 Plumbing</option>
-        <option value="electrical">⚡ Electrical</option>
-        <option value="wifi">📶 WiFi</option>
-        <option value="housekeeping">🧹 Housekeeping</option>
-        <option value="food">🍱 Food</option>
-        <option value="furniture">🪑 Furniture</option>
-        <option value="security">🔒 Security</option>
-        <option value="ac">❄️ AC</option>
-        <option value="water">💧 Water</option>
+        <option value="plumbing">Plumbing</option>
+        <option value="electrical">Electrical</option>
+        <option value="wifi">WiFi</option>
+        <option value="housekeeping">Housekeeping</option>
+        <option value="food">Food</option>
+        <option value="furniture">Furniture</option>
+        <option value="security">Security</option>
+        <option value="ac">AC</option>
+        <option value="water">Water</option>
         <option value="other">Other</option>
     </select>
     <button class="px-5 py-2.5 bg-ink-950 text-cream rounded-lg text-sm font-bold">Filter</button>
@@ -64,7 +64,7 @@
 
 @if($complaints->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">🛠️</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-screwdriver-wrench fa-fw"></i></div>
         <p class="text-ink-700 mb-4">No complaints registered yet.</p>
         <a href="{{ route('owner.complaints.create') }}" class="inline-block px-5 py-3 bg-coral-500 text-white rounded-xl font-bold">+ Register First Complaint</a>
     </div>
@@ -79,13 +79,13 @@
                             <span class="text-xs bg-cream px-2 py-0.5 rounded-full font-bold">{{ $complaint->category_label }}</span>
                             
                             @if($complaint->priority === 'urgent')
-                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">🔴 Urgent</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#ef4444"></i> Urgent</span>
                             @elseif($complaint->priority === 'high')
-                                <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold">🟠 High</span>
+                                <span class="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#f97316"></i> High</span>
                             @elseif($complaint->priority === 'medium')
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">🟡 Medium</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#eab308"></i> Medium</span>
                             @else
-                                <span class="text-xs bg-ink-100 text-ink-700 px-2 py-0.5 rounded-full font-bold">🟢 Low</span>
+                                <span class="text-xs bg-ink-100 text-ink-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#22c55e"></i> Low</span>
                             @endif
 
                             @if($complaint->status === 'resolved' || $complaint->status === 'closed')
@@ -102,9 +102,9 @@
                         <h3 class="font-bold text-ink-950">{{ $complaint->title }}</h3>
 
                         <div class="flex items-center gap-3 text-xs text-ink-700 mt-1 flex-wrap">
-                            <span>👤 {{ $complaint->tenant?->name }}</span>
-                            @if($complaint->tenant?->room_number)<span>🚪 Room {{ $complaint->tenant->room_number }}</span>@endif
-                            <span>📅 {{ $complaint->created_at->diffForHumans() }}</span>
+                            <span><i class="fa-solid fa-user fa-fw"></i> {{ $complaint->tenant?->name }}</span>
+                            @if($complaint->tenant?->room_number)<span><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $complaint->tenant->room_number }}</span>@endif
+                            <span><i class="fa-solid fa-calendar-days fa-fw"></i> {{ $complaint->created_at->diffForHumans() }}</span>
                             @if($complaint->assigned_to_name)
                                 <span class="text-purple-700 font-bold">→ {{ $complaint->assigned_to_name }}</span>
                             @endif

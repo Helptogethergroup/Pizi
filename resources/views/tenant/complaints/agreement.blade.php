@@ -21,14 +21,14 @@
                 </div>
                 <div class="flex gap-2 flex-wrap">
                     @if($a->pdf_path ?? false)
-                        <a href="{{ asset('storage/' . $a->pdf_path) }}" target="_blank" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold">📥 Download PDF</a>
+                        <a href="{{ asset('storage/' . $a->pdf_path) }}" target="_blank" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-inbox fa-fw"></i> Download PDF</a>
                     @endif
                 </div>
             </div>
         </div>
     @empty
         <div class="bg-white rounded-2xl border border-ink-900/10 p-12 text-center">
-            <div class="text-6xl mb-3">📄</div>
+            <div class="text-6xl mb-3"><i class="fa-solid fa-file-lines fa-fw"></i></div>
             <h3 class="font-bold text-lg">No Agreement yet</h3>
             <p class="text-ink-900/60 text-sm mt-1">Owner aapka rent agreement abhi tak create nahi kiya hai.</p>
         </div>

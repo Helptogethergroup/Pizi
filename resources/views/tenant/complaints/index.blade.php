@@ -20,7 +20,7 @@
                     <div class="flex items-center gap-2 mb-1">
                         <span class="text-xs px-2 py-0.5 bg-ink-100 text-ink-700 rounded-full uppercase font-bold">{{ $c->category ?? 'general' }}</span>
                         @if($c->priority === 'urgent')
-                            <span class="text-xs px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full uppercase font-bold">🚨 Urgent</span>
+                            <span class="text-xs px-2 py-0.5 bg-rose-100 text-rose-700 rounded-full uppercase font-bold"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Urgent</span>
                         @elseif($c->priority === 'high')
                             <span class="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full uppercase font-bold">High</span>
                         @endif
@@ -39,7 +39,7 @@
         </div>
     @empty
         <div class="bg-white rounded-2xl border border-ink-900/10 p-12 text-center">
-            <div class="text-6xl mb-3">🎉</div>
+            <div class="text-6xl mb-3"><i class="fa-solid fa-champagne-glasses fa-fw"></i></div>
             <h3 class="font-bold text-lg">No complaints!</h3>
             <p class="text-ink-900/60 text-sm mt-1">Aap settled ho — koi issue nahi.</p>
         </div>

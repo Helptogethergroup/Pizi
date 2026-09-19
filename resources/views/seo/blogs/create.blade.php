@@ -23,7 +23,7 @@
     <div>
         <label class="text-xs font-bold uppercase text-ink-900/60">Content *</label>
         <textarea name="content" required rows="15" placeholder="Write your blog content here. HTML supported." class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">{{ old('content') }}</textarea>
-        <p class="text-xs text-ink-500 mt-1">💡 You can use basic HTML tags like &lt;b&gt;, &lt;i&gt;, &lt;a&gt;, &lt;br&gt;</p>
+        <p class="text-xs text-ink-500 mt-1"><i class="fa-solid fa-lightbulb fa-fw"></i> You can use basic HTML tags like &lt;b&gt;, &lt;i&gt;, &lt;a&gt;, &lt;br&gt;</p>
     </div>
 
     <div>
@@ -32,7 +32,7 @@
     </div>
 
     <div class="pt-4 border-t border-ink-100">
-        <h3 class="font-bold mb-3">🔍 SEO Settings (optional)</h3>
+        <h3 class="font-bold mb-3"><i class="fa-solid fa-magnifying-glass fa-fw"></i> SEO Settings (optional)</h3>
         <div class="space-y-3">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Meta Title</label>

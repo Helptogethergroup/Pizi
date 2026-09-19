@@ -14,11 +14,11 @@
                     <p class="text-lg text-ink/60 mb-4">{{ $university->abbreviation }}</p>
                     <div class="space-y-2 text-ink/70">
                         @if($university->address)
-                            <p><strong>📍 Address:</strong> {{ $university->address }}</p>
+                            <p><strong><i class="fa-solid fa-location-dot fa-fw"></i> Address:</strong> {{ $university->address }}</p>
                         @endif
-                        <p><strong>🏙️ City:</strong> {{ ucfirst($university->city) }}</p>
-                        <p><strong>📚 Type:</strong> {{ ucfirst($university->type) }}</p>
-                        <p><strong>📍 Coordinates:</strong> {{ $university->latitude }}, {{ $university->longitude }}</p>
+                        <p><strong><i class="fa-solid fa-city fa-fw"></i> City:</strong> {{ ucfirst($university->city) }}</p>
+                        <p><strong><i class="fa-solid fa-book fa-fw"></i> Type:</strong> {{ ucfirst($university->type) }}</p>
+                        <p><strong><i class="fa-solid fa-location-dot fa-fw"></i> Coordinates:</strong> {{ $university->latitude }}, {{ $university->longitude }}</p>
                     </div>
                 </div>
                 <div class="bg-coral-50 rounded-lg p-6 border border-coral-100">
@@ -33,7 +33,7 @@
     <!-- Filter Section -->
     <div class="max-w-6xl mx-auto px-4 py-8">
         <form id="filterForm" class="bg-white rounded-lg shadow-sm p-6 border border-ink/5 mb-8">
-            <h3 class="font-bold text-ink mb-4">🔍 Refine Results</h3>
+            <h3 class="font-bold text-ink mb-4"><i class="fa-solid fa-magnifying-glass fa-fw"></i> Refine Results</h3>
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
                 <!-- Budget Min -->
                 <div>
@@ -91,7 +91,7 @@
                                      alt="{{ $prop->name }}" 
                                      class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
                             @else
-                                <div class="w-full h-full flex items-center justify-center text-5xl">🏠</div>
+                                <div class="w-full h-full flex items-center justify-center text-5xl"><i class="fa-solid fa-house fa-fw"></i></div>
                             @endif
                             
                             @if($prop->distance_km)
@@ -105,7 +105,7 @@
                         <!-- Content -->
                         <div class="p-5 flex-1 flex flex-col">
                             <h3 class="font-bold text-lg text-ink group-hover:text-coral-500 transition mb-1">{{ $prop->name }}</h3>
-                            <p class="text-xs text-ink/50 mb-3">📍 {{ $prop->locality_name }}, {{ $prop->city_name }}</p>
+                            <p class="text-xs text-ink/50 mb-3"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $prop->locality_name }}, {{ $prop->city_name }}</p>
                             
                             <!-- Details -->
                             <div class="space-y-2 text-sm mb-4 flex-1">
@@ -135,7 +135,7 @@
             </div>
         @else
             <div class="bg-white rounded-lg shadow-sm border border-ink/5 p-12 text-center">
-                <p class="text-2xl mb-2">🔍</p>
+                <p class="text-2xl mb-2"><i class="fa-solid fa-magnifying-glass fa-fw"></i></p>
                 <p class="text-lg font-semibold text-ink mb-2">No PGs Found</p>
                 <p class="text-ink/60 mb-6">Try adjusting your budget or gender preferences</p>
                 <a href="{{ route('universities.index') }}" class="inline-block bg-coral-500 text-white font-bold py-2 px-6 rounded-lg hover:bg-coral-600 transition">
@@ -154,10 +154,10 @@
                 <a href="https://wa.me/918006680092?text=Hi%2C%20I%27m%20looking%20for%20a%20PG%20near%20{{ urlencode($university->name) }}" 
                    target="_blank"
                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center justify-center gap-2">
-                    💬 WhatsApp: 8006680092
+                    <i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp: 8006680092
                 </a>
                 <a href="tel:8006680092" class="bg-white/20 hover:bg-white/30 text-white font-bold py-3 px-6 rounded-lg transition inline-flex items-center justify-center gap-2 border border-white/50">
-                    📞 Call: 8006680092
+                    <i class="fa-solid fa-phone fa-fw"></i> Call: 8006680092
                 </a>
             </div>
         </div>

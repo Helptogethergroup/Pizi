@@ -49,8 +49,8 @@
                 <div>
                     <label class="text-xs font-bold uppercase text-ink-900/60">I am a *</label>
                     <select name="role" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
-                        <option value="guest">🏠 Looking for PG (Tenant)</option>
-                        <option value="owner">👤 PG Owner</option>
+                        <option value="guest">Looking for PG (Tenant)</option>
+                        <option value="owner">PG Owner</option>
                     </select>
                 </div>
 

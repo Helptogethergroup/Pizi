@@ -42,12 +42,12 @@
                 
                 <!-- Success Message -->
                 <div id="success-msg" class="hidden bg-green-100 text-green-800 p-4 rounded-lg mb-6">
-                    ✅ <span id="success-text"></span>
+                    <i class="fa-solid fa-circle-check fa-fw"></i> <span id="success-text"></span>
                 </div>
 
                 <!-- Error Message -->
                 <div id="error-msg" class="hidden bg-red-100 text-red-800 p-4 rounded-lg mb-6">
-                    ❌ <span id="error-text"></span>
+                    <i class="fa-solid fa-circle-xmark fa-fw"></i> <span id="error-text"></span>
                 </div>
 
                 <!-- Selected Package -->
@@ -61,7 +61,7 @@
                     <p class="text-sm text-gray-600 mb-4">Logged in as <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->email }})</p>
                     <button type="button" onclick="handleRegister()" id="reg-btn" disabled 
                             class="w-full bg-coral-500 hover:bg-coral-600 disabled:opacity-50 text-white font-bold py-3 rounded-lg transition mt-6">
-                        💳 Pay Now
+                        <i class="fa-solid fa-credit-card fa-fw"></i> Pay Now
                     </button>
                 @else
                     <form id="reg-form" class="space-y-4">
@@ -89,7 +89,7 @@
 
                         <button type="button" onclick="handleRegister()" id="reg-btn" disabled 
                                 class="w-full bg-coral-500 hover:bg-coral-600 disabled:opacity-50 text-white font-bold py-3 rounded-lg transition mt-6">
-                            💳 Register & Pay
+                            <i class="fa-solid fa-credit-card fa-fw"></i> Register & Pay
                         </button>
                     </form>
 
@@ -269,7 +269,7 @@
                     const verifyData = await verifyRes.json();
                     
                     if (verifyData.success) {
-                        alert('✅ Success!');
+                        alert('Success!');
                         window.location = '/owner';
                     } else {
                         showError(verifyData.message || 'Verification failed');

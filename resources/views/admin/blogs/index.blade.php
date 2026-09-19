@@ -61,7 +61,7 @@
             @if($blog->cover_image)
                 <img src="{{ asset('storage/' . $blog->cover_image) }}" class="w-16 h-16 rounded-xl object-cover flex-shrink-0" alt="">
             @else
-                <div class="w-16 h-16 rounded-xl bg-cream flex items-center justify-center flex-shrink-0 text-2xl">📝</div>
+                <div class="w-16 h-16 rounded-xl bg-cream flex items-center justify-center flex-shrink-0 text-2xl"><i class="fa-solid fa-pen-to-square fa-fw"></i></div>
             @endif
             <div class="min-w-0">
                 <div class="flex items-center gap-2 flex-wrap">
@@ -73,7 +73,7 @@
                     @endif
                 </div>
                 <p class="text-xs text-ink-900/50 truncate mt-0.5">{{ Str::limit($blog->excerpt, 90) }}</p>
-                <p class="text-xs text-ink-900/40 mt-1">👁 {{ number_format($blog->view_count) }} views · {{ $blog->created_at->format('d M Y') }}</p>
+                <p class="text-xs text-ink-900/40 mt-1"><i class="fa-solid fa-eye fa-fw"></i> {{ number_format($blog->view_count) }} views · {{ $blog->created_at->format('d M Y') }}</p>
             </div>
         </div>
 

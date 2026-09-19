@@ -4,7 +4,7 @@
 
 <div class="mb-6">
     <a href="{{ route('owner.rooms.index') }}" class="text-coral-500 font-bold">← Back to rooms</a>
-    <h1 class="font-display font-black text-3xl mt-2">🗑️ Deleted Rooms</h1>
+    <h1 class="font-display font-black text-3xl mt-2"><i class="fa-solid fa-trash-can fa-fw"></i> Deleted Rooms</h1>
     <p class="text-ink-900/60 mt-1">Rooms deleted in the last 30 days can be restored here.</p>
 </div>
 
@@ -35,7 +35,7 @@
                 <div class="flex gap-2">
                     <form method="POST" action="{{ route('owner.rooms.restore', $room->id) }}" class="inline-block">
                         @csrf
-                        <button class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold">↩ Restore</button>
+                        <button class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-rotate-left fa-fw"></i> Restore</button>
                     </form>
                     <form method="POST" action="{{ route('owner.rooms.force-delete', $room->id) }}" onsubmit="return confirm('Permanently delete this room? This CANNOT be undone.')" class="inline-block">
                         @csrf @method('DELETE')

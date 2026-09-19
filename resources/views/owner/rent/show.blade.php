@@ -18,9 +18,9 @@
                     @elseif($bill->status === 'partial')
                         <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold">Partial Payment</span>
                     @elseif($bill->status === 'overdue')
-                        <span class="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full font-bold">⚠️ Overdue</span>
+                        <span class="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Overdue</span>
                     @else
-                        <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-bold">⏳ Pending</span>
+                        <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> Pending</span>
                     @endif
                     <h1 class="font-display font-black text-2xl mt-2">Bill — {{ $bill->month_label }}</h1>
                     <p class="text-sm text-ink-700 mt-1">Bill #: <span class="font-mono font-bold">{{ $bill->bill_number }}</span></p>
@@ -33,7 +33,7 @@
 
             <div class="pt-4 border-t border-ink-100">
                 <h3 class="font-bold mb-2">Tenant</h3>
-                <p>{{ $bill->tenant?->name }} · 📱 {{ $bill->tenant?->phone }}</p>
+                <p>{{ $bill->tenant?->name }} · <i class="fa-solid fa-mobile-screen fa-fw"></i> {{ $bill->tenant?->phone }}</p>
                 <p class="text-sm text-ink-700">{{ $bill->property?->name }}, Room {{ $bill->tenant?->room_number }}</p>
             </div>
 
@@ -73,7 +73,7 @@
 
         @if($bill->due_amount > 0)
         <div class="bg-white p-6 rounded-2xl border border-emerald-200">
-            <h2 class="font-display font-bold text-lg mb-4">💰 Record Payment</h2>
+            <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-sack-dollar fa-fw"></i> Record Payment</h2>
             <form method="POST" action="{{ route('owner.rent.payment', $bill) }}" class="space-y-3">
                 @csrf
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -84,12 +84,12 @@
                     <div>
                         <label class="text-xs font-bold uppercase text-ink-500">Payment Method *</label>
                         <select name="payment_method" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
-                            <option value="cash">💵 Cash</option>
-                            <option value="upi">📱 UPI</option>
-                            <option value="bank_transfer">🏦 Bank Transfer</option>
-                            <option value="phonepe">📱 PhonePe</option>
-                            <option value="paytm">📱 Paytm</option>
-                            <option value="cheque">📝 Cheque</option>
+                            <option value="cash">Cash</option>
+                            <option value="upi">UPI</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="phonepe">PhonePe</option>
+                            <option value="paytm">Paytm</option>
+                            <option value="cheque">Cheque</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
@@ -110,7 +110,7 @@
 
         @if($bill->payments->count())
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <h2 class="font-display font-bold text-lg mb-4">📋 Payment History</h2>
+            <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-clipboard-list fa-fw"></i> Payment History</h2>
             <div class="space-y-2">
                 @foreach($bill->payments as $payment)
                     <div class="flex items-center justify-between gap-3 p-3 bg-cream rounded-xl flex-wrap">
@@ -123,10 +123,10 @@
                             </div>
                         </div>
                         <div class="flex gap-2">
-                            <a href="{{ route('owner.rent.receipt', $payment) }}" target="_blank" class="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-bold">📄 Receipt</a>
+                            <a href="{{ route('owner.rent.receipt', $payment) }}" target="_blank" class="px-3 py-1.5 bg-blue-500 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-file-lines fa-fw"></i> Receipt</a>
                             <form method="POST" action="{{ route('owner.rent.payment.delete', $payment) }}" onsubmit="return confirm('Remove this payment?')" class="inline-block">
                                 @csrf @method('DELETE')
-                                <button class="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold">🗑</button>
+                                <button class="px-3 py-1.5 bg-rose-500 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-trash-can fa-fw"></i></button>
                             </form>
                         </div>
                     </div>
@@ -156,7 +156,7 @@
                         {{-- Payment Link — always works, independent of WhatsApp template/button approval --}}
             @if($bill->status !== 'paid')
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
-                <h3 class="font-display font-bold mb-3">🔗 Payment Link</h3>
+                <h3 class="font-display font-bold mb-3"><i class="fa-solid fa-link fa-fw"></i> Payment Link</h3>
                 <div class="flex items-center gap-2 mb-3">
                     <input id="payUrlInput" type="text" readonly value="{{ $bill->pay_url }}"
                         class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-ink-200 text-xs font-mono bg-cream">
@@ -168,17 +168,17 @@
                 <a href="https://wa.me/?text={{ urlencode('Hi ' . $bill->tenant?->name . ', your rent bill for ' . $bill->month_label . ' — Amount: ₹' . number_format($bill->due_amount, 0) . '. Pay here: ' . $bill->pay_url) }}"
                     target="_blank"
                     class="block text-center w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition">
-                    💬 Share on WhatsApp
+                    <i class="fa-solid fa-comment-dots fa-fw"></i> Share on WhatsApp
                 </a>
             </div>
 
             {{-- WhatsApp Template Reminder --}}
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
-                <h3 class="font-display font-bold mb-3">📲 Auto Reminder</h3>
+                <h3 class="font-display font-bold mb-3"><i class="fa-solid fa-mobile-screen-button fa-fw"></i> Auto Reminder</h3>
                 <p class="text-xs text-ink-500 mb-3">{{ $bill->tenant?->name }} ko template message bhejo (link ke bina, agar button approved nahi hai)</p>
                 <button id="waBtn" onclick="sendWaReminder()"
                     class="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold transition">
-                    💬 Send Reminder
+                    <i class="fa-solid fa-comment-dots fa-fw"></i> Send Reminder
                 </button>
                 <div id="waResult" class="mt-2 text-xs text-center hidden"></div>
             </div>
@@ -239,7 +239,7 @@
 
             <form method="POST" action="{{ route('owner.rent.destroy', $bill) }}" onsubmit="return confirm('Delete this bill and all its payments?')">
                 @csrf @method('DELETE')
-                <button class="w-full px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold">🗑️ Delete Bill</button>
+                <button class="w-full px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete Bill</button>
             </form>
         </div>
     </div>

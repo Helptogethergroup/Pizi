@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6">
     <div>
-        <h1 class="font-display font-black text-3xl">📝 My Blogs</h1>
+        <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-pen-to-square fa-fw"></i> My Blogs</h1>
         <p class="text-ink-900/60 mt-1">Share your insights with PGFind community</p>
     </div>
     <a href="{{ route('owner.blogs.create') }}" class="px-5 py-3 bg-coral-500 text-white rounded-xl font-bold hover:bg-coral-600">+ New Blog</a>
@@ -59,7 +59,7 @@
                     @if($b->cover_image)
                         <img src="{{ str_starts_with($b->cover_image, 'http') ? $b->cover_image : asset('storage/' . $b->cover_image) }}" class="w-16 h-12 rounded-lg object-cover">
                     @else
-                        <div class="w-16 h-12 rounded-lg bg-ink-900/10 flex items-center justify-center">📝</div>
+                        <div class="w-16 h-12 rounded-lg bg-ink-900/10 flex items-center justify-center"><i class="fa-solid fa-pen-to-square fa-fw"></i></div>
                     @endif
                     <div>
                         <div class="font-semibold line-clamp-1">{{ $b->title }}</div>
@@ -72,18 +72,18 @@
                 @if($b->is_published)
                     <span class="px-2 py-1 rounded-full text-xs bg-emerald-100 text-emerald-700">✓ Published</span>
                 @else
-                    <span class="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-700">📝 Pending review</span>
+                    <span class="px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-700"><i class="fa-solid fa-pen-to-square fa-fw"></i> Pending review</span>
                 @endif
             </td>
             <td class="text-xs text-ink-900/60">{{ $b->created_at->format('d M Y') }}</td>
             <td class="px-4 py-3 text-right">
                 <div class="flex flex-wrap gap-1 justify-end">
                     @if($b->is_published)
-                        <a href="{{ route('blog.show', $b->slug) }}" target="_blank" class="text-xs px-2 py-1 rounded-lg border border-ink-900/15">👁 View</a>
+                        <a href="{{ route('blog.show', $b->slug) }}" target="_blank" class="text-xs px-2 py-1 rounded-lg border border-ink-900/15"><i class="fa-solid fa-eye fa-fw"></i> View</a>
                     @endif
-                    <a href="{{ route('owner.blogs.edit', $b) }}" class="text-xs px-2 py-1 rounded-lg bg-blue-500 text-white">✏️ Edit</a>
+                    <a href="{{ route('owner.blogs.edit', $b) }}" class="text-xs px-2 py-1 rounded-lg bg-blue-500 text-white"><i class="fa-solid fa-pencil fa-fw"></i> Edit</a>
                     <form method="POST" action="{{ route('owner.blogs.destroy', $b) }}" class="inline" onsubmit="return confirm('Delete this blog?');">@csrf @method('DELETE')
-                        <button class="text-xs px-2 py-1 rounded-lg bg-rose-500 text-white">🗑 Delete</button>
+                        <button class="text-xs px-2 py-1 rounded-lg bg-rose-500 text-white"><i class="fa-solid fa-trash-can fa-fw"></i> Delete</button>
                     </form>
                 </div>
             </td>

@@ -4,19 +4,19 @@
 
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
     <div>
-        <h1 class="font-display font-black text-3xl">🛏️ Rooms & Beds</h1>
+        <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-bed fa-fw"></i> Rooms & Beds</h1>
         <p class="text-ink-900/60 mt-1">Manage room inventory and bed allocations</p>
     </div>
     <div class="flex gap-2">
-        <button id="toggleSelectBtn" onclick="toggleSelectMode()" class="px-5 py-2.5 bg-white border border-ink-200 hover:bg-cream text-ink-700 rounded-xl text-sm font-bold">☑️ Select</button>
-        <a href="{{ route('owner.rooms.trash') }}" class="px-5 py-2.5 bg-white border border-ink-200 hover:bg-cream text-ink-700 rounded-xl text-sm font-bold">🗑️ Trash</a>
+        <button id="toggleSelectBtn" onclick="toggleSelectMode()" class="px-5 py-2.5 bg-white border border-ink-200 hover:bg-cream text-ink-700 rounded-xl text-sm font-bold"><i class="fa-solid fa-square-check fa-fw"></i> Select</button>
+        <a href="{{ route('owner.rooms.trash') }}" class="px-5 py-2.5 bg-white border border-ink-200 hover:bg-cream text-ink-700 rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Trash</a>
         <a href="{{ route('owner.rooms.create', ['property_id' => $selectedProperty?->id]) }}" class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-coral-500/30">+ Add Room</a>
     </div>
 </div>
 
 @if($properties->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">🏠</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-house fa-fw"></i></div>
         <p class="text-ink-700 mb-4">Add a property first to manage rooms.</p>
         <a href="{{ route('owner.properties.create') }}" class="inline-block px-5 py-3 bg-coral-500 text-white rounded-xl font-bold">+ Add Property</a>
     </div>
@@ -27,7 +27,7 @@
     @foreach($properties as $p)
         <a href="{{ route('owner.rooms.index', ['property_id' => $p->id]) }}"
            class="px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap {{ $selectedProperty?->id == $p->id ? 'bg-coral-500 text-white' : 'text-ink-700 hover:bg-cream' }}">
-            🏠 {{ $p->name }} ({{ $p->rooms_count }} rooms)
+            <i class="fa-solid fa-house fa-fw"></i> {{ $p->name }} ({{ $p->rooms_count }} rooms)
         </a>
     @endforeach
 </div>
@@ -55,7 +55,7 @@
 
 @if($rooms->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">🛏️</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-bed fa-fw"></i></div>
         <p class="text-ink-700 mb-4">No rooms in this property yet.</p>
         <a href="{{ route('owner.rooms.create', ['property_id' => $selectedProperty->id]) }}" class="inline-block px-5 py-3 bg-coral-500 text-white rounded-xl font-bold">+ Add First Room</a>
     </div>
@@ -123,7 +123,7 @@
 
     <div id="bulkDeleteBar" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-ink-900 text-cream px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-4 z-50">
         <span id="selectedCount" class="font-bold text-sm">0 selected</span>
-        <button type="button" onclick="submitBulkDelete()" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 rounded-xl text-sm font-bold">🗑️ Delete Selected</button>
+        <button type="button" onclick="submitBulkDelete()" class="px-4 py-2 bg-rose-500 hover:bg-rose-600 rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete Selected</button>
         <button type="button" onclick="toggleSelectMode()" class="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-xl text-sm font-bold">Cancel</button>
     </div>
 

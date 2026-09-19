@@ -334,7 +334,7 @@
     <!-- CHAT WINDOW -->
     <div class="chat-window" id="chat-window">
         <div class="chat-header">
-            <h3>🤖 Pizi AI Assistant <span class="status-indicator"></span></h3>
+            <h3><i class="fa-solid fa-robot fa-fw"></i> Pizi AI Assistant <span class="status-indicator"></span></h3>
             <button class="close-btn" onclick="closeChat()" title="Close Chat" aria-label="Close">✕</button>
         </div>
         <div class="lang-selector">
@@ -346,7 +346,7 @@
         </div>
         <div class="chat-body" id="chat-body">
             <div class="msg msg-greeting" id="greeting-msg">
-                नमस्ते! 👋 मैं आपकी कैसे मदद कर सकता हूं?
+                नमस्ते! <i class="fa-solid fa-hand fa-fw"></i> मैं आपकी कैसे मदद कर सकता हूं?
             </div>
         </div>
         <div class="chat-footer">

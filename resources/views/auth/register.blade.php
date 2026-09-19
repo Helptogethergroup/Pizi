@@ -139,7 +139,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                                 <div class="text-right flex-shrink-0">
                                     <div class="pz-mono text-2xl font-bold text-[#FF6551]">₹{{ number_format($pkg->price_inr) }}</div>
                                     @if($pkg->is_popular)
-                                        <span class="inline-block mt-1 bg-[#E3A130] text-white text-xs px-2 py-0.5 rounded-full font-bold">⭐ Popular</span>
+                                        <span class="inline-block mt-1 bg-[#E3A130] text-white text-xs px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Popular</span>
                                     @endif
                                 </div>
                             </div>
@@ -171,10 +171,10 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                     <div class="bg-[#16233B] rounded-2xl p-5 text-sm text-[#B9C2D4]">
                         <h3 class="font-bold text-white mb-3">Why Pizi?</h3>
                         <div class="space-y-2">
-                            <p>🚀 <span class="text-white font-semibold">Instant visibility</span> — leads within hours</p>
-                            <p>💰 <span class="text-white font-semibold">Zero commission</span> — no hidden charges</p>
-                            <p>📱 <span class="text-white font-semibold">Direct contact</span> — real phone numbers</p>
-                            <p>✅ <span class="text-white font-semibold">Verified tenants</span> — no spam profiles</p>
+                            <p><i class="fa-solid fa-rocket fa-fw"></i> <span class="text-white font-semibold">Instant visibility</span> — leads within hours</p>
+                            <p><i class="fa-solid fa-sack-dollar fa-fw"></i> <span class="text-white font-semibold">Zero commission</span> — no hidden charges</p>
+                            <p><i class="fa-solid fa-mobile-screen fa-fw"></i> <span class="text-white font-semibold">Direct contact</span> — real phone numbers</p>
+                            <p><i class="fa-solid fa-circle-check fa-fw"></i> <span class="text-white font-semibold">Verified tenants</span> — no spam profiles</p>
                         </div>
                     </div>
                 </div>
@@ -241,7 +241,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
 
                         <button type="button" onclick="mBuyPackage()" id="mBuyButton"
                             class="pz-shimmer w-full bg-[#FF6551] hover:bg-[#D9432E] text-white font-bold py-3.5 rounded-xl transition mt-2">
-                            💳 Create Account &amp; Buy Credits
+                            <i class="fa-solid fa-credit-card fa-fw"></i> Create Account &amp; Buy Credits
                         </button>
                     </form>
                     <p class="text-center text-sm text-[#8A8071] mt-4">Already registered? <a href="/login" class="text-[#D9432E] font-semibold">Login here</a></p>
@@ -528,7 +528,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                                     <div class="text-right">
                                         <div class="pz-mono text-3xl font-bold text-[#FF6551]">₹{{ number_format($pkg->price_inr) }}</div>
                                         @if($pkg->is_popular)
-                                            <span class="inline-block mt-2 bg-[#E3A130] text-white text-xs px-3 py-1 rounded-full font-bold">⭐ Popular</span>
+                                            <span class="inline-block mt-2 bg-[#E3A130] text-white text-xs px-3 py-1 rounded-full font-bold"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Popular</span>
                                         @endif
                                     </div>
                                 </div>
@@ -544,19 +544,19 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                     <h3 class="font-bold text-white mb-4">Why choose Pizi?</h3>
                     <div class="grid grid-cols-2 gap-5 text-sm text-[#B9C2D4]">
                         <div>
-                            <p class="font-bold text-white">🚀 Instant visibility</p>
+                            <p class="font-bold text-white"><i class="fa-solid fa-rocket fa-fw"></i> Instant visibility</p>
                             <p class="text-xs mt-0.5">Get leads within hours</p>
                         </div>
                         <div>
-                            <p class="font-bold text-white">💰 Zero commission</p>
+                            <p class="font-bold text-white"><i class="fa-solid fa-sack-dollar fa-fw"></i> Zero commission</p>
                             <p class="text-xs mt-0.5">No hidden charges</p>
                         </div>
                         <div>
-                            <p class="font-bold text-white">📱 Direct contact</p>
+                            <p class="font-bold text-white"><i class="fa-solid fa-mobile-screen fa-fw"></i> Direct contact</p>
                             <p class="text-xs mt-0.5">Real phone numbers</p>
                         </div>
                         <div>
-                            <p class="font-bold text-white">✅ Verified tenants</p>
+                            <p class="font-bold text-white"><i class="fa-solid fa-circle-check fa-fw"></i> Verified tenants</p>
                             <p class="text-xs mt-0.5">No spam profiles</p>
                         </div>
                     </div>
@@ -681,7 +681,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                             disabled
                             class="pz-shimmer w-full bg-[#FF6551] hover:bg-[#D9432E] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl transition mt-6"
                         >
-                            💳 Create Account &amp; Buy Credits
+                            <i class="fa-solid fa-credit-card fa-fw"></i> Create Account &amp; Buy Credits
                         </button>
                     </form>
 

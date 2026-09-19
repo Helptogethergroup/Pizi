@@ -27,7 +27,7 @@
         <div class="p-6 bg-white rounded-2xl border-2 {{ $pkg->is_active ? 'border-ink-900/10' : 'border-rose-200 opacity-60' }}">
             <div class="flex justify-between items-start">
                 <h3 class="font-display font-bold text-xl">{{ $pkg->name }}</h3>
-                @if($pkg->is_popular)<span class="text-xs px-2 py-1 rounded-full bg-coral-500 text-white">⭐ Popular</span>@endif
+                @if($pkg->is_popular)<span class="text-xs px-2 py-1 rounded-full bg-coral-500 text-white"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Popular</span>@endif
             </div>
             <div class="font-display font-black text-3xl mt-2">₹{{ number_format($pkg->price_inr) }}</div>
             <div class="text-sm text-ink-900/60">{{ $pkg->total_credits }} credits ({{ $pkg->credits }} + {{ $pkg->bonus_credits }} bonus)</div>
@@ -42,7 +42,7 @@
                     data-popular="{{ $pkg->is_popular ? '1' : '0' }}"
                     data-order="{{ $pkg->display_order }}"
                     class="pkg-edit-btn text-xs px-3 py-1.5 rounded-lg border border-blue-300 text-blue-600">
-                    ✏️ Edit
+                    <i class="fa-solid fa-pencil fa-fw"></i> Edit
                 </button>
                 <form method="POST" action="{{ route('admin.packages.toggle', $pkg) }}">@csrf @method('PATCH')
                     <button class="text-xs px-3 py-1.5 rounded-lg border border-ink-900/15">{{ $pkg->is_active ? 'Disable' : 'Enable' }}</button>

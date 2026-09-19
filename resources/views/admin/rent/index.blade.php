@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="mb-6">
-    <h1 class="font-display font-black text-3xl">💰 All Rent Bills</h1>
+    <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-sack-dollar fa-fw"></i> All Rent Bills</h1>
     <p class="text-ink-900/60 mt-1">Platform-wide rent collection overview</p>
 </div>
 
@@ -51,7 +51,7 @@
 
 @if($bills->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">💰</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-sack-dollar fa-fw"></i></div>
         <p class="text-ink-700">No bills found.</p>
     </div>
 @else
@@ -70,15 +70,15 @@
                             @elseif($bill->status === 'partial')
                                 <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">Partial</span>
                             @elseif($bill->status === 'overdue')
-                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">⚠️ Overdue</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Overdue</span>
                             @else
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⏳ Pending</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> Pending</span>
                             @endif
                         </div>
                         <div class="flex items-center gap-3 text-xs text-ink-700 flex-wrap">
                             <span class="font-mono">{{ $bill->bill_number }}</span>
-                            <span>📞 {{ $bill->tenant?->phone }}</span>
-                            <span>👤 Owner: <strong>{{ $bill->owner?->name }}</strong></span>
+                            <span><i class="fa-solid fa-phone fa-fw"></i> {{ $bill->tenant?->phone }}</span>
+                            <span><i class="fa-solid fa-user fa-fw"></i> Owner: <strong>{{ $bill->owner?->name }}</strong></span>
                         </div>
                     </div>
 
@@ -94,7 +94,7 @@
                     <div class="flex gap-1.5 flex-wrap">
                         <a href="{{ route('admin.rent.show', $bill) }}" class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-bold">View</a>
                         @if($bill->due_amount > 0)
-                            <a href="https://wa.me/91{{ $bill->tenant?->phone }}?text={{ urlencode('Hi '.$bill->tenant?->name.', your rent of ₹'.number_format($bill->due_amount).' for '.$bill->month_label.' is pending. Pay here: '.route('public.pay', $bill->bill_number)) }}" target="_blank" class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">💬 Remind</a>
+                            <a href="https://wa.me/91{{ $bill->tenant?->phone }}?text={{ urlencode('Hi '.$bill->tenant?->name.', your rent of ₹'.number_format($bill->due_amount).' for '.$bill->month_label.' is pending. Pay here: '.route('public.pay', $bill->bill_number)) }}" target="_blank" class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-comment-dots fa-fw"></i> Remind</a>
                         @endif
                     </div>
                 </div>

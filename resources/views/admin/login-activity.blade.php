@@ -42,7 +42,7 @@
                                 {{ $row->login_count }}
                             </span>
                             @if($row->login_count >= 20)
-                                <span class="text-xs text-rose-500 block">⚠ Frequent</span>
+                                <span class="text-xs text-rose-500 block"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Frequent</span>
                             @endif
                         </td>
                         <td class="text-ink-900/70">{{ \Carbon\Carbon::parse($row->last_login)->diffForHumans() }}</td>

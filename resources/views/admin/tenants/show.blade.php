@@ -21,16 +21,16 @@
                         @if($tenant->kyc_status === 'approved')
                             <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">✓ KYC Verified</span>
                         @elseif($tenant->kyc_status === 'submitted')
-                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">📋 KYC Under Review</span>
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-clipboard-list fa-fw"></i> KYC Under Review</span>
                         @elseif($tenant->kyc_status === 'rejected')
-                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">❌ KYC Rejected</span>
+                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle-xmark fa-fw"></i> KYC Rejected</span>
                         @else
-                            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⏳ KYC Pending</span>
+                            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> KYC Pending</span>
                         @endif
                     </div>
                     <div class="text-sm text-ink-700 mt-2">
-                        📞 {{ $tenant->phone }}
-                        @if($tenant->email) · 📧 {{ $tenant->email }}@endif
+                        <i class="fa-solid fa-phone fa-fw"></i> {{ $tenant->phone }}
+                        @if($tenant->email) · <i class="fa-solid fa-envelope fa-fw"></i> {{ $tenant->email }}@endif
                     </div>
                 </div>
             </div>
@@ -57,14 +57,14 @@
 
         {{-- KYC Documents --}}
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <h2 class="font-display font-bold text-xl mb-4">📄 KYC Documents ({{ $tenant->documents->count() }})</h2>
+            <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-file-lines fa-fw"></i> KYC Documents ({{ $tenant->documents->count() }})</h2>
 
             @if($tenant->documents->count())
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-4">
                     @foreach($tenant->documents as $doc)
                         <a href="{{ $doc->url }}" target="_blank" class="rounded-xl border border-ink-100 overflow-hidden hover:border-coral-300">
                             @if(str_ends_with(strtolower($doc->file_path), '.pdf'))
-                                <div class="aspect-square bg-rose-50 flex items-center justify-center text-4xl">📄</div>
+                                <div class="aspect-square bg-rose-50 flex items-center justify-center text-4xl"><i class="fa-solid fa-file-lines fa-fw"></i></div>
                             @else
                                 <img src="{{ $doc->url }}" class="w-full aspect-square object-cover">
                             @endif
@@ -85,7 +85,7 @@
 
                             @if(empty($tenant->property_id))
                                 <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                                    <div class="text-xs font-bold text-amber-900 mb-2">⚠️ Property assign nahi hai — abhi assign karo (journey complete karne ke liye zaroori):</div>
+                                    <div class="text-xs font-bold text-amber-900 mb-2"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Property assign nahi hai — abhi assign karo (journey complete karne ke liye zaroori):</div>
                                     <div class="grid sm:grid-cols-3 gap-2">
                                         <select name="property_id" required class="px-3 py-2 border border-ink-200 rounded-lg text-sm">
                                             <option value="">Select Property *</option>
@@ -107,7 +107,7 @@
                         <form method="POST" action="{{ route('admin.tenants.kyc.reject', $tenant) }}" class="inline-flex gap-2 items-center">
                             @csrf @method('PATCH')
                             <input name="remarks" placeholder="Reason" class="px-3 py-2 border border-ink-200 rounded-lg text-sm">
-                            <button class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold">❌ Reject</button>
+                            <button class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-circle-xmark fa-fw"></i> Reject</button>
                         </form>
                     </div>
                 @endif
@@ -126,7 +126,7 @@
         {{-- Recent Bills --}}
         @if($tenant->bills->count())
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <h2 class="font-display font-bold text-xl mb-4">💰 Recent Bills</h2>
+            <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-sack-dollar fa-fw"></i> Recent Bills</h2>
             <div class="space-y-2">
                 @foreach($tenant->bills->take(5) as $b)
                     <a href="{{ route('admin.rent.show', $b) }}" class="flex items-center justify-between gap-3 p-3 bg-cream rounded-xl hover:bg-cream-200 transition">
@@ -151,7 +151,7 @@
         {{-- Recent Complaints --}}
         @if($tenant->complaints->count())
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <h2 class="font-display font-bold text-xl mb-4">🛠️ Recent Complaints</h2>
+            <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-screwdriver-wrench fa-fw"></i> Recent Complaints</h2>
             <div class="space-y-2">
                 @foreach($tenant->complaints->take(5) as $c)
                     <a href="{{ route('admin.complaints.show', $c) }}" class="flex items-center justify-between gap-3 p-3 bg-cream rounded-xl hover:bg-cream-200 transition">
@@ -171,7 +171,7 @@
     <div class="lg:col-span-1">
         <div class="lg:sticky lg:top-24 space-y-4">
             <div class="bg-amber-50 p-5 rounded-2xl border border-amber-200">
-                <h3 class="font-display font-bold text-amber-900 mb-3">⚡ Admin Actions</h3>
+                <h3 class="font-display font-bold text-amber-900 mb-3"><i class="fa-solid fa-bolt fa-fw"></i> Admin Actions</h3>
                 <p class="text-xs text-amber-800 mb-3">As admin, you can override owner actions.</p>
 
                 <form method="POST" action="{{ route('admin.tenants.status', $tenant) }}" class="mb-3">
@@ -181,22 +181,22 @@
                         <option value="active" @selected($tenant->status==='active')>Active</option>
                         <option value="notice_period" @selected($tenant->status==='notice_period')>Notice Period</option>
                         <option value="left" @selected($tenant->status==='left')>Left</option>
-                        <option value="blacklisted" @selected($tenant->status==='blacklisted')>🚫 Blacklisted</option>
+                        <option value="blacklisted" @selected($tenant->status==='blacklisted')>Blacklisted</option>
                     </select>
                 </form>
 
                 <form method="POST" action="{{ route('admin.tenants.destroy', $tenant) }}" onsubmit="return confirm('Permanently delete this tenant and all data?')">
                     @csrf @method('DELETE')
-                    <button class="w-full px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold">🗑️ Delete Tenant</button>
+                    <button class="w-full px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete Tenant</button>
                 </form>
             </div>
 
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
                 <h3 class="font-display font-bold mb-3">Contact</h3>
                 <div class="space-y-2">
-                    <a href="https://wa.me/91{{ $tenant->phone }}" target="_blank" class="block w-full text-center px-4 py-2.5 bg-emerald-500 text-white rounded-lg text-sm font-bold">💬 WhatsApp</a>
-                    <a href="tel:{{ $tenant->phone }}" class="block w-full text-center px-4 py-2.5 bg-blue-500 text-white rounded-lg text-sm font-bold">📞 Call Tenant</a>
-                    <a href="tel:{{ $tenant->owner?->phone }}" class="block w-full text-center px-4 py-2.5 bg-purple-500 text-white rounded-lg text-sm font-bold">📞 Call Owner</a>
+                    <a href="https://wa.me/91{{ $tenant->phone }}" target="_blank" class="block w-full text-center px-4 py-2.5 bg-emerald-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp</a>
+                    <a href="tel:{{ $tenant->phone }}" class="block w-full text-center px-4 py-2.5 bg-blue-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call Tenant</a>
+                    <a href="tel:{{ $tenant->owner?->phone }}" class="block w-full text-center px-4 py-2.5 bg-purple-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call Owner</a>
                 </div>
             </div>
         </div>

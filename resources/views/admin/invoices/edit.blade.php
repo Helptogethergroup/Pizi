@@ -2,7 +2,7 @@
 @section('title', 'Edit Invoice — Admin')
 @section('content')
 
-<h1 class="font-display font-black text-3xl mb-6">🧾 Edit Invoice {{ $invoice->invoice_number }}</h1>
+<h1 class="font-display font-black text-3xl mb-6"><i class="fa-solid fa-receipt fa-fw"></i> Edit Invoice {{ $invoice->invoice_number }}</h1>
 
 <div class="bg-white p-6 rounded-2xl border border-ink-100 max-w-2xl">
     <form method="POST" action="{{ route('admin.invoices.update', $invoice) }}" class="space-y-5">

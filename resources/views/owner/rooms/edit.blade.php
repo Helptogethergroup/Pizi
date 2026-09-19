@@ -24,9 +24,9 @@
                 <option value="dorm" @selected($room->room_type==='dorm')>Dorm</option>
             </select>
             <select name="gender" required class="px-4 py-3 rounded-xl border border-ink-200">
-                <option value="male" @selected($room->gender==='male')>👨 Boys</option>
-                <option value="female" @selected($room->gender==='female')>👩 Girls</option>
-                <option value="unisex" @selected($room->gender==='unisex')>👥 Unisex</option>
+                <option value="male" @selected($room->gender==='male')>Boys</option>
+                <option value="female" @selected($room->gender==='female')>Girls</option>
+                <option value="unisex" @selected($room->gender==='unisex')>Unisex</option>
             </select>
             <input name="monthly_rent" type="number" value="{{ $room->monthly_rent }}" placeholder="Rent" class="px-4 py-3 rounded-xl border border-ink-200">
             <input name="security_deposit" type="number" value="{{ $room->security_deposit }}" placeholder="Deposit" class="px-4 py-3 rounded-xl border border-ink-200">
@@ -56,8 +56,8 @@
         <label class="text-xs font-bold uppercase text-ink-500">Status</label>
         <select name="status" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
             <option value="active" @selected($room->status==='active')>✓ Active</option>
-            <option value="maintenance" @selected($room->status==='maintenance')>🔧 Maintenance</option>
-            <option value="closed" @selected($room->status==='closed')>❌ Closed</option>
+            <option value="maintenance" @selected($room->status==='maintenance')>Maintenance</option>
+            <option value="closed" @selected($room->status==='closed')>Closed</option>
         </select>
         <textarea name="notes" rows="2" placeholder="Notes" class="w-full mt-3 px-4 py-3 rounded-xl border border-ink-200">{{ $room->notes }}</textarea>
     </div>

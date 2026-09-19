@@ -12,7 +12,7 @@
         <div class="relative">
             <input type="text" name="q" value="{{ $search ?? '' }}" placeholder="Search articles..."
                    class="w-full pl-11 pr-4 py-3 rounded-xl border border-ink-900/15 focus:outline-none focus:border-coral-500 text-sm">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-900/40">🔍</span>
+            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink-900/40"><i class="fa-solid fa-magnifying-glass fa-fw"></i></span>
         </div>
     </form>
 
@@ -62,7 +62,7 @@
         <aside class="space-y-8">
             @if(($popular ?? collect())->count())
             <div class="bg-cream rounded-2xl border border-ink-900/8 p-6">
-                <h3 class="font-display font-bold text-lg mb-4">🔥 Popular reads</h3>
+                <h3 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-fire fa-fw"></i> Popular reads</h3>
                 <div class="space-y-4">
                     @foreach($popular as $p)
                         <a href="{{ route('blog.show', $p->slug) }}" class="flex items-start gap-3 group">
@@ -80,7 +80,7 @@
             @endif
 
             <div class="bg-ink-950 text-cream rounded-2xl p-6">
-                <h3 class="font-display font-bold text-lg mb-2">📬 Get PG tips in your inbox</h3>
+                <h3 class="font-display font-bold text-lg mb-2"><i class="fa-solid fa-envelope-open fa-fw"></i> Get PG tips in your inbox</h3>
                 <p class="text-sm text-cream/60 mb-4">Locality guides, safety checklists &amp; move-in tips — no spam.</p>
                 @if(session('success'))
                     <p class="text-xs text-emerald-400 font-semibold mb-2">✓ {{ session('success') }}</p>
@@ -94,7 +94,7 @@
             </div>
 
             <div class="bg-white rounded-2xl border border-ink-900/8 p-6 text-center">
-                <div class="text-3xl mb-2">🏠</div>
+                <div class="text-3xl mb-2"><i class="fa-solid fa-house fa-fw"></i></div>
                 <h3 class="font-display font-bold text-lg">Looking for a PG?</h3>
                 <p class="text-sm text-ink-900/60 mt-1 mb-4">Browse verified listings across Delhi NCR.</p>
                 <a href="{{ route('search') }}" class="inline-block w-full py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-sm transition">Browse PGs →</a>

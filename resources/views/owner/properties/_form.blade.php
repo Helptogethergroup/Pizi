@@ -31,7 +31,7 @@
 
     <div id="manualLocalityWrap" class="hidden mt-2">
         <input name="locality_name" id="manualLocality" placeholder="Type new locality name..." class="w-full px-4 py-3 rounded-xl border-2 border-coral-500 bg-coral-50">
-        <p class="text-xs text-coral-700 mt-1">💡 New locality will be saved automatically.</p>
+        <p class="text-xs text-coral-700 mt-1"><i class="fa-solid fa-lightbulb fa-fw"></i> New locality will be saved automatically.</p>
     </div>
 </div>
         <div>
@@ -53,7 +53,7 @@
     </div>
     
    <div>
-        <label class="text-xs font-semibold text-ink-900/60 uppercase">🎓 Nearby University (Optional)</label>
+        <label class="text-xs font-semibold text-ink-900/60 uppercase"><i class="fa-solid fa-graduation-cap fa-fw"></i> Nearby University (Optional)</label>
         <div class="mt-1 flex gap-2">
             <select name="nearby_university_id" id="universitySelect" class="flex-1 min-w-0 px-4 py-3 rounded-xl border border-ink-900/15">
                 <option value="">-- Select University --</option>
@@ -72,7 +72,7 @@
         <div id="manualUniversityWrap" class="hidden mt-2">
             <input name="university_name" id="manualUniversity" placeholder="Type university name..." class="w-full px-4 py-3 rounded-xl border-2 border-coral-500 bg-coral-50">
             <input name="university_abbreviation" id="manualUniversityAbbr" placeholder="Abbreviation (e.g., DU)" class="w-full px-4 py-3 rounded-xl border-2 border-coral-500 bg-coral-50 mt-2">
-            <p class="text-xs text-coral-700 mt-1">💡 New university will be saved automatically.</p>
+            <p class="text-xs text-coral-700 mt-1"><i class="fa-solid fa-lightbulb fa-fw"></i> New university will be saved automatically.</p>
         </div>
     </div>
 
@@ -285,7 +285,7 @@
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
              <div><label class="text-xs font-semibold text-ink-900/60 uppercase">Landmark</label><input name="landmark" value="{{ old('landmark', $property->landmark ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15"></div>
-        <div><label class="text-xs font-semibold text-ink-900/60 uppercase">🚓 Nearby Police Station</label><input name="nearby_police_station" value="{{ old('nearby_police_station', $property->nearby_police_station ?? '') }}" placeholder="e.g. Sector 24 Police Station" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15"></div>
+        <div><label class="text-xs font-semibold text-ink-900/60 uppercase"><i class="fa-solid fa-car-side fa-fw"></i> Nearby Police Station</label><input name="nearby_police_station" value="{{ old('nearby_police_station', $property->nearby_police_station ?? '') }}" placeholder="e.g. Sector 24 Police Station" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15"></div>
         <div><label class="text-xs font-semibold text-ink-900/60 uppercase">Pincode</label><input name="pincode" value="{{ old('pincode', $property->pincode ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15"></div>
         <div><label class="text-xs font-semibold text-ink-900/60 uppercase">Total rooms</label><input name="total_rooms" type="number" value="{{ old('total_rooms', $property->total_rooms ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15"></div>
         <div><label class="text-xs font-semibold text-ink-900/60 uppercase">Available rooms</label><input name="available_rooms" type="number" value="{{ old('available_rooms', $property->available_rooms ?? '') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15"></div>
@@ -293,13 +293,13 @@
 
 {{-- ===== INTERACTIVE LOCATION MAP (Leaflet - FREE) ===== --}}
 <div class="md:col-span-2">
-    <label class="text-xs font-bold uppercase text-ink-900/60 mb-2 block">📍 Property Location on Map</label>
+    <label class="text-xs font-bold uppercase text-ink-900/60 mb-2 block"><i class="fa-solid fa-location-dot fa-fw"></i> Property Location on Map</label>
 
     {{-- Search bar --}}
     <div class="flex flex-wrap gap-2 mb-3">
         <input type="text" id="mapSearchInput" placeholder="Search address / paste Google Maps coordinates..." class="flex-1 min-w-[200px] px-4 py-3 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500">
-        <button type="button" id="mapSearchBtn" class="px-5 py-3 bg-coral-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-coral-600">🔍 Search</button>
-        <button type="button" id="mapMyLocBtn" class="px-4 py-3 bg-emerald-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-emerald-600">📍 My Location</button>
+        <button type="button" id="mapSearchBtn" class="px-5 py-3 bg-coral-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-coral-600"><i class="fa-solid fa-magnifying-glass fa-fw"></i> Search</button>
+        <button type="button" id="mapMyLocBtn" class="px-4 py-3 bg-emerald-500 text-white rounded-xl font-bold whitespace-nowrap hover:bg-emerald-600"><i class="fa-solid fa-location-dot fa-fw"></i> My Location</button>
     </div>
 
     {{-- Map container --}}
@@ -313,13 +313,13 @@
         </div>
         <div class="flex-1"></div>
         <a id="openInGmaps" href="#" target="_blank" rel="noreferrer" class="hidden text-xs px-3 py-1 bg-blue-50 border border-blue-300 text-blue-700 rounded-lg font-bold hover:bg-blue-100">
-            🗺️ Open in Google Maps
+            <i class="fa-solid fa-map fa-fw"></i> Open in Google Maps
         </a>
     </div>
 
     {{-- Helper instructions --}}
     <div class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">
-        <strong>💡 How to set location:</strong>
+        <strong><i class="fa-solid fa-lightbulb fa-fw"></i> How to set location:</strong>
         <ul class="list-disc ml-5 mt-1 space-y-0.5">
             <li><strong>Drag the marker</strong> to the exact spot (most accurate)</li>
             <li>Or type an address and click <strong>Search</strong></li>

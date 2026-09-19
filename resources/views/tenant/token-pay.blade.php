@@ -20,15 +20,15 @@
     @if(!$tokenPayment)
         {{-- Field exec ne amount set nahi kiya --}}
         <div class="mt-6 bg-white rounded-2xl border border-ink-900/10 p-8 text-center">
-            <div class="text-5xl mb-3">⏳</div>
+            <div class="text-5xl mb-3"><i class="fa-solid fa-hourglass-half fa-fw"></i></div>
             <h2 class="font-bold text-xl text-ink-950">Token amount not set yet</h2>
             <p class="text-ink-900/60 mt-2">Your field executive will set the token amount after your visit. Please check back shortly or contact us.</p>
-            <a href="https://wa.me/918006680092" target="_blank" class="inline-block mt-4 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm">💬 Contact us</a>
+            <a href="https://wa.me/918006680092" target="_blank" class="inline-block mt-4 px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm"><i class="fa-solid fa-comment-dots fa-fw"></i> Contact us</a>
         </div>
 
     @elseif($tokenPayment->status === 'paid')
         <div class="mt-6 bg-white rounded-2xl border-2 border-emerald-300 p-8 text-center">
-            <div class="text-5xl mb-3">✅</div>
+            <div class="text-5xl mb-3"><i class="fa-solid fa-circle-check fa-fw"></i></div>
             <h2 class="font-bold text-xl text-ink-950">Token already paid</h2>
             <p class="text-ink-900/60 mt-2">₹{{ number_format($tokenPayment->amount) }} received via {{ ucfirst($tokenPayment->payment_method) }}.</p>
             <a href="{{ route('tenant.onboarding') }}" class="inline-block mt-4 px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-sm">Continue →</a>
@@ -44,7 +44,7 @@
                     <div class="text-sm text-ink-900/60 mt-2">For: <strong>{{ $property->name }}</strong></div>
                 @endif
                 @if($tokenPayment->payment_method === 'cash')
-                    <div class="mt-3 inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold">💵 Cash selected — pay your field executive</div>
+                    <div class="mt-3 inline-block px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs font-bold"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Cash selected — pay your field executive</div>
                 @endif
             </div>
 
@@ -54,7 +54,7 @@
                 {{-- ONLINE --}}
                 @if($razorpayOrderId)
                     <button id="payOnlineBtn" type="button" class="w-full py-4 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold flex items-center justify-center gap-2 transition shadow-lg shadow-coral-500/30">
-                        💳 Pay Online (UPI / Card / Netbanking)
+                        <i class="fa-solid fa-credit-card fa-fw"></i> Pay Online (UPI / Card / Netbanking)
                     </button>
                 @else
                     <div class="w-full py-4 bg-ink-100 text-ink-500 rounded-xl font-bold text-center text-sm">Online payment temporarily unavailable. Please choose cash.</div>
@@ -65,7 +65,7 @@
                     @csrf
                     <input type="hidden" name="token_payment_id" value="{{ $tokenPayment->id }}">
                     <button type="submit" class="w-full py-4 bg-white border-2 border-ink-900/15 hover:border-coral-500 text-ink-950 rounded-xl font-bold flex items-center justify-center gap-2 transition">
-                        💵 Pay Cash to Field Executive
+                        <i class="fa-solid fa-money-bill-wave fa-fw"></i> Pay Cash to Field Executive
                     </button>
                 </form>
 

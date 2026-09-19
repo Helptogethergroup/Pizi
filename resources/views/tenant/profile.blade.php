@@ -10,7 +10,7 @@
 
     {{-- PERSONAL INFO --}}
     <div class="mt-6 bg-white rounded-2xl border border-ink-900/10 p-6">
-        <h2 class="font-display font-bold text-xl mb-5">📝 Personal Information</h2>
+        <h2 class="font-display font-bold text-xl mb-5"><i class="fa-solid fa-pen-to-square fa-fw"></i> Personal Information</h2>
         
         <form method="POST" action="{{ route('tenant.profile.update') }}" class="space-y-4">
             @csrf
@@ -39,7 +39,7 @@
             </div>
 
             <div class="border-t border-ink-900/10 pt-4 mt-4">
-                <h3 class="font-bold mb-3">🚨 Emergency Contact</h3>
+                <h3 class="font-bold mb-3"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Emergency Contact</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="text-xs font-bold uppercase text-ink-900/60">Name</label>
@@ -57,7 +57,7 @@
             </div>
 
             <button type="submit" class="px-8 py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold">
-                💾 Save Changes
+                <i class="fa-solid fa-floppy-disk fa-fw"></i> Save Changes
             </button>
         </form>
     </div>
@@ -70,7 +70,7 @@
 
         @if($hasRealEmail && $user->password)
             <div class="flex items-start gap-3">
-                <div class="text-2xl">✅</div>
+                <div class="text-2xl"><i class="fa-solid fa-circle-check fa-fw"></i></div>
                 <div>
                     <h2 class="font-display font-bold text-xl">Password Login is Set Up</h2>
                     <p class="text-sm text-ink-900/60 mt-1">You can log in anytime with your email ({{ $user->email }}) and password — no need to wait for OTP every time.</p>
@@ -78,7 +78,7 @@
                 </div>
             </div>
         @else
-            <h2 class="font-display font-bold text-xl mb-1">🔐 Set Up Password Login</h2>
+            <h2 class="font-display font-bold text-xl mb-1"><i class="fa-solid fa-lock fa-fw"></i> Set Up Password Login</h2>
             <p class="text-sm text-ink-900/60 mb-5">Tired of waiting for an OTP every time? Set an email + password once, and log in instantly next time — OTP will still work too if you prefer it.</p>
         @endif
 
@@ -100,14 +100,14 @@
                 </div>
             </div>
             <button type="submit" class="px-8 py-3 bg-ink-950 hover:bg-ink-900 text-white rounded-xl font-bold">
-                🔐 {{ ($hasRealEmail && $user->password) ? 'Update Password' : 'Set Up Password Login' }}
+                <i class="fa-solid fa-lock fa-fw"></i> {{ ($hasRealEmail && $user->password) ? 'Update Password' : 'Set Up Password Login' }}
             </button>
         </form>
     </div>
 
     <!--{{-- KYC DOCUMENTS UPLOAD --}}-->
     <!--<div id="kyc-section" class="mt-6 bg-white rounded-2xl border border-ink-900/10 p-6">-->
-    <!--    <h2 class="font-display font-bold text-xl mb-2">📄 KYC Documents</h2>-->
+    <!--    <h2 class="font-display font-bold text-xl mb-2"><i class="fa-solid fa-file-lines fa-fw"></i> KYC Documents</h2>-->
     <!--    <p class="text-sm text-ink-900/60 mb-5">Upload kare verify karne ke liye — Owner approve karega.</p>-->
 
     <!--    @if($tenant && $tenant->documents->count())-->
@@ -115,7 +115,7 @@
     <!--            @foreach($tenant->documents as $doc)-->
     <!--                <div class="border border-ink-900/10 rounded-xl p-3">-->
     <!--                    <div class="text-xs font-bold uppercase text-ink-900/60">{{ str_replace('_', ' ', $doc->document_type) }}</div>-->
-    <!--                    <div class="mt-2 aspect-video bg-cream rounded-lg flex items-center justify-center text-2xl">📄</div>-->
+    <!--                    <div class="mt-2 aspect-video bg-cream rounded-lg flex items-center justify-center text-2xl"><i class="fa-solid fa-file-lines fa-fw"></i></div>-->
     <!--                    <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="block text-center text-xs mt-2 text-coral-600 font-bold">View</a>-->
     <!--                </div>-->
     <!--            @endforeach-->

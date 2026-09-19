@@ -29,14 +29,14 @@
 
         @if($bill->due_amount <= 0)
             <div class="p-8 text-center">
-                <div class="text-4xl mb-2">✅</div>
+                <div class="text-4xl mb-2"><i class="fa-solid fa-circle-check fa-fw"></i></div>
                 <p class="font-bold text-emerald-700">This bill is fully paid.</p>
                 <p class="text-sm text-ink-900/60 mt-1">Thank you!</p>
             </div>
         @else
             {{-- SUCCESS STATE --}}
             <div id="paySuccess" class="hidden p-8 text-center">
-                <div class="text-5xl mb-3">🎉</div>
+                <div class="text-5xl mb-3"><i class="fa-solid fa-champagne-glasses fa-fw"></i></div>
                 <p class="font-bold text-emerald-700 text-lg">Payment Successful!</p>
                 <p class="text-sm text-ink-900/60 mt-1">Your rent has been recorded.</p>
                 <a href="{{ route('tenant.rent.history') }}" class="inline-block mt-4 px-5 py-2.5 bg-ink-950 text-cream rounded-lg font-bold text-sm">View Rent History</a>
@@ -47,7 +47,7 @@
                 <p class="text-sm text-ink-900/60 mb-4">Pay securely via Razorpay (UPI, Card, NetBanking)</p>
                 <button id="payBtn"
                     class="w-full px-6 py-3.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-base transition">
-                    💳 Pay ₹{{ number_format($bill->due_amount, 0) }} Now
+                    <i class="fa-solid fa-credit-card fa-fw"></i> Pay ₹{{ number_format($bill->due_amount, 0) }} Now
                 </button>
                 <p class="text-xs text-ink-900/40 mt-2">Powered by Razorpay · 100% Secure</p>
             </div>

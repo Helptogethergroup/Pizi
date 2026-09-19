@@ -4,7 +4,7 @@
 
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
     <div>
-        <h1 class="font-display font-black text-3xl">📄 Rent Agreements</h1>
+        <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-file-lines fa-fw"></i> Rent Agreements</h1>
         <p class="text-ink-900/60 mt-1">Digital rental contracts with e-signatures</p>
     </div>
     <a href="{{ route('owner.agreements.create') }}" class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-coral-500/30">+ New Agreement</a>
@@ -34,18 +34,18 @@
     <input name="q" value="{{ request('q') }}" placeholder="Agreement no / tenant name..." class="flex-1 min-w-[200px] px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
     <select name="status" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
         <option value="">All Status</option>
-        <option value="draft" @selected(request('status')==='draft')>📝 Draft</option>
-        <option value="active" @selected(request('status')==='active')>✅ Active</option>
-        <option value="expired" @selected(request('status')==='expired')>⏰ Expired</option>
-        <option value="terminated" @selected(request('status')==='terminated')>❌ Terminated</option>
-        <option value="renewed" @selected(request('status')==='renewed')>🔄 Renewed</option>
+        <option value="draft" @selected(request('status')==='draft')>Draft</option>
+        <option value="active" @selected(request('status')==='active')>Active</option>
+        <option value="expired" @selected(request('status')==='expired')>Expired</option>
+        <option value="terminated" @selected(request('status')==='terminated')>Terminated</option>
+        <option value="renewed" @selected(request('status')==='renewed')>Renewed</option>
     </select>
     <button class="px-5 py-2.5 bg-ink-950 text-cream rounded-lg text-sm font-bold">Filter</button>
 </form>
 
 @if($agreements->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">📄</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-file-lines fa-fw"></i></div>
         <p class="text-ink-700 mb-4">No agreements yet.</p>
         <a href="{{ route('owner.agreements.create') }}" class="inline-block px-5 py-3 bg-coral-500 text-white rounded-xl font-bold">+ Create First Agreement</a>
     </div>
@@ -69,14 +69,14 @@
                             @endif
 
                             @if($agreement->is_expiring_soon)
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⚠️ Expires in {{ $agreement->days_remaining }} days</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Expires in {{ $agreement->days_remaining }} days</span>
                             @endif
                         </div>
                         <h3 class="font-bold">{{ $agreement->tenant?->name }}</h3>
                         <div class="flex items-center gap-3 text-xs text-ink-700 mt-1 flex-wrap">
-                            <span>🏠 {{ $agreement->property?->name }}</span>
-                            @if($agreement->room_number)<span>🚪 Room {{ $agreement->room_number }}</span>@endif
-                            <span>📅 {{ $agreement->start_date->format('d M Y') }} → {{ $agreement->end_date->format('d M Y') }}</span>
+                            <span><i class="fa-solid fa-house fa-fw"></i> {{ $agreement->property?->name }}</span>
+                            @if($agreement->room_number)<span><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $agreement->room_number }}</span>@endif
+                            <span><i class="fa-solid fa-calendar-days fa-fw"></i> {{ $agreement->start_date->format('d M Y') }} → {{ $agreement->end_date->format('d M Y') }}</span>
                             <span class="font-bold text-coral-600">₹{{ number_format($agreement->monthly_rent) }}/mo</span>
                         </div>
                     </div>

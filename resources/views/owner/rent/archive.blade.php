@@ -4,13 +4,13 @@
 
 <div class="mb-6">
     <a href="{{ route('owner.rent.index') }}" class="text-coral-500 font-bold">← Back to Rent Collection</a>
-    <h1 class="font-display font-black text-3xl mt-2">🗄️ Bill Archive</h1>
+    <h1 class="font-display font-black text-3xl mt-2"><i class="fa-solid fa-box-archive fa-fw"></i> Bill Archive</h1>
     <p class="text-ink-900/60 mt-1">30+ din purane aur deleted bills — sirf owner ke liye visible.</p>
 </div>
 
 {{-- Deleted Bills --}}
 <div class="mb-8">
-    <h2 class="font-display font-bold text-xl mb-3 text-rose-700">🗑️ Deleted Bills ({{ $deletedBills->total() }})</h2>
+    <h2 class="font-display font-bold text-xl mb-3 text-rose-700"><i class="fa-solid fa-trash-can fa-fw"></i> Deleted Bills ({{ $deletedBills->total() }})</h2>
     @if($deletedBills->isEmpty())
         <div class="bg-white p-6 rounded-2xl border border-ink-100 text-center text-ink-700">Koi deleted bill nahi hai.</div>
     @else
@@ -39,7 +39,7 @@
 
 {{-- Old Bills (30+ days) --}}
 <div>
-    <h2 class="font-display font-bold text-xl mb-3">📅 Bills Older Than 30 Days ({{ $oldBills->total() }})</h2>
+    <h2 class="font-display font-bold text-xl mb-3"><i class="fa-solid fa-calendar-days fa-fw"></i> Bills Older Than 30 Days ({{ $oldBills->total() }})</h2>
     @if($oldBills->isEmpty())
         <div class="bg-white p-6 rounded-2xl border border-ink-100 text-center text-ink-700">Koi purana bill nahi hai.</div>
     @else

@@ -125,9 +125,9 @@
             <div class="bg-gray-100 p-6 rounded-lg">
                 <h3 class="font-semibold text-gray-900 mb-3">For Privacy Inquiries:</h3>
                 <p class="text-gray-700 mb-2"><strong>Pizi.in</strong></p>
-                <p class="text-gray-700 mb-1">📧 Email: <a href="mailto:info@pizi.in" class="text-blue-600 hover:underline"> info@pizi.in</a></p>
-                <p class="text-gray-700 mb-1">📞 Phone: <a href="tel:+918006680092" class="text-blue-600 hover:underline">+91 8006680092</a></p>
-                <p class="text-gray-700 mb-3">📍 Location: Delhi NCR, India</p>
+                <p class="text-gray-700 mb-1"><i class="fa-solid fa-envelope fa-fw"></i> Email: <a href="mailto:info@pizi.in" class="text-blue-600 hover:underline"> info@pizi.in</a></p>
+                <p class="text-gray-700 mb-1"><i class="fa-solid fa-phone fa-fw"></i> Phone: <a href="tel:+918006680092" class="text-blue-600 hover:underline">+91 8006680092</a></p>
+                <p class="text-gray-700 mb-3"><i class="fa-solid fa-location-dot fa-fw"></i> Location: Delhi NCR, India</p>
                 <p class="text-gray-600 text-sm">Response Time: We aim to respond within 7-10 business days</p>
             </div>
         </section>

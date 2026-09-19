@@ -9,7 +9,7 @@
         @if($errors->any())
             <div class="mt-6 mb-4 p-4 bg-rose-100 text-rose-700 rounded-lg text-sm">
                 @foreach($errors->all() as $error)
-                    <p>❌ {{ $error }}</p>
+                    <p><i class="fa-solid fa-circle-xmark fa-fw"></i> {{ $error }}</p>
                 @endforeach
             </div>
         @endif

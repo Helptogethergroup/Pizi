@@ -37,7 +37,7 @@
     </div>
 
     <div class="pt-4 border-t border-ink-100">
-        <h3 class="font-bold mb-3">🔍 SEO Settings</h3>
+        <h3 class="font-bold mb-3"><i class="fa-solid fa-magnifying-glass fa-fw"></i> SEO Settings</h3>
         <div class="space-y-3">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Meta Title</label>

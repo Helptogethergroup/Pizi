@@ -18,7 +18,7 @@
 
 @if($visits->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">📋</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-clipboard-list fa-fw"></i></div>
         <p class="text-ink-700">No visits found.</p>
     </div>
 @else
@@ -37,11 +37,11 @@
                                 {{ str_replace('_', ' ', $visit->status) }}
                             </span>
                             @if($visit->is_missed)
-                                <span class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-rose-600 text-white">🔴 Missed</span>
+                                <span class="text-xs font-bold uppercase px-2 py-0.5 rounded bg-rose-600 text-white"><i class="fa-solid fa-circle fa-fw" style="color:#ef4444"></i> Missed</span>
                             @endif
                         </div>
                         <h3 class="font-display font-bold text-lg text-ink-950">{{ $visit->property?->name ?? '—' }}</h3>
-                        <p class="text-sm text-ink-700 mt-1">📍 {{ $visit->property?->locality?->name }}, {{ $visit->property?->city?->name }}</p>
+                        <p class="text-sm text-ink-700 mt-1"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $visit->property?->locality?->name }}, {{ $visit->property?->city?->name }}</p>
                     </a>
                     <div class="text-right flex flex-col items-end gap-2">
                         <div>
@@ -49,7 +49,7 @@
                             <div class="font-bold text-ink-950">{{ $visit->scheduled_at->format('d M, h:i A') }}</div>
                         </div>
                         @if($lead?->phone)
-                            <a href="tel:{{ $lead->phone }}" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">📞 Call</a>
+                            <a href="tel:{{ $lead->phone }}" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call</a>
                         @endif
                     </div>
                 </div>

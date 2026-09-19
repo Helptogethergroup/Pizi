@@ -28,7 +28,7 @@
     </div>
 </div>
 
-<h2 class="font-display font-bold text-xl mb-4">🛏️ Beds ({{ $room->beds->count() }})</h2>
+<h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-bed fa-fw"></i> Beds ({{ $room->beds->count() }})</h2>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
     @foreach($room->beds as $bed)
@@ -47,8 +47,8 @@
             </div>
             @if($bed->tenant)
                 <div class="mt-2 text-sm">
-                    <div class="font-bold">👤 {{ $bed->tenant->name }}</div>
-                    <div class="text-ink-700">📞 {{ $bed->tenant->phone }}</div>
+                    <div class="font-bold"><i class="fa-solid fa-user fa-fw"></i> {{ $bed->tenant->name }}</div>
+                    <div class="text-ink-700"><i class="fa-solid fa-phone fa-fw"></i> {{ $bed->tenant->phone }}</div>
                     @if($bed->occupied_since)
                         <div class="text-xs text-ink-500">Since: {{ $bed->occupied_since->format('d M Y') }}</div>
                     @endif
@@ -61,7 +61,7 @@
 
 <form method="POST" action="{{ route('admin.rooms.destroy', $room) }}" onsubmit="return confirm('Delete room?')">
     @csrf @method('DELETE')
-    <button class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold">🗑️ Delete Room</button>
+    <button class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete Room</button>
 </form>
 
 @endsection

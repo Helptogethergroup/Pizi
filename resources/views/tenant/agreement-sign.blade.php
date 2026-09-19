@@ -66,7 +66,7 @@
 
 <div class="card border-0 rounded-4 mb-3" style="background:#fff8e1;">
     <div class="card-body p-3 d-flex gap-3 align-items-start">
-        <span style="font-size:20px;">🔐</span>
+        <span style="font-size:20px;"><i class="fa-solid fa-lock fa-fw"></i></span>
         <div>
             <div class="fw-semibold" style="color:#92400e;font-size:13px;">Aadhaar-based eSign</div>
             <div class="text-muted" style="font-size:12px;">You will receive an OTP on your Aadhaar-linked mobile. This signature is legally valid under IT Act 2000.</div>
@@ -86,7 +86,7 @@
 </div>
 
 <button id="signBtn" class="btn w-100 fw-semibold py-3 rounded-3 mb-2" style="background:#FF6B5B;color:#fff;border:none;font-size:15px;" onclick="initiateEsign()" disabled>
-    <span id="btnText">🔏 Sign with Aadhaar eSign</span>
+    <span id="btnText"><i class="fa-solid fa-lock fa-fw"></i> Sign with Aadhaar eSign</span>
     <span id="btnSpinner" class="d-none">
         <span class="spinner-border spinner-border-sm me-2"></span>Preparing document...
     </span>
@@ -96,7 +96,7 @@
 @else
 <div class="card border-0 shadow-sm rounded-4">
     <div class="card-body p-5 text-center">
-        <div style="font-size:52px;">📋</div>
+        <div style="font-size:52px;"><i class="fa-solid fa-clipboard-list fa-fw"></i></div>
         <h5 class="mt-3 fw-bold" style="color:#0F2748;">No Agreement Found</h5>
         <p class="text-muted">Your rental agreement has not been created yet. The PG owner will create it once your profile is reviewed.</p>
         <a href="{{ route('tenant.onboarding') }}" class="btn btn-outline-secondary mt-2 rounded-3">← Back to Onboarding</a>

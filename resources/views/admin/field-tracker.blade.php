@@ -7,7 +7,7 @@
         <h1 class="font-display font-black text-3xl">Field Executive Tracker</h1>
         <p class="text-ink-900/60 mt-1">Live view of field operations · {{ now()->format('l, d M Y') }}</p>
     </div>
-    <button onclick="window.location.reload()" class="px-4 py-2 bg-ink-900 text-cream rounded-lg text-sm">🔄 Refresh</button>
+    <button onclick="window.location.reload()" class="px-4 py-2 bg-ink-900 text-cream rounded-lg text-sm"><i class="fa-solid fa-rotate fa-fw"></i> Refresh</button>
 </div>
 
 {{-- Active visits (live) --}}
@@ -28,7 +28,7 @@
                     <div>
                         <div class="font-display font-bold text-lg">{{ $visit->fieldExecutive?->name }}</div>
                         <div class="text-xs text-emerald-700 font-semibold mt-0.5">
-                            ⏱ Inside since {{ $visit->checked_in_at?->diffForHumans() }}
+                            <i class="fa-solid fa-stopwatch fa-fw"></i> Inside since {{ $visit->checked_in_at?->diffForHumans() }}
                         </div>
                     </div>
                     <span class="px-2 py-1 rounded-full text-xs bg-emerald-500 text-white font-bold">LIVE</span>
@@ -37,27 +37,27 @@
                 <div class="mt-3 pt-3 border-t border-emerald-200 text-sm">
                     <div class="text-xs text-ink-900/60 uppercase">Visiting</div>
                     <div class="font-semibold">{{ $visit->property?->name }}</div>
-                    <div class="text-xs text-ink-900/60">📍 {{ $visit->property?->locality?->name }}</div>
+                    <div class="text-xs text-ink-900/60"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $visit->property?->locality?->name }}</div>
                 </div>
 
                 <div class="mt-2 text-sm">
                     <div class="text-xs text-ink-900/60 uppercase">With tenant</div>
-                    <div class="font-semibold">{{ $visit->lead?->name }} · 📞 {{ $visit->lead?->phone }}</div>
+                    <div class="font-semibold">{{ $visit->lead?->name }} · <i class="fa-solid fa-phone fa-fw"></i> {{ $visit->lead?->phone }}</div>
                 </div>
 
                 @if($visit->checkin_distance_m !== null)
                     <div class="mt-2 text-xs">
                         @if($visit->checkin_distance_m <= 100)
-                            <span class="text-emerald-700">✅ Checked in within {{ $visit->checkin_distance_m }}m</span>
+                            <span class="text-emerald-700"><i class="fa-solid fa-circle-check fa-fw"></i> Checked in within {{ $visit->checkin_distance_m }}m</span>
                         @else
-                            <span class="text-rose-700">⚠️ Checked in {{ $visit->checkin_distance_m }}m away (admin override)</span>
+                            <span class="text-rose-700"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Checked in {{ $visit->checkin_distance_m }}m away (admin override)</span>
                         @endif
                     </div>
                 @endif
 
                 @if($visit->checkin_lat && $visit->checkin_lng)
                     <a href="https://www.google.com/maps?q={{ $visit->checkin_lat }},{{ $visit->checkin_lng }}" target="_blank"
-                       class="inline-block mt-3 text-xs text-coral-600 font-semibold">📍 View on Google Maps →</a>
+                       class="inline-block mt-3 text-xs text-coral-600 font-semibold"><i class="fa-solid fa-location-dot fa-fw"></i> View on Google Maps →</a>
                 @endif
             </div>
         @endforeach
@@ -74,7 +74,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="font-display font-bold text-lg">{{ $exec->name }}</div>
-                        <div class="text-xs text-ink-900/60">📞 {{ $exec->phone }}</div>
+                        <div class="text-xs text-ink-900/60"><i class="fa-solid fa-phone fa-fw"></i> {{ $exec->phone }}</div>
                     </div>
                     @if($exec->today_done >= $exec->today_total && $exec->today_total > 0)
                         <span class="px-2 py-1 rounded-full text-xs bg-emerald-100 text-emerald-700">✓ Done</span>
@@ -128,7 +128,7 @@
                     <td class="text-xs">{{ $v->property?->name }}</td>
                     <td class="text-xs">
                         @if($v->checked_in_at)
-                            ✅ {{ $v->checked_in_at->format('h:i A') }}
+                            <i class="fa-solid fa-circle-check fa-fw"></i> {{ $v->checked_in_at->format('h:i A') }}
                             @if($v->checkin_distance_m !== null)
                                 <span class="text-ink-900/50">({{ $v->checkin_distance_m }}m)</span>
                             @endif

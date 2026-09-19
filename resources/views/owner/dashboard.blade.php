@@ -10,7 +10,7 @@
         <p class="text-ink-900/60">Here's how your listings are doing.</p>
     </div>
     <a href="{{ route('owner.guide.show') }}" target="_blank" class="px-4 py-2 border border-ink-200 rounded-lg text-sm font-bold text-ink-700 hover:bg-cream">
-        ❓ Dashboard Guide
+        <i class="fa-solid fa-circle-question fa-fw"></i> Dashboard Guide
     </a>
 </div>
 
@@ -52,7 +52,7 @@
         @forelse($recentLeads as $lead)
             <div class="py-2 border-t border-ink-900/5 first:border-t-0">
                 <div class="font-semibold text-sm">{{ $lead->name }}</div>
-                <div class="text-xs text-ink-900/50">📞 {{ $lead->phone }} · {{ $lead->property?->name }}</div>
+                <div class="text-xs text-ink-900/50"><i class="fa-solid fa-phone fa-fw"></i> {{ $lead->phone }} · {{ $lead->property?->name }}</div>
                 <div class="text-xs text-ink-900/40 mt-1">{{ $lead->created_at->diffForHumans() }}</div>
             </div>
         @empty

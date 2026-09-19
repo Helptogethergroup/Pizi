@@ -12,6 +12,7 @@
             body { padding: 0 !important; }
         }
     </style>
+@include('partials.emoji-icons')
 </head>
 <body class="bg-gray-50 p-6">
 
@@ -23,7 +24,7 @@
                 <button onclick="setLang('hi')" id="btnHi" class="px-4 py-2 rounded-lg text-sm font-bold bg-gray-200 text-gray-700">हिंदी</button>
             </div>
             <button onclick="window.print()" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold text-sm">
-                🖨️ Print / Save as PDF
+                <i class="fa-solid fa-print fa-fw"></i> Print / Save as PDF
             </button>
         </div>
 

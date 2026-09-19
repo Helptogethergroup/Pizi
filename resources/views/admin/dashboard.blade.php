@@ -27,7 +27,7 @@
 <div class="mt-8 p-6 rounded-2xl bg-gradient-to-br from-ink-900 to-ink-950 text-cream">
     <div class="flex items-center justify-between">
         <div>
-            <div class="text-xs uppercase tracking-wider text-coral-400">🎯 Lead Routing Engine</div>
+            <div class="text-xs uppercase tracking-wider text-coral-400"><i class="fa-solid fa-bullseye fa-fw"></i> Lead Routing Engine</div>
             <h2 class="font-display font-bold text-2xl mt-1">Smart matching is active</h2>
             <p class="text-cream/70 text-sm mt-2">
                 Every lead is auto-scored against owners' properties using location (40%), budget (30%), gender (20%), and availability (10%).
@@ -35,7 +35,7 @@
             </p>
         </div>
         <div class="text-right">
-            <div class="text-4xl">🤖</div>
+            <div class="text-4xl"><i class="fa-solid fa-robot fa-fw"></i></div>
         </div>
     </div>
 </div>
@@ -83,7 +83,7 @@
 @if($unmatchedLeads->count())
 <div class="mt-10 p-6 rounded-2xl bg-amber-50 border-2 border-amber-200">
     <div class="flex items-start gap-3">
-        <span class="text-3xl">⚠️</span>
+        <span class="text-3xl"><i class="fa-solid fa-triangle-exclamation fa-fw"></i></span>
         <div class="flex-1">
             <h2 class="font-display font-bold text-xl text-amber-900">
                 {{ $unmatchedLeads->count() }} unmatched leads (last 7 days)
@@ -98,8 +98,8 @@
                         <div>
                             <div class="font-semibold">{{ $lead->name }}</div>
                             <div class="text-xs text-ink-900/60">
-                                📍 {{ $lead->preferred_locality ?? '—' }} {{ $lead->preferred_city ? ", {$lead->preferred_city}" : '' }}
-                                · 💰 ₹{{ number_format($lead->budget_max ?? 0) }}
+                                <i class="fa-solid fa-location-dot fa-fw"></i> {{ $lead->preferred_locality ?? '—' }} {{ $lead->preferred_city ? ", {$lead->preferred_city}" : '' }}
+                                · <i class="fa-solid fa-sack-dollar fa-fw"></i> ₹{{ number_format($lead->budget_max ?? 0) }}
                                 · {{ ucfirst($lead->preferred_gender ?? 'any') }}
                             </div>
                         </div>

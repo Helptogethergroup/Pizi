@@ -11,7 +11,7 @@
     @csrf @method('PATCH')
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">🏠 Property</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-house fa-fw"></i> Property</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-3">
                 <select name="property_id" required class="w-full px-4 py-3 rounded-xl border border-ink-200">
@@ -29,7 +29,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">👤 Personal</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-user fa-fw"></i> Personal</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input name="name" required value="{{ $tenant->name }}" placeholder="Name" class="px-4 py-3 rounded-xl border border-ink-200">
             <input name="phone" required value="{{ $tenant->phone }}" placeholder="Phone" class="px-4 py-3 rounded-xl border border-ink-200">
@@ -47,7 +47,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">📍 Address</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-location-dot fa-fw"></i> Address</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <textarea name="address_line" rows="2" placeholder="Address" class="md:col-span-2 px-4 py-3 rounded-xl border border-ink-200">{{ $tenant->address_line }}</textarea>
             <input name="city" value="{{ $tenant->city }}" placeholder="City" class="px-4 py-3 rounded-xl border border-ink-200">
@@ -57,7 +57,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">🚨 Emergency</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Emergency</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <input name="emergency_name" value="{{ $tenant->emergency_name }}" placeholder="Name" class="px-4 py-3 rounded-xl border border-ink-200">
             <input name="emergency_phone" value="{{ $tenant->emergency_phone }}" placeholder="Phone" class="px-4 py-3 rounded-xl border border-ink-200">

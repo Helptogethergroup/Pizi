@@ -24,19 +24,19 @@
                         @if($tenant->kyc_status === 'approved')
                             <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">✓ KYC Verified</span>
                         @elseif($tenant->kyc_status === 'submitted')
-                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">📋 KYC Under Review</span>
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-clipboard-list fa-fw"></i> KYC Under Review</span>
                         @elseif($tenant->kyc_status === 'rejected')
-                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">❌ KYC Rejected</span>
+                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle-xmark fa-fw"></i> KYC Rejected</span>
                         @else
-                            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⏳ KYC Pending</span>
+                            <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> KYC Pending</span>
                         @endif
                     </div>
                     <div class="flex items-center gap-3 text-sm text-ink-700 mt-2 flex-wrap">
-                        <span>📞 {{ $tenant->phone }}</span>
-                        @if($tenant->email)<span>📧 {{ $tenant->email }}</span>@endif
+                        <span><i class="fa-solid fa-phone fa-fw"></i> {{ $tenant->phone }}</span>
+                        @if($tenant->email)<span><i class="fa-solid fa-envelope fa-fw"></i> {{ $tenant->email }}</span>@endif
                     </div>
                 </div>
-                <a href="{{ route('owner.tenants.edit', $tenant) }}" class="px-4 py-2 bg-ink-950 text-cream rounded-xl text-sm font-bold">✏ Edit Details</a>
+                <a href="{{ route('owner.tenants.edit', $tenant) }}" class="px-4 py-2 bg-ink-950 text-cream rounded-xl text-sm font-bold"><i class="fa-solid fa-pencil fa-fw"></i> Edit Details</a>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 pt-5 border-t border-ink-100">
@@ -61,7 +61,7 @@
 
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
             <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <h2 class="font-display font-bold text-xl">📄 KYC Documents</h2>
+                <h2 class="font-display font-bold text-xl"><i class="fa-solid fa-file-lines fa-fw"></i> KYC Documents</h2>
                 <div class="text-sm font-bold text-emerald-700">{{ $tenant->kyc_progress }}% Complete</div>
             </div>
 
@@ -96,7 +96,7 @@
                     <input name="document_number" placeholder="Document number (optional)" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
                 </div>
                 <input type="file" name="file" required accept="image/*,.pdf" class="w-full text-sm">
-                <button class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-lg text-sm font-bold">📤 Upload Document</button>
+                <button class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i> Upload Document</button>
             </form>
 
             @if($tenant->documents->count())
@@ -104,7 +104,7 @@
                     @foreach($tenant->documents as $doc)
                         <div class="rounded-xl border border-ink-100 overflow-hidden">
                             @if(str_ends_with(strtolower($doc->file_path), '.pdf'))
-                                <div class="aspect-square bg-rose-50 flex items-center justify-center text-4xl">📄</div>
+                                <div class="aspect-square bg-rose-50 flex items-center justify-center text-4xl"><i class="fa-solid fa-file-lines fa-fw"></i></div>
                             @else
                                 <a href="{{ $doc->url }}" target="_blank">
                                     <img src="{{ $doc->url }}" class="w-full aspect-square object-cover">
@@ -117,7 +117,7 @@
                                     <a href="{{ $doc->url }}" target="_blank" class="flex-1 px-2 py-1 bg-blue-500 text-white rounded text-xs text-center font-bold">View</a>
                                     <form method="POST" action="{{ route('owner.tenants.documents.delete', $doc) }}" onsubmit="return confirm('Delete this document?')" class="inline-block">
                                         @csrf @method('DELETE')
-                                        <button class="px-2 py-1 bg-rose-500 text-white rounded text-xs font-bold">🗑</button>
+                                        <button class="px-2 py-1 bg-rose-500 text-white rounded text-xs font-bold"><i class="fa-solid fa-trash-can fa-fw"></i></button>
                                     </form>
                                 </div>
                             </div>
@@ -137,7 +137,7 @@
                     <form method="POST" action="{{ route('owner.tenants.kyc.reject', $tenant) }}" class="inline-flex gap-2 items-center">
                         @csrf @method('PATCH')
                         <input name="remarks" placeholder="Reason for rejection" class="px-3 py-2 border border-ink-200 rounded-lg text-sm">
-                        <button class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold">❌ Reject</button>
+                        <button class="px-5 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-circle-xmark fa-fw"></i> Reject</button>
                     </form>
                 </div>
             @endif
@@ -151,7 +151,7 @@
         </div>
 
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
-            <h2 class="font-display font-bold text-xl mb-4">📋 Personal Details</h2>
+            <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-clipboard-list fa-fw"></i> Personal Details</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
                 <div><span class="text-ink-500">DOB:</span> <strong>{{ $tenant->dob?->format('d M Y') ?? '—' }}</strong></div>
                 <div><span class="text-ink-500">Gender:</span> <strong class="capitalize">{{ $tenant->gender ?? '—' }}</strong></div>
@@ -163,7 +163,7 @@
 
         @if($tenant->emergency_name)
         <div class="bg-amber-50 p-6 rounded-2xl border border-amber-200">
-            <h2 class="font-display font-bold text-xl mb-3">🚨 Emergency Contact</h2>
+            <h2 class="font-display font-bold text-xl mb-3"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Emergency Contact</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                 <div><span class="text-amber-700">Name:</span> <strong>{{ $tenant->emergency_name }}</strong></div>
                 <div><span class="text-amber-700">Phone:</span> <strong>{{ $tenant->emergency_phone }}</strong></div>
@@ -177,10 +177,10 @@
     <div class="lg:col-span-1">
         <div class="lg:sticky lg:top-24 space-y-4">
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
-                <h3 class="font-display font-bold mb-3">⚡ Quick Actions</h3>
+                <h3 class="font-display font-bold mb-3"><i class="fa-solid fa-bolt fa-fw"></i> Quick Actions</h3>
                 <div class="space-y-2">
-                    <a href="https://wa.me/91{{ $tenant->phone }}" target="_blank" class="block w-full text-center px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold">💬 WhatsApp</a>
-                    <a href="tel:{{ $tenant->phone }}" class="block w-full text-center px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold">📞 Call</a>
+                    <a href="https://wa.me/91{{ $tenant->phone }}" target="_blank" class="block w-full text-center px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp</a>
+                    <a href="tel:{{ $tenant->phone }}" class="block w-full text-center px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call</a>
                 </div>
             </div>
 
@@ -190,16 +190,16 @@
                     @csrf @method('PATCH')
                     <select name="status" onchange="this.form.submit()" class="w-full px-3 py-2.5 rounded-lg border border-ink-200 text-sm">
                         <option value="active" @selected($tenant->status==='active')>✓ Active</option>
-                        <option value="notice_period" @selected($tenant->status==='notice_period')>⚠️ Notice Period</option>
-                        <option value="left" @selected($tenant->status==='left')>👋 Left</option>
-                        <option value="blacklisted" @selected($tenant->status==='blacklisted')>🚫 Blacklisted</option>
+                        <option value="notice_period" @selected($tenant->status==='notice_period')>Notice Period</option>
+                        <option value="left" @selected($tenant->status==='left')>Left</option>
+                        <option value="blacklisted" @selected($tenant->status==='blacklisted')>Blacklisted</option>
                     </select>
                 </form>
             </div>
 
             <form method="POST" action="{{ route('owner.tenants.destroy', $tenant) }}" onsubmit="return confirm('Delete this tenant permanently?')">
                 @csrf @method('DELETE')
-                <button class="w-full px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold">🗑️ Delete Tenant</button>
+                <button class="w-full px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete Tenant</button>
             </form>
         </div>
     </div>

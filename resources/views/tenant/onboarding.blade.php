@@ -9,12 +9,12 @@
 <div class="max-w-4xl mx-auto mb-4">
     <div class="bg-emerald-50 border border-emerald-300 rounded-2xl p-4 d-flex align-items-center justify-content-between">
         <div>
-            <div class="font-bold text-emerald-800">✅ Agreement Signed Successfully!</div>
+            <div class="font-bold text-emerald-800"><i class="fa-solid fa-circle-check fa-fw"></i> Agreement Signed Successfully!</div>
             <div class="text-sm text-emerald-700 mt-1">Your signed agreement is ready to download.</div>
         </div>
         <a href="{{ session('signed_doc_url') }}" target="_blank" 
            class="inline-block px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-sm ms-4">
-            ⬇ Download PDF
+            <i class="fa-solid fa-arrow-down fa-fw"></i> Download PDF
         </a>
     </div>
 </div>
@@ -30,7 +30,7 @@
     
     {{-- HEADER --}}
     <div class="bg-gradient-to-br from-ink-950 to-ink-900 text-cream rounded-3xl p-6 lg:p-8">
-        <h1 class="font-display font-black text-3xl lg:text-4xl">Hi {{ auth()->user()->name }} 👋</h1>
+        <h1 class="font-display font-black text-3xl lg:text-4xl">Hi {{ auth()->user()->name }} <i class="fa-solid fa-hand fa-fw"></i></h1>
         <p class="text-cream/70 mt-2">Complete your verification to unlock your dashboard</p>
         
         {{-- Progress bar --}}
@@ -46,7 +46,7 @@
 
         @if($completedCount >= $totalSteps)
             <div class="mt-6 p-4 bg-emerald-500/20 border border-emerald-400 rounded-xl">
-                <div class="font-bold text-lg">🎉 All steps complete!</div>
+                <div class="font-bold text-lg"><i class="fa-solid fa-champagne-glasses fa-fw"></i> All steps complete!</div>
                 <a href="{{ route('tenant.dashboard') }}" class="inline-block mt-3 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold">
                     Go to Dashboard →
                 </a>
@@ -56,7 +56,7 @@
         @if($agreement && $agreement->signed_doc_url)
 <a href="{{ $agreement->signed_doc_url }}" target="_blank" 
    class="inline-block mt-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold ms-2">
-    ⬇ Download Signed Agreement
+    <i class="fa-solid fa-arrow-down fa-fw"></i> Download Signed Agreement
 </a>
 @endif
     </div>
@@ -78,7 +78,7 @@
                         @elseif($step['unlocked'])
                             <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-coral-500 text-white flex items-center justify-center text-2xl">{{ $step['icon'] }}</div>
                         @else
-                            <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-ink-100 text-ink-400 flex items-center justify-center text-2xl">🔒</div>
+                            <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-ink-100 text-ink-400 flex items-center justify-center text-2xl"><i class="fa-solid fa-lock fa-fw"></i></div>
                         @endif
                     </div>
 
@@ -91,7 +91,7 @@
                             @elseif($step['unlocked'])
                                 <span class="px-2 py-0.5 bg-coral-100 text-coral-700 text-xs rounded-full font-bold uppercase">In Progress</span>
                             @else
-                                <span class="px-2 py-0.5 bg-ink-100 text-ink-500 text-xs rounded-full font-bold uppercase">🔒 Locked</span>
+                                <span class="px-2 py-0.5 bg-ink-100 text-ink-500 text-xs rounded-full font-bold uppercase"><i class="fa-solid fa-lock fa-fw"></i> Locked</span>
                             @endif
                         </div>
                         <h3 class="font-bold text-lg lg:text-xl mt-1">{{ $step['title'] }}</h3>
@@ -103,7 +103,7 @@
                             </a>
                         @elseif(!$step['completed'] && $step['unlocked'] && !$step['cta_route'])
                             <div class="inline-block mt-3 px-5 py-2.5 bg-amber-100 text-amber-800 rounded-xl font-bold text-sm">
-                                ⏳ {{ $step['cta'] }}
+                                <i class="fa-solid fa-hourglass-half fa-fw"></i> {{ $step['cta'] }}
                             </div>
                         @endif
                     </div>
@@ -116,7 +116,7 @@
     <div class="mt-8 p-5 bg-cream rounded-2xl border border-ink-900/10 text-center">
         <p class="text-sm text-ink-900/70">Need help? Contact us on WhatsApp</p>
         <a href="https://wa.me/918006680092" target="_blank" class="inline-block mt-2 px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full text-sm font-bold">
-            💬 Chat with us
+            <i class="fa-solid fa-comment-dots fa-fw"></i> Chat with us
         </a>
     </div>
 </div>

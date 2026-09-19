@@ -13,16 +13,16 @@
         <label class="text-xs font-bold uppercase text-ink-900/60">Category *</label>
         <select name="category" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15 focus:border-coral-500 outline-none">
             <option value="">— Select category —</option>
-            <option value="electricity">⚡ Electricity</option>
-            <option value="water">💧 Water</option>
-            <option value="plumbing">🚿 Plumbing</option>
-            <option value="wifi">📶 WiFi / Internet</option>
-            <option value="food">🍽️ Food</option>
-            <option value="cleaning">🧹 Cleaning / Housekeeping</option>
-            <option value="security">🔒 Security</option>
-            <option value="ac">❄️ AC / Cooling</option>
-            <option value="furniture">🛋️ Furniture / Damage</option>
-            <option value="other">📝 Other</option>
+            <option value="electricity">Electricity</option>
+            <option value="water">Water</option>
+            <option value="plumbing">Plumbing</option>
+            <option value="wifi">WiFi / Internet</option>
+            <option value="food">Food</option>
+            <option value="cleaning">Cleaning / Housekeeping</option>
+            <option value="security">Security</option>
+            <option value="ac">AC / Cooling</option>
+            <option value="furniture">Furniture / Damage</option>
+            <option value="other">Other</option>
         </select>
     </div>
 
@@ -49,7 +49,7 @@
     </div>
 
     <button type="submit" class="px-8 py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold">
-        🚀 Submit Complaint
+        <i class="fa-solid fa-rocket fa-fw"></i> Submit Complaint
     </button>
 </form>
 

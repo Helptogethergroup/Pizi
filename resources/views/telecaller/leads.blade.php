@@ -29,7 +29,7 @@
        class="rounded-2xl border-2 p-5 flex items-center justify-between transition {{ request('inquiry_type') === 'tenant' ? 'border-coral-500 bg-coral-50' : 'border-ink-900/10 bg-white hover:border-coral-300' }}">
         <div>
             <div class="text-xs uppercase font-bold text-ink-900/50">Looking for a PG</div>
-            <div class="font-display font-black text-2xl">🧳 Tenant Leads</div>
+            <div class="font-display font-black text-2xl"><i class="fa-solid fa-suitcase-rolling fa-fw"></i> Tenant Leads</div>
         </div>
         <div class="text-3xl font-black text-coral-500">{{ $tenantCount }}</div>
     </a>
@@ -37,7 +37,7 @@
        class="rounded-2xl border-2 p-5 flex items-center justify-between transition {{ request('inquiry_type') === 'owner' ? 'border-coral-500 bg-coral-50' : 'border-ink-900/10 bg-white hover:border-coral-300' }}">
         <div>
             <div class="text-xs uppercase font-bold text-ink-900/50">Wants to list their PG</div>
-            <div class="font-display font-black text-2xl">🏠 Owner Leads</div>
+            <div class="font-display font-black text-2xl"><i class="fa-solid fa-house fa-fw"></i> Owner Leads</div>
         </div>
         <div class="text-3xl font-black text-coral-500">{{ $ownerCount }}</div>
     </a>
@@ -69,7 +69,7 @@
             <tr class="border-t border-ink-900/5 hover:bg-ink-900/5">
                 <td class="px-4 py-3">
                     <div class="font-semibold">{{ $lead->name }}</div>
-                    <div class="text-xs text-ink-900/50">📞 {{ $lead->phone }}</div>
+                    <div class="text-xs text-ink-900/50"><i class="fa-solid fa-phone fa-fw"></i> {{ $lead->phone }}</div>
                 </td>
                 <td>
                     @php $ib = $lead->inquiryTypeBadge(); @endphp
@@ -96,19 +96,19 @@
                             onclick="openEditModal({{ $lead->id }})"
                             class="text-xs px-2 py-1 rounded bg-blue-500 text-white font-semibold hover:bg-blue-600"
                         >
-                            ✏️ Edit
+                            <i class="fa-solid fa-pencil fa-fw"></i> Edit
                         </button>
 
                         <button
                             onclick="openRemarkModal({{ $lead->id }})"
                             class="text-xs px-2 py-1 rounded bg-purple-500 text-white font-semibold hover:bg-purple-600"
                         >
-                            💬 Remark
+                            <i class="fa-solid fa-comment-dots fa-fw"></i> Remark
                         </button>
 
                         <a href="{{ route('telecaller.leads.show', $lead) }}" class="text-xs px-2 py-1 rounded bg-ink-900 text-cream font-semibold">Open</a>
 
-                        <a href="tel:{{ $lead->phone }}" class="text-xs px-2 py-1 rounded bg-emerald-500 text-white font-semibold">📞 Call</a>
+                        <a href="tel:{{ $lead->phone }}" class="text-xs px-2 py-1 rounded bg-emerald-500 text-white font-semibold"><i class="fa-solid fa-phone fa-fw"></i> Call</a>
                     </div>
                 </td>
                 <td>
@@ -120,7 +120,7 @@
                         }
                     @endphp
                     @if($ownerClaim)
-                        <span class="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold">🔒 Owner claimed</span>
+                        <span class="text-xs px-2 py-1 rounded-full bg-emerald-100 text-emerald-700 font-semibold"><i class="fa-solid fa-lock fa-fw"></i> Owner claimed</span>
                     @endif
                 </td>
             </tr>
@@ -161,9 +161,9 @@
             <div>
                 <label class="block text-xs uppercase text-ink-900/60 mb-1">Inquiry Type</label>
                 <select id="editInquiryType" name="inquiry_type" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
-                    <option value="tenant">🧳 Tenant — looking for a PG</option>
-                    <option value="owner">🏠 Owner — wants to list a PG</option>
-                    <option value="unknown">❓ Unknown</option>
+                    <option value="tenant">Tenant — looking for a PG</option>
+                    <option value="owner">Owner — wants to list a PG</option>
+                    <option value="unknown">Unknown</option>
                 </select>
             </div>
 

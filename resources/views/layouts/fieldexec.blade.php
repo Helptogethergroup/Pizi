@@ -23,6 +23,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f6f5f1; }
         h1, h2, h3, .font-display { font-family: 'Fraunces', serif; letter-spacing: -0.02em; }
     </style>
+@include('partials.emoji-icons')
 </head>
 <body class="text-ink-950">
 
@@ -39,16 +40,16 @@
 
         <nav class="flex-1 p-4 space-y-1 text-sm">
             <a href="{{ route('fieldexec.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('fieldexec.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">
-                🏠 Today's Visits
+                <i class="fa-solid fa-house fa-fw"></i> Today's Visits
             </a>
             <a href="{{ route('fieldexec.visits.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('fieldexec.visits.*') ? 'bg-cream/10 text-coral-500' : '' }}">
-                📋 All Visits
+                <i class="fa-solid fa-clipboard-list fa-fw"></i> All Visits
             </a>
             <a href="{{ route('fieldexec.visits.index', ['filter' => 'closed']) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">
-                ✅ Closed Visits
+                <i class="fa-solid fa-circle-check fa-fw"></i> Closed Visits
             </a>
             <a href="{{ route('notifications.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('notifications.*') ? 'bg-cream/10 text-coral-500' : '' }}">
-                🔔 Notifications
+                <i class="fa-solid fa-bell fa-fw"></i> Notifications
                 @php $u = auth()->user()->unreadNotifications->count(); @endphp
                 @if($u > 0)
                     <span class="ml-auto px-2 py-0.5 rounded-full bg-coral-500 text-white text-xs font-bold">{{ $u }}</span>
@@ -75,7 +76,7 @@
         {{-- Top header (DESKTOP) - shows name + logout --}}
         <header class="hidden md:flex bg-white border-b border-ink-900/10 px-6 py-3 items-center justify-end gap-4">
             <span class="text-sm text-ink-900/70">Hi, <strong>{{ auth()->user()->name }}</strong></span>
-            <span class="px-2 py-1 rounded-full text-xs bg-coral-500 text-white font-bold">🚗 Field Executive</span>
+            <span class="px-2 py-1 rounded-full text-xs bg-coral-500 text-white font-bold"><i class="fa-solid fa-car fa-fw"></i> Field Executive</span>
             <form method="POST" action="{{ route('logout') }}">@csrf
                 <button class="text-sm px-3 py-1.5 rounded-lg border border-ink-900/15 hover:bg-cream">Logout</button>
             </form>
@@ -114,22 +115,22 @@
 <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-ink-900/10 md:hidden">
     <div class="grid grid-cols-4 max-w-md mx-auto">
         <a href="{{ route('fieldexec.dashboard') }}" class="flex flex-col items-center py-3 {{ request()->routeIs('fieldexec.dashboard') ? 'text-coral-500' : 'text-ink-900/60' }}">
-            <div class="text-xl">🏠</div>
+            <div class="text-xl"><i class="fa-solid fa-house fa-fw"></i></div>
             <div class="text-xs font-semibold mt-0.5">Today</div>
         </a>
         <a href="{{ route('fieldexec.visits.index') }}" class="flex flex-col items-center py-3 {{ request()->routeIs('fieldexec.visits.*') ? 'text-coral-500' : 'text-ink-900/60' }}">
-            <div class="text-xl">📋</div>
+            <div class="text-xl"><i class="fa-solid fa-clipboard-list fa-fw"></i></div>
             <div class="text-xs font-semibold mt-0.5">Visits</div>
         </a>
         <a href="{{ route('notifications.index') }}" class="relative flex flex-col items-center py-3 {{ request()->routeIs('notifications.*') ? 'text-coral-500' : 'text-ink-900/60' }}">
-            <div class="text-xl">🔔</div>
+            <div class="text-xl"><i class="fa-solid fa-bell fa-fw"></i></div>
             @if($u ?? 0 > 0)
                 <span class="absolute top-2 right-1/4 w-4 h-4 rounded-full bg-coral-500 text-white text-[10px] font-bold flex items-center justify-center">{{ $u }}</span>
             @endif
             <div class="text-xs font-semibold mt-0.5">Alerts</div>
         </a>
         <a href="{{ route('fieldexec.visits.index', ['filter' => 'closed']) }}" class="flex flex-col items-center py-3 text-ink-900/60">
-            <div class="text-xl">📊</div>
+            <div class="text-xl"><i class="fa-solid fa-chart-column fa-fw"></i></div>
             <div class="text-xs font-semibold mt-0.5">Closed</div>
         </a>
     </div>

@@ -7,7 +7,7 @@
 
 @section('content')
 
-<h1 class="font-display font-black text-3xl mb-2">📊 My Analytics</h1>
+<h1 class="font-display font-black text-3xl mb-2"><i class="fa-solid fa-chart-column fa-fw"></i> My Analytics</h1>
 <p class="text-ink-900/60">How your properties are performing</p>
 
 {{-- KPI cards --}}
@@ -32,12 +32,12 @@
 
 {{-- Property performance --}}
 <div class="bg-white p-6 rounded-2xl border border-ink-900/10 mb-6">
-    <h2 class="font-display font-bold text-xl mb-4">🏠 Property performance</h2>
+    <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-house fa-fw"></i> Property performance</h2>
     @forelse($properties as $p)
         <div class="flex items-center justify-between py-3 border-b border-ink-900/5 last:border-0">
             <div>
                 <div class="font-semibold">{{ $p->name }}</div>
-                <div class="text-xs text-ink-900/60">📍 {{ $p->locality?->name }}</div>
+                <div class="text-xs text-ink-900/60"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $p->locality?->name }}</div>
             </div>
             <div class="text-right">
                 <div class="text-sm">
@@ -55,14 +55,14 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {{-- Credit usage --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-1">💰 Credit usage (6 months)</h2>
+        <h2 class="font-display font-bold text-xl mb-1"><i class="fa-solid fa-sack-dollar fa-fw"></i> Credit usage (6 months)</h2>
         <p class="text-sm text-ink-900/60 mb-4">Monthly credit spending</p>
         <div class="h-64"><canvas id="creditChart"></canvas></div>
     </div>
 
     {{-- Lead types --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-1">🎯 Lead types received</h2>
+        <h2 class="font-display font-bold text-xl mb-1"><i class="fa-solid fa-bullseye fa-fw"></i> Lead types received</h2>
         <p class="text-sm text-ink-900/60 mb-4">Quality breakdown</p>
         <div class="h-64"><canvas id="typesChart"></canvas></div>
     </div>

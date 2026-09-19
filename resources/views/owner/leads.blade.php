@@ -9,7 +9,7 @@
     </div>
     <div class="flex items-center gap-3">
         <div class="px-4 py-2 bg-ink-950 text-cream rounded-xl font-bold">
-            🪙 {{ number_format($wallet->balance) }} credits
+            <i class="fa-solid fa-coins fa-fw"></i> {{ number_format($wallet->balance) }} credits
         </div>
         <a href="{{ route('owner.packages') }}" class="px-4 py-2 bg-coral-500 text-white rounded-xl font-bold">+ Buy Credits</a>
     </div>
@@ -72,9 +72,9 @@
             <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Inquiry</label>
             <select name="inquiry_type" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
                 <option value="">All</option>
-                <option value="tenant" @selected(request('inquiry_type') === 'tenant')>🧳 Tenant</option>
-                <option value="owner" @selected(request('inquiry_type') === 'owner')>🏠 Owner</option>
-                <option value="unknown" @selected(request('inquiry_type') === 'unknown')>❓ Unknown</option>
+                <option value="tenant" @selected(request('inquiry_type') === 'tenant')>Tenant</option>
+                <option value="owner" @selected(request('inquiry_type') === 'owner')>Owner</option>
+                <option value="unknown" @selected(request('inquiry_type') === 'unknown')>Unknown</option>
             </select>
         </div>
 
@@ -104,7 +104,7 @@
             <select name="locality" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
                 <option value="">All localities</option>
                 @foreach($localities as $loc)
-                    <option value="{{ $loc }}" @selected(request('locality') === $loc)>📍 {{ $loc }}</option>
+                    <option value="{{ $loc }}" @selected(request('locality') === $loc)>{{ $loc }}</option>
                 @endforeach
             </select>
         </div>
@@ -112,10 +112,10 @@
         <div>
             <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Sort by</label>
             <select name="sort" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
-                <option value="" @selected(!request('sort'))>🎯 Best Match</option>
-                <option value="newest" @selected(request('sort') === 'newest')>🆕 Newest first</option>
-                <option value="budget_high" @selected(request('sort') === 'budget_high')>💰 Budget: High to Low</option>
-                <option value="budget_low" @selected(request('sort') === 'budget_low')>💰 Budget: Low to High</option>
+                <option value="" @selected(!request('sort'))>Best Match</option>
+                <option value="newest" @selected(request('sort') === 'newest')>Newest first</option>
+                <option value="budget_high" @selected(request('sort') === 'budget_high')>Budget: High to Low</option>
+                <option value="budget_low" @selected(request('sort') === 'budget_low')>Budget: Low to High</option>
             </select>
         </div>
 
@@ -136,12 +136,12 @@
         @if(request()->boolean('area_only'))
             <a href="?{{ http_build_query($withoutAreaOnly) }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-coral-500 text-white">
-                📍 Only my area ✕
+                <i class="fa-solid fa-location-dot fa-fw"></i> Only my area ✕
             </a>
         @else
             <a href="?{{ http_build_query($areaOnlyParams) }}"
                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-cream text-ink-900/70 border border-ink-900/15 hover:bg-coral-50 hover:text-coral-700 hover:border-coral-200">
-                📍 Only my area
+                <i class="fa-solid fa-location-dot fa-fw"></i> Only my area
             </a>
         @endif
     </div>
@@ -154,18 +154,18 @@
     </a>
      <a href="?tab=verified"
             class="px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap {{ $tab === 'verified' ? 'bg-ink-950 text-cream' : 'text-ink-900/60 hover:bg-ink-900/5' }}">
-            ✅ Verified ({{ $counts['verified'] }})
+            <i class="fa-solid fa-circle-check fa-fw"></i> Verified ({{ $counts['verified'] }})
         </a>
         <a href="?tab=manual"
             class="px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap {{ $tab === 'manual' ? 'bg-ink-950 text-cream' : 'text-ink-900/60 hover:bg-ink-900/5' }}">
-            📋 Direct ({{ $counts['manual'] }})
+            <i class="fa-solid fa-clipboard-list fa-fw"></i> Direct ({{ $counts['manual'] }})
         </a>
 </div>
 
 {{-- Lead cards --}}
 @if($paginated->count() === 0)
     <div class="bg-white p-16 rounded-2xl border border-ink-900/10 text-center">
-        <div class="text-6xl mb-4">🔍</div>
+        <div class="text-6xl mb-4"><i class="fa-solid fa-magnifying-glass fa-fw"></i></div>
         <p class="font-display font-bold text-xl">No leads in this tab</p>
         <p class="text-sm text-ink-900/60 mt-2">Check other tabs or wait for new leads to come in.</p>
     </div>

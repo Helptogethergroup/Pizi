@@ -17,7 +17,7 @@
     </a>
     <a href="{{ route('owner.tenants.index', ['filter' => 'unassigned']) }}"
        class="px-4 py-2 rounded-xl text-sm font-bold {{ request('filter') === 'unassigned' ? 'bg-ink-950 text-cream' : 'bg-white border border-ink-200 text-ink-700' }}">
-        🆕 New Sign-ups Awaiting Assignment
+        <i class="fa-solid fa-certificate fa-fw"></i> New Sign-ups Awaiting Assignment
     </a>
 </div>
 
@@ -60,7 +60,7 @@
 
 @if($tenants->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">👥</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-users fa-fw"></i></div>
         <p class="text-ink-700 mb-4">No tenants yet. Add your first tenant!</p>
         <a href="{{ route('owner.tenants.create') }}" class="inline-block px-5 py-3 bg-coral-500 text-white rounded-xl font-bold">+ Add First Tenant</a>
     </div>
@@ -90,17 +90,17 @@
                             @if($tenant->kyc_status === 'approved')
                                 <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">✓ KYC Verified</span>
                             @elseif($tenant->kyc_status === 'submitted')
-                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">📋 KYC Submitted</span>
+                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-clipboard-list fa-fw"></i> KYC Submitted</span>
                             @elseif($tenant->kyc_status === 'rejected')
-                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">❌ KYC Rejected</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle-xmark fa-fw"></i> KYC Rejected</span>
                             @else
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⏳ KYC Pending</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> KYC Pending</span>
                             @endif
                         </div>
                         <div class="flex items-center gap-3 text-xs text-ink-700 flex-wrap">
-                            <span>📞 {{ $tenant->phone }}</span>
-                            @if($tenant->room_number)<span>🚪 Room {{ $tenant->room_number }}</span>@endif
-                            <span>🏠 {{ $tenant->property?->name }}</span>
+                            <span><i class="fa-solid fa-phone fa-fw"></i> {{ $tenant->phone }}</span>
+                            @if($tenant->room_number)<span><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $tenant->room_number }}</span>@endif
+                            <span><i class="fa-solid fa-house fa-fw"></i> {{ $tenant->property?->name }}</span>
                             @if($tenant->monthly_rent > 0)<span class="font-bold text-coral-600">₹{{ number_format($tenant->monthly_rent) }}/mo</span>@endif
                         </div>
                     </div>
@@ -109,13 +109,13 @@
                         @if(is_null($tenant->owner_id))
                             <button type="button" onclick="document.getElementById('claimForm{{ $tenant->id }}').classList.toggle('hidden')"
                                 class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold">
-                                ✅ Claim &amp; Assign Room
+                                <i class="fa-solid fa-circle-check fa-fw"></i> Claim &amp; Assign Room
                             </button>
                         @else
-                            <a href="{{ route('owner.tenants.show', $tenant) }}" class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-bold">👁 View</a>
-                            <a href="{{ route('owner.tenants.edit', $tenant) }}" class="px-3 py-2 bg-ink-100 hover:bg-ink-200 text-ink-950 rounded-lg text-xs font-bold">✏ Edit</a>
+                            <a href="{{ route('owner.tenants.show', $tenant) }}" class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-eye fa-fw"></i> View</a>
+                            <a href="{{ route('owner.tenants.edit', $tenant) }}" class="px-3 py-2 bg-ink-100 hover:bg-ink-200 text-ink-950 rounded-lg text-xs font-bold"><i class="fa-solid fa-pencil fa-fw"></i> Edit</a>
                         @endif
-                        <a href="https://wa.me/91{{ $tenant->phone }}" target="_blank" class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">💬 WA</a>
+                        <a href="https://wa.me/91{{ $tenant->phone }}" target="_blank" class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-comment-dots fa-fw"></i> WA</a>
                     </div>
        </div>
 

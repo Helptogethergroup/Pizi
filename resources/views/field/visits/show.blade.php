@@ -22,20 +22,20 @@
                     {{ str_replace('_', ' ', $visit->status) }}
                 </span>
                 @if($visit->is_missed)
-                    <span class="text-xs font-bold uppercase px-2 py-1 rounded bg-rose-600 text-white">🔴 Missed — was due {{ $visit->scheduled_at->diffForHumans() }}</span>
+                    <span class="text-xs font-bold uppercase px-2 py-1 rounded bg-rose-600 text-white"><i class="fa-solid fa-circle fa-fw" style="color:#ef4444"></i> Missed — was due {{ $visit->scheduled_at->diffForHumans() }}</span>
                 @endif
             </div>
             <h1 class="font-display font-black text-2xl text-ink-950 mt-3">{{ $visit->property->name }}</h1>
-            <p class="text-ink-700 mt-1">📍 {{ $visit->property->address_line }}, {{ $visit->property->locality?->name }}, {{ $visit->property->city?->name }}</p>
+            <p class="text-ink-700 mt-1"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $visit->property->address_line }}, {{ $visit->property->locality?->name }}, {{ $visit->property->city?->name }}</p>
 
             <div class="flex flex-wrap gap-2 mt-3">
                 @if(!empty($visit->property->google_map_link))
-                    <a href="{{ $visit->property->google_map_link }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold">🧭 Get Directions</a>
+                    <a href="{{ $visit->property->google_map_link }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-compass fa-fw"></i> Get Directions</a>
                 @elseif($visit->property->latitude && $visit->property->longitude)
-                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $visit->property->latitude }},{{ $visit->property->longitude }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold">🧭 Get Directions</a>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination={{ $visit->property->latitude }},{{ $visit->property->longitude }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-compass fa-fw"></i> Get Directions</a>
                 @endif
                 @if($lead?->phone)
-                    <a href="tel:{{ $lead->phone }}" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold">📞 Call {{ $lead->name }}</a>
+                    <a href="tel:{{ $lead->phone }}" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call {{ $lead->name }}</a>
                 @endif
             </div>
 
@@ -61,14 +61,14 @@
 
         @if($visit->status === 'scheduled')
             <div class="bg-amber-50 border-2 border-amber-300 p-6 rounded-2xl">
-                <h3 class="font-bold text-lg text-amber-900">⏳ Ready to start?</h3>
+                <h3 class="font-bold text-lg text-amber-900"><i class="fa-solid fa-hourglass-half fa-fw"></i> Ready to start?</h3>
                 <p class="text-sm text-amber-800 mt-1 mb-4">Click below to check-in. Your GPS location will be recorded.</p>
                 <form method="POST" action="{{ route('field.visits.start', $visit) }}" id="startForm">
                     @csrf
                     <input type="hidden" name="lat" id="startLat">
                     <input type="hidden" name="lng" id="startLng">
                     <button type="button" onclick="startVisit()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-lg">
-                        🚀 Check-in & Start Visit
+                        <i class="fa-solid fa-rocket fa-fw"></i> Check-in & Start Visit
                     </button>
                 </form>
             </div>
@@ -81,7 +81,7 @@
                     <div class="flex items-center gap-3">
                         <div class="text-sm font-bold text-emerald-700">{{ $visit->verification_progress }}%</div>
                         @if($visit->status !== 'completed')
-                            <button type="button" onclick="markAllOk()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">✅ All OK</button>
+                            <button type="button" onclick="markAllOk()" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-circle-check fa-fw"></i> All OK</button>
                         @endif
                     </div>
                 </div>
@@ -124,7 +124,7 @@
                                 <div class="font-bold">{{ $info['label'] }}</div>
                                 <div class="text-xs text-ink-700">{{ $info['desc'] }}</div>
                                 @if($info['listed'])
-                                    <div class="text-xs text-ink-900/50 mt-1 bg-cream rounded px-2 py-1 inline-block">📋 Listed: {{ $info['listed'] }}</div>
+                                    <div class="text-xs text-ink-900/50 mt-1 bg-cream rounded px-2 py-1 inline-block"><i class="fa-solid fa-clipboard-list fa-fw"></i> Listed: {{ $info['listed'] }}</div>
                                 @endif
                             </div>
                         </label>
@@ -133,13 +133,13 @@
                     <textarea name="remarks" rows="3" placeholder="Remarks..." class="w-full px-4 py-3 rounded-xl border border-ink-200" {{ $visit->status === 'completed' ? 'readonly' : '' }}>{{ $visit->remarks }}</textarea>
 
                     @if($visit->status !== 'completed')
-                        <button type="submit" class="px-5 py-2.5 bg-ink-950 text-cream rounded-xl font-bold text-sm">💾 Save Checklist</button>
+                        <button type="submit" class="px-5 py-2.5 bg-ink-950 text-cream rounded-xl font-bold text-sm"><i class="fa-solid fa-floppy-disk fa-fw"></i> Save Checklist</button>
                     @endif
                 </form>
             </div>
 
             <div class="bg-white p-6 rounded-2xl border border-ink-100">
-                <h2 class="font-display font-bold text-xl mb-4">📸 Photos & Videos</h2>
+                <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-camera fa-fw"></i> Photos & Videos</h2>
 
                 @if($visit->status !== 'completed')
                     <form method="POST" action="{{ route('field.visits.media', $visit) }}" enctype="multipart/form-data" class="space-y-3 mb-5" id="mediaForm">
@@ -147,7 +147,7 @@
                         <input type="file" name="media[]" id="mediaInput" multiple accept="image/*,video/*" capture="environment" class="w-full text-sm" required>
                         <p id="compressStatus" class="text-xs text-ink-500 h-4"></p>
                         <input type="text" name="caption" placeholder="Caption (optional)" class="w-full px-4 py-2 rounded-xl border border-ink-200 text-sm">
-                        <button type="submit" id="uploadBtn" class="px-5 py-2.5 bg-coral-500 text-white rounded-xl font-bold text-sm">📤 Upload</button>
+                        <button type="submit" id="uploadBtn" class="px-5 py-2.5 bg-coral-500 text-white rounded-xl font-bold text-sm"><i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i> Upload</button>
                     </form>
                 @endif
 
@@ -171,13 +171,13 @@
 
         @if($visit->status === 'in_progress')
             <div class="bg-emerald-50 border-2 border-emerald-300 p-6 rounded-2xl">
-                <h3 class="font-bold text-lg text-emerald-900">✅ Done with the visit?</h3>
+                <h3 class="font-bold text-lg text-emerald-900"><i class="fa-solid fa-circle-check fa-fw"></i> Done with the visit?</h3>
                 <form method="POST" action="{{ route('field.visits.complete', $visit) }}" id="completeForm" class="mt-4">
                     @csrf
                     <input type="hidden" name="lat" id="endLat">
                     <input type="hidden" name="lng" id="endLng">
                     <button type="button" onclick="completeVisit()" class="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold text-lg">
-                        🏁 Check-out & Complete Visit
+                        <i class="fa-solid fa-flag-checkered fa-fw"></i> Check-out & Complete Visit
                     </button>
                 </form>
             </div>
@@ -185,7 +185,7 @@
 
         @if($visit->status === 'completed')
             <div class="bg-emerald-50 border-2 border-emerald-300 p-6 rounded-2xl text-center">
-                <div class="text-5xl mb-2">🎉</div>
+                <div class="text-5xl mb-2"><i class="fa-solid fa-champagne-glasses fa-fw"></i></div>
                 <h3 class="font-bold text-lg text-emerald-900">Visit Completed</h3>
                 <p class="text-sm text-emerald-800 mt-1">Great work! Submitted on {{ $visit->completed_at->format('d M, h:i A') }}</p>
             </div>
@@ -196,7 +196,7 @@
         <div class="lg:sticky lg:top-24 space-y-6">
             @if($lead)
                 <div class="bg-white p-5 rounded-2xl border border-ink-100">
-                    <h3 class="font-display font-bold text-lg mb-3">👤 Tenant</h3>
+                    <h3 class="font-display font-bold text-lg mb-3"><i class="fa-solid fa-user fa-fw"></i> Tenant</h3>
                     <div class="space-y-2 text-sm">
                         <div><span class="text-ink-500">Name:</span> <strong>{{ $lead->name }}</strong></div>
                         @if($lead->phone)
@@ -205,15 +205,15 @@
                     </div>
                     @if($lead->phone)
                         <div class="grid grid-cols-2 gap-2 mt-3">
-                            <a href="tel:{{ $lead->phone }}" class="text-center py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold">📞 Call</a>
-                            <a href="https://wa.me/{{ preg_replace('/\D/', '', $lead->phone) }}" target="_blank" class="text-center py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold">💬 WhatsApp</a>
+                            <a href="tel:{{ $lead->phone }}" class="text-center py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call</a>
+                            <a href="https://wa.me/{{ preg_replace('/\D/', '', $lead->phone) }}" target="_blank" class="text-center py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp</a>
                         </div>
                     @endif
                 </div>
             @endif
 
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
-                <h3 class="font-display font-bold text-lg mb-3">🏠 Property Info</h3>
+                <h3 class="font-display font-bold text-lg mb-3"><i class="fa-solid fa-house fa-fw"></i> Property Info</h3>
                 <div class="space-y-2 text-sm">
                     <div><span class="text-ink-500">Type:</span> <strong class="capitalize">{{ $visit->property->property_type }}</strong></div>
                     <div><span class="text-ink-500">Gender:</span> <strong class="capitalize">{{ $visit->property->gender }}</strong></div>

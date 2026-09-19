@@ -13,9 +13,9 @@
             <div class="flex items-center gap-2 mt-2 flex-wrap">
                 <span class="text-xs bg-cream px-2 py-0.5 rounded-full font-bold capitalize">{{ $room->room_type }} ({{ $room->capacity }})</span>
                 <span class="text-xs bg-cream px-2 py-0.5 rounded-full font-bold capitalize">
-                    @if($room->gender === 'male') 👨 Boys
-                    @elseif($room->gender === 'female') 👩 Girls
-                    @else 👥 Unisex @endif
+                    @if($room->gender === 'male') <i class="fa-solid fa-user fa-fw"></i> Boys
+                    @elseif($room->gender === 'female') <i class="fa-solid fa-user fa-fw"></i> Girls
+                    @else <i class="fa-solid fa-users fa-fw"></i> Unisex @endif
                 </span>
                 @if($room->floor)<span class="text-xs bg-cream px-2 py-0.5 rounded-full font-bold">Floor: {{ $room->floor }}</span>@endif
                 @if($room->status !== 'active')
@@ -35,10 +35,10 @@
             @endif
         </div>
         <div class="flex gap-2 flex-wrap">
-            <a href="{{ route('owner.rooms.edit', $room) }}" class="px-4 py-2 bg-ink-950 text-cream rounded-xl text-sm font-bold">✏ Edit</a>
+            <a href="{{ route('owner.rooms.edit', $room) }}" class="px-4 py-2 bg-ink-950 text-cream rounded-xl text-sm font-bold"><i class="fa-solid fa-pencil fa-fw"></i> Edit</a>
             <form method="POST" action="{{ route('owner.rooms.destroy', $room) }}" id="deleteRoomForm" class="inline-block">
                 @csrf @method('DELETE')
-                <button type="button" onclick="confirmRoomDelete()" class="px-4 py-2 bg-rose-500 text-white rounded-xl text-sm font-bold">🗑</button>
+                <button type="button" onclick="confirmRoomDelete()" class="px-4 py-2 bg-rose-500 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i></button>
             </form>
         </div>
     </div>
@@ -61,7 +61,7 @@
 
 {{-- Add Bed --}}
 <div class="bg-white p-6 rounded-2xl border border-ink-100 mb-6">
-    <h2 class="font-display font-bold text-lg mb-4">➕ Add New Bed</h2>
+    <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-plus fa-fw"></i> Add New Bed</h2>
     <form method="POST" action="{{ route('owner.rooms.beds.store', $room) }}" class="grid grid-cols-1 md:grid-cols-4 gap-3">
         @csrf
         <input name="bed_number" required placeholder="Bed (A, B, 1, 2...)" class="px-4 py-3 rounded-xl border border-ink-200">
@@ -77,7 +77,7 @@
 </div>
 
 {{-- Beds Grid --}}
-<h2 class="font-display font-bold text-xl mb-4">🛏️ Beds ({{ $room->beds->count() }})</h2>
+<h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-bed fa-fw"></i> Beds ({{ $room->beds->count() }})</h2>
 
 @if($room->beds->isEmpty())
     <div class="bg-white p-8 rounded-2xl border border-ink-100 text-center">
@@ -118,8 +118,8 @@
                     <div class="p-3 bg-rose-50 rounded-xl mb-3">
                         <div class="flex items-center justify-between flex-wrap gap-2">
                             <div>
-                                <div class="font-bold text-sm">👤 {{ $bed->tenant->name }}</div>
-                                <div class="text-xs text-ink-700">📞 {{ $bed->tenant->phone }}</div>
+                                <div class="font-bold text-sm"><i class="fa-solid fa-user fa-fw"></i> {{ $bed->tenant->name }}</div>
+                                <div class="text-xs text-ink-700"><i class="fa-solid fa-phone fa-fw"></i> {{ $bed->tenant->phone }}</div>
                                 @if($bed->occupied_since)
                                     <div class="text-xs text-ink-700">Since: {{ $bed->occupied_since->format('d M Y') }}</div>
                                 @endif
@@ -131,11 +131,11 @@
                     <div class="flex gap-2 flex-wrap">
                         <form method="POST" action="{{ route('owner.rooms.beds.unassign', $bed) }}" onsubmit="return confirm('Unassign this bed?')" class="inline-block">
                             @csrf @method('PATCH')
-                            <button class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold">↩ Unassign</button>
+                            <button class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-rotate-left fa-fw"></i> Unassign</button>
                         </form>
                         <form method="POST" action="{{ route('owner.rooms.beds.destroy', $bed) }}" onsubmit="return confirm('Delete bed?')" class="inline-block">
                             @csrf @method('DELETE')
-                            <button class="px-3 py-2 bg-rose-500 text-white rounded-lg text-xs font-bold" disabled>🗑 (Unassign first)</button>
+                            <button class="px-3 py-2 bg-rose-500 text-white rounded-lg text-xs font-bold" disabled><i class="fa-solid fa-trash-can fa-fw"></i> (Unassign first)</button>
                         </form>
                     </div>
 
@@ -159,16 +159,16 @@
                         <form method="POST" action="{{ route('owner.rooms.beds.status', $bed) }}" class="inline-block">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="reserved">
-                            <button class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold">⏳ Reserve</button>
+                            <button class="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> Reserve</button>
                         </form>
                         <form method="POST" action="{{ route('owner.rooms.beds.status', $bed) }}" class="inline-block">
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="maintenance">
-                            <button class="px-3 py-2 bg-ink-500 hover:bg-ink-600 text-white rounded-lg text-xs font-bold">🔧 Maintenance</button>
+                            <button class="px-3 py-2 bg-ink-500 hover:bg-ink-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-wrench fa-fw"></i> Maintenance</button>
                         </form>
                         <form method="POST" action="{{ route('owner.rooms.beds.destroy', $bed) }}" onsubmit="return confirm('Delete bed?')" class="inline-block">
                             @csrf @method('DELETE')
-                            <button class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold">🗑</button>
+                            <button class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-trash-can fa-fw"></i></button>
                         </form>
                     </div>
 
@@ -176,7 +176,7 @@
                     <form method="POST" action="{{ route('owner.rooms.beds.status', $bed) }}" class="inline-block">
                         @csrf @method('PATCH')
                         <input type="hidden" name="status" value="vacant">
-                        <button class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold">✅ Mark Vacant</button>
+                        <button class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-circle-check fa-fw"></i> Mark Vacant</button>
                     </form>
                 @endif
             </div>

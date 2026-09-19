@@ -14,11 +14,11 @@
     </div>
 
     <div class="mt-6 p-5 bg-amber-50 border border-amber-200 rounded-xl text-sm">
-        💡 Online payment integration (Razorpay) abhi setup ho raha hai. Tab tak owner ko cash/UPI me pay kar do aur receipt collect karo.
+        <i class="fa-solid fa-lightbulb fa-fw"></i> Online payment integration (Razorpay) abhi setup ho raha hai. Tab tak owner ko cash/UPI me pay kar do aur receipt collect karo.
     </div>
 
     <a href="https://wa.me/{{ env('BRAND_WHATSAPP', '918006680092') }}?text={{ urlencode('Hi, I want to pay rent for ' . \Carbon\Carbon::parse($bill->month ?? $bill->due_date)->format('M Y')) }}" target="_blank" class="block mt-4 text-center py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold">
-        💬 Contact Owner on WhatsApp
+        <i class="fa-solid fa-comment-dots fa-fw"></i> Contact Owner on WhatsApp
     </a>
 </div>
 

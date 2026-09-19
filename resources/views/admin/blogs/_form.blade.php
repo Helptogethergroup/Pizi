@@ -42,10 +42,10 @@
 
             {{-- AI Assist --}}
             <div class="bg-gradient-to-br from-coral-50 to-white p-5 sm:p-6 rounded-2xl border border-coral-200">
-                <h3 class="font-bold text-lg mb-1">✨ AI Assist</h3>
+                <h3 class="font-bold text-lg mb-1"><i class="fa-solid fa-wand-magic-sparkles fa-fw"></i> AI Assist</h3>
                 <p class="text-xs text-ink-900/60 mb-3">Title + content likh lo, fir click karo — excerpt aur SEO fields khud fill ho jayenge (edit kar sakte ho baad mein).</p>
                 <button type="button" id="aiAssistBtn" class="w-full py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-sm disabled:opacity-50">
-                    ✨ Auto-fill excerpt & SEO
+                    <i class="fa-solid fa-wand-magic-sparkles fa-fw"></i> Auto-fill excerpt & SEO
                 </button>
                 <p id="aiAssistStatus" class="text-xs mt-2 h-4"></p>
             </div>
@@ -76,7 +76,7 @@
 
             {{-- SEO --}}
             <div class="bg-white p-5 sm:p-6 rounded-2xl border border-ink-900/10">
-                <h3 class="font-bold text-lg mb-4">🔍 SEO Settings</h3>
+                <h3 class="font-bold text-lg mb-4"><i class="fa-solid fa-magnifying-glass fa-fw"></i> SEO Settings</h3>
                 <div class="space-y-3">
                     <div>
                         <div class="flex items-center justify-between">

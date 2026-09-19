@@ -39,7 +39,7 @@
 <section id="reviews" class="py-8 lg:py-12 bg-cream scroll-mt-24">
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
 
-        <h2 class="font-display font-black text-2xl lg:text-3xl text-ink-950 mb-6">⭐ Reviews &amp; Ratings</h2>
+        <h2 class="font-display font-black text-2xl lg:text-3xl text-ink-950 mb-6"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Reviews &amp; Ratings</h2>
 
         {{-- ===== FLASH ===== --}}
         @if (session('review_success'))
@@ -87,7 +87,7 @@
             </div>
             <button type="button" onclick="document.getElementById('writeReviewBox').classList.toggle('hidden')"
                 class="px-5 py-2.5 rounded-xl bg-coral-500 hover:bg-coral-600 text-white text-sm font-bold transition shadow-lg shadow-coral-500/30">
-                ✍️ Write a Review
+                <i class="fa-solid fa-signature fa-fw"></i> Write a Review
             </button>
         </div>
 
@@ -186,17 +186,17 @@
                     <div class="flex items-center gap-4 mt-4 text-xs text-ink-900/50">
                         <form method="POST" action="{{ route('reviews.helpful', $r->id) }}">
                             @csrf <input type="hidden" name="type" value="yes">
-                            <button class="hover:text-ink-950 font-semibold">👍 Helpful ({{ $r->helpful_count }})</button>
+                            <button class="hover:text-ink-950 font-semibold"><i class="fa-solid fa-thumbs-up fa-fw"></i> Helpful ({{ $r->helpful_count }})</button>
                         </form>
                         <form method="POST" action="{{ route('reviews.helpful', $r->id) }}">
                             @csrf <input type="hidden" name="type" value="no">
-                            <button class="hover:text-ink-950 font-semibold">👎 ({{ $r->not_helpful_count }})</button>
+                            <button class="hover:text-ink-950 font-semibold"><i class="fa-solid fa-thumbs-down fa-fw"></i> ({{ $r->not_helpful_count }})</button>
                         </form>
                     </div>
                 </article>
             @empty
                 <div class="text-center text-ink-900/50 py-10 bg-white rounded-2xl border border-ink-900/10 font-semibold">
-                    No reviews yet. Be the first to review! ✨
+                    No reviews yet. Be the first to review! <i class="fa-solid fa-wand-magic-sparkles fa-fw"></i>
                 </div>
             @endforelse
         </div>

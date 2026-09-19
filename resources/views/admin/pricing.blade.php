@@ -47,7 +47,7 @@
 </form>
 
 <div class="mt-12 p-6 rounded-2xl bg-amber-50 border border-amber-200">
-    <h3 class="font-display font-bold text-lg text-amber-900">💡 How pricing works</h3>
+    <h3 class="font-display font-bold text-lg text-amber-900"><i class="fa-solid fa-lightbulb fa-fw"></i> How pricing works</h3>
     <ul class="text-sm text-amber-900/80 mt-3 space-y-1 list-disc pl-5">
         <li>When a PG owner clicks "Unlock" on a lead, these credits are deducted from their wallet.</li>
         <li>Higher quality leads (Verified / Converted) should cost more credits than raw Direct leads.</li>

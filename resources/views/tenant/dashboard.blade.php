@@ -2,7 +2,7 @@
 @section('title', 'My Dashboard')
 @section('content')
 
-<h1 class="font-display font-black text-4xl text-ink-950">Welcome, {{ auth()->user()->name }} 👋</h1>
+<h1 class="font-display font-black text-4xl text-ink-950">Welcome, {{ auth()->user()->name }} <i class="fa-solid fa-hand fa-fw"></i></h1>
 <p class="text-ink-900/60 mt-2">Aapka tenant portal — sab ek jagah pe.</p>
 
 {{-- STATS --}}
@@ -28,7 +28,7 @@
 {{-- PROPERTY INFO --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
     <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">🏠 My PG</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-house fa-fw"></i> My PG</h2>
         @if($tenant->property)
             <div class="flex gap-4 items-start">
                 @if($tenant->property->cover_image)
@@ -40,7 +40,7 @@
                     <p class="text-sm text-ink-900/60">{{ $tenant->property->locality?->name }}, {{ $tenant->property->city?->name }}</p>
                @if($tenant->room_number)
                         <div class="mt-3 px-3 py-1 bg-coral-50 text-coral-700 rounded-full text-xs font-bold inline-block">
-                            🛏️ Room: {{ $tenant->room_number }}{{ $tenant->bed_number ? ' / Bed '.$tenant->bed_number : '' }}
+                            <i class="fa-solid fa-bed fa-fw"></i> Room: {{ $tenant->room_number }}{{ $tenant->bed_number ? ' / Bed '.$tenant->bed_number : '' }}
                         </div>
                     @endif
                     <div class="mt-3">
@@ -53,7 +53,7 @@
 
     {{-- CURRENT BILL --}}
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">💰 Current Bill</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-sack-dollar fa-fw"></i> Current Bill</h2>
         @if($currentBill)
             <div class="space-y-2 text-sm">
                 <div class="flex justify-between"><span>Month:</span> <strong>{{ $currentBill->month_label }}</strong></div>
@@ -65,7 +65,7 @@
                 Pay Now →
             </a>
         @else
-            <p class="text-emerald-700 font-bold">✅ No pending bills!</p>
+            <p class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check fa-fw"></i> No pending bills!</p>
         @endif
     </div>
 </div>
@@ -73,7 +73,7 @@
 {{-- RECENT COMPLAINTS --}}
 <div class="bg-white p-6 rounded-2xl border border-ink-900/10 mt-6">
     <div class="flex justify-between items-center mb-4">
-        <h2 class="font-display font-bold text-xl">🛠️ Recent Complaints</h2>
+        <h2 class="font-display font-bold text-xl"><i class="fa-solid fa-screwdriver-wrench fa-fw"></i> Recent Complaints</h2>
         <a href="{{ route('tenant.complaints.create') }}" class="px-4 py-2 bg-coral-500 text-white rounded-lg font-semibold text-sm">+ New Complaint</a>
     </div>
     @forelse($recentComplaints as $c)
@@ -90,7 +90,7 @@
             </span>
         </div>
     @empty
-        <p class="text-ink-900/50 text-center py-8">No complaints yet. Aap ekdum settled ho! 🎉</p>
+        <p class="text-ink-900/50 text-center py-8">No complaints yet. Aap ekdum settled ho! <i class="fa-solid fa-champagne-glasses fa-fw"></i></p>
     @endforelse
 </div>
 

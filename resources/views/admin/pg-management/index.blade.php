@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="mb-6">
-    <h1 class="font-display font-black text-3xl">🏠 PG Management Overview</h1>
+    <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-house fa-fw"></i> PG Management Overview</h1>
     <p class="text-ink-900/60 mt-1">Platform-wide tenant operations dashboard</p>
 </div>
 
@@ -51,7 +51,7 @@
     {{-- Top Owners --}}
     <div class="bg-white rounded-2xl border border-ink-100">
         <div class="p-5 border-b border-ink-100">
-            <h2 class="font-display font-bold text-lg">🏆 Top Property Owners</h2>
+            <h2 class="font-display font-bold text-lg"><i class="fa-solid fa-trophy fa-fw"></i> Top Property Owners</h2>
         </div>
         <div class="divide-y divide-ink-100">
             @forelse($topOwners as $owner)
@@ -77,7 +77,7 @@
     {{-- Urgent Complaints --}}
     <div class="bg-white rounded-2xl border border-rose-200">
         <div class="p-5 border-b border-rose-100 flex items-center justify-between">
-            <h2 class="font-display font-bold text-lg">🚨 Urgent Complaints</h2>
+            <h2 class="font-display font-bold text-lg"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Urgent Complaints</h2>
             <a href="{{ route('admin.complaints.index', ['priority' => 'urgent']) }}" class="text-xs text-coral-500 font-bold">View All →</a>
         </div>
         <div class="divide-y divide-rose-50">
@@ -85,13 +85,13 @@
                 <a href="{{ route('admin.complaints.show', $c) }}" class="block p-4 hover:bg-rose-50 transition">
                     <div class="flex items-center gap-2 flex-wrap mb-1">
                         <span class="text-xs font-mono bg-rose-100 text-rose-700 px-2 py-0.5 rounded font-bold">{{ $c->ticket_number }}</span>
-                        <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">🔴 Urgent</span>
+                        <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle fa-fw" style="color:#ef4444"></i> Urgent</span>
                     </div>
                     <div class="font-bold text-sm">{{ $c->title }}</div>
                     <div class="text-xs text-ink-700 mt-1">{{ $c->tenant?->name }} · Owner: {{ $c->owner?->name }} · {{ $c->created_at->diffForHumans() }}</div>
                 </a>
             @empty
-                <div class="p-8 text-center text-ink-500">No urgent complaints. All good! 🎉</div>
+                <div class="p-8 text-center text-ink-500">No urgent complaints. All good! <i class="fa-solid fa-champagne-glasses fa-fw"></i></div>
             @endforelse
         </div>
     </div>
@@ -99,7 +99,7 @@
     {{-- Recent Tenants --}}
     <div class="bg-white rounded-2xl border border-ink-100">
         <div class="p-5 border-b border-ink-100 flex items-center justify-between">
-            <h2 class="font-display font-bold text-lg">👥 Recent Tenants</h2>
+            <h2 class="font-display font-bold text-lg"><i class="fa-solid fa-users fa-fw"></i> Recent Tenants</h2>
             <a href="{{ route('admin.tenants.index') }}" class="text-xs text-coral-500 font-bold">View All →</a>
         </div>
         <div class="divide-y divide-ink-100">
@@ -110,9 +110,9 @@
                         @if($t->kyc_status === 'approved')
                             <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">✓ KYC</span>
                         @elseif($t->kyc_status === 'submitted')
-                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">📋 Review</span>
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-clipboard-list fa-fw"></i> Review</span>
                         @elseif($t->kyc_status === 'rejected')
-                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">❌ Rejected</span>
+                            <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle-xmark fa-fw"></i> Rejected</span>
                         @endif
                     </div>
                     <div class="text-xs text-ink-700 mt-0.5">{{ $t->property?->name }} · {{ $t->owner?->name }} · {{ $t->created_at->diffForHumans() }}</div>
@@ -126,7 +126,7 @@
     {{-- Recent Bills --}}
     <div class="bg-white rounded-2xl border border-ink-100">
         <div class="p-5 border-b border-ink-100 flex items-center justify-between">
-            <h2 class="font-display font-bold text-lg">💰 Recent Bills</h2>
+            <h2 class="font-display font-bold text-lg"><i class="fa-solid fa-sack-dollar fa-fw"></i> Recent Bills</h2>
             <a href="{{ route('admin.rent.index') }}" class="text-xs text-coral-500 font-bold">View All →</a>
         </div>
         <div class="divide-y divide-ink-100">
@@ -142,7 +142,7 @@
                             @if($b->status === 'paid')
                                 <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">✓ Paid</span>
                             @elseif($b->status === 'overdue')
-                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">⚠️ Overdue</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Overdue</span>
                             @else
                                 <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">Pending</span>
                             @endif

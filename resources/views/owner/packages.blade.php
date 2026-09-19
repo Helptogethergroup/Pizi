@@ -25,7 +25,7 @@
         {{-- Badge --}}
         @if($pkg->is_popular)
         <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-coral-500 to-coral-600 text-white text-xs font-black uppercase tracking-wider shadow-lg">
-            ⭐ Best Value
+            <i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Best Value
         </div>
         @endif
         
@@ -61,7 +61,7 @@
                 @if($pkg->bonus_credits > 0)
                 <div class="flex items-start gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
                     <div class="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <span class="text-white font-bold text-xs">🎁</span>
+                        <span class="text-white font-bold text-xs"><i class="fa-solid fa-gift fa-fw"></i></span>
                     </div>
                     <div>
                         <p class="text-xs uppercase tracking-wider text-emerald-700 font-semibold">Bonus Credits</p>
@@ -106,7 +106,7 @@
 {{-- Info Section --}}
 <div class="mt-16 grid md:grid-cols-2 gap-8">
     <div class="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-50/50 border border-blue-200">
-        <h3 class="font-display font-bold text-xl text-blue-900 mb-4">💡 How Credits Work</h3>
+        <h3 class="font-display font-bold text-xl text-blue-900 mb-4"><i class="fa-solid fa-lightbulb fa-fw"></i> How Credits Work</h3>
         <ul class="space-y-3 text-sm text-blue-900/80">
             <li class="flex items-start gap-3">
                 <span class="text-lg mt-0.5">1️⃣</span>
@@ -121,14 +121,14 @@
                 <span><strong>Follow up</strong> — call, message, visit tenants at properties</span>
             </li>
             <li class="flex items-start gap-3">
-                <span class="text-lg mt-0.5">🎯</span>
+                <span class="text-lg mt-0.5"><i class="fa-solid fa-bullseye fa-fw"></i></span>
                 <span><strong>Credits never expire</strong> — use them anytime, no rush</span>
             </li>
         </ul>
     </div>
     
     <div class="p-8 rounded-2xl bg-gradient-to-br from-amber-50 to-amber-50/50 border border-amber-200">
-        <h3 class="font-display font-bold text-xl text-amber-900 mb-4">🔒 Safe & Secure</h3>
+        <h3 class="font-display font-bold text-xl text-amber-900 mb-4"><i class="fa-solid fa-lock fa-fw"></i> Safe & Secure</h3>
         <ul class="space-y-3 text-sm text-amber-900/80">
             <li class="flex items-start gap-3">
                 <span class="text-lg">✓</span>

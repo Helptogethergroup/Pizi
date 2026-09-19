@@ -30,7 +30,7 @@
                 
                 @if($package->bonus_credits > 0)
                 <div class="flex justify-between items-baseline p-3 rounded-lg bg-emerald-50">
-                    <span class="text-emerald-700 font-semibold">{{ $package->bonus_credits }} bonus credits 🎁</span>
+                    <span class="text-emerald-700 font-semibold">{{ $package->bonus_credits }} bonus credits <i class="fa-solid fa-gift fa-fw"></i></span>
                     <span class="font-display font-bold text-lg text-emerald-700">+ {{ $package->bonus_credits }}</span>
                 </div>
                 @endif
@@ -119,18 +119,18 @@
                 </button>
                 
                 <p class="text-xs text-center text-ink-900/40 mt-4">
-                    🔒 Powered by Razorpay • 256-bit SSL Encrypted
+                    <i class="fa-solid fa-lock fa-fw"></i> Powered by Razorpay • 256-bit SSL Encrypted
                 </p>
             </div>
             
             {{-- Security Badges --}}
             <div class="mt-8 grid grid-cols-3 gap-4 text-center">
                 <div class="p-4 rounded-lg bg-emerald-50 border border-emerald-200">
-                    <p class="text-2xl">🔐</p>
+                    <p class="text-2xl"><i class="fa-solid fa-lock fa-fw"></i></p>
                     <p class="text-xs font-semibold text-emerald-700 mt-2">Secure</p>
                 </div>
                 <div class="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                    <p class="text-2xl">⚡</p>
+                    <p class="text-2xl"><i class="fa-solid fa-bolt fa-fw"></i></p>
                     <p class="text-xs font-semibold text-blue-700 mt-2">Instant</p>
                 </div>
                 <div class="p-4 rounded-lg bg-purple-50 border border-purple-200">

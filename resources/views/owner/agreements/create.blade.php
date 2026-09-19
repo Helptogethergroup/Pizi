@@ -11,7 +11,7 @@
     @csrf
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">👤 Tenant</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-user fa-fw"></i> Tenant</h2>
         <select name="tenant_id" required class="w-full px-4 py-3 rounded-xl border border-ink-200">
             <option value="">— Select tenant —</option>
             @foreach($tenants as $t)
@@ -28,7 +28,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">💰 Financial Terms</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-sack-dollar fa-fw"></i> Financial Terms</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-500">Monthly Rent *</label>
@@ -52,21 +52,21 @@
         <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-2">
             <label class="flex items-center gap-2 p-3 rounded-xl border border-ink-100 cursor-pointer hover:bg-cream">
                 <input type="checkbox" name="electricity_included" value="1" class="rounded">
-                <span class="text-sm">⚡ Electricity included</span>
+                <span class="text-sm"><i class="fa-solid fa-bolt fa-fw"></i> Electricity included</span>
             </label>
             <label class="flex items-center gap-2 p-3 rounded-xl border border-ink-100 cursor-pointer hover:bg-cream">
                 <input type="checkbox" name="water_included" value="1" checked class="rounded">
-                <span class="text-sm">💧 Water included</span>
+                <span class="text-sm"><i class="fa-solid fa-droplet fa-fw"></i> Water included</span>
             </label>
             <label class="flex items-center gap-2 p-3 rounded-xl border border-ink-100 cursor-pointer hover:bg-cream">
                 <input type="checkbox" name="food_included" value="1" class="rounded">
-                <span class="text-sm">🍱 Food included</span>
+                <span class="text-sm"><i class="fa-solid fa-utensils fa-fw"></i> Food included</span>
             </label>
         </div>
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">📅 Duration</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-calendar-days fa-fw"></i> Duration</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-500">Start Date *</label>
@@ -89,7 +89,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">📜 Agreement Template</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-scroll fa-fw"></i> Agreement Template</h2>
         <select name="terms_template" class="w-full px-4 py-3 rounded-xl border border-ink-200 mb-3">
             <option value="delhi_standard">Delhi Standard Template (recommended)</option>
             <option value="custom">Custom Terms</option>

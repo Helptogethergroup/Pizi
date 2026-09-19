@@ -6,7 +6,7 @@
      <div class="flex items-center gap-3">
         <h1 class="font-display font-black text-3xl">All leads</h1>
         <a href="{{ route('leads.manual.create') }}" class="px-4 py-2 bg-coral-500 text-white rounded-lg font-semibold text-sm">+ Add Manual</a>
-        <a href="{{ route('admin.leads.export', request()->query()) }}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold text-sm">📥 Export CSV</a>
+        <a href="{{ route('admin.leads.export', request()->query()) }}" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold text-sm"><i class="fa-solid fa-inbox fa-fw"></i> Export CSV</a>
     </div>
     <form class="flex gap-2 flex-wrap items-center">
         <input name="search" value="{{ request('search') }}" placeholder="Name / phone…" class="px-3 py-2 rounded-lg border border-ink-900/15">
@@ -23,9 +23,9 @@
         </select>
         <select name="inquiry_type" class="px-3 py-2 rounded-lg border border-ink-900/15">
             <option value="">All Inquiries</option>
-            <option value="tenant" @selected(request('inquiry_type') == 'tenant')>🧳 Tenant</option>
-            <option value="owner" @selected(request('inquiry_type') == 'owner')>🏠 Owner</option>
-            <option value="unknown" @selected(request('inquiry_type') == 'unknown')>❓ Unknown</option>
+            <option value="tenant" @selected(request('inquiry_type') == 'tenant')>Tenant</option>
+            <option value="owner" @selected(request('inquiry_type') == 'owner')>Owner</option>
+            <option value="unknown" @selected(request('inquiry_type') == 'unknown')>Unknown</option>
         </select>
         <select name="source" class="px-3 py-2 rounded-lg border border-ink-900/15">
             <option value="">All Sources</option>
@@ -40,7 +40,7 @@
         </select>
         <label class="flex items-center gap-1.5 text-sm px-2">
             <input type="checkbox" name="duplicates_only" value="1" @checked(request()->boolean('duplicates_only'))>
-            🔁 Duplicates only
+            <i class="fa-solid fa-repeat fa-fw"></i> Duplicates only
         </label>
         <button class="px-4 py-2 bg-ink-900 text-cream rounded-lg">Filter</button>
     </form>
@@ -51,7 +51,7 @@
        class="rounded-2xl border-2 p-5 flex items-center justify-between transition {{ request('inquiry_type') === 'tenant' ? 'border-coral-500 bg-coral-50' : 'border-ink-900/10 bg-white hover:border-coral-300' }}">
         <div>
             <div class="text-xs uppercase font-bold text-ink-900/50">Looking for a PG</div>
-            <div class="font-display font-black text-2xl">🧳 Tenant Leads</div>
+            <div class="font-display font-black text-2xl"><i class="fa-solid fa-suitcase-rolling fa-fw"></i> Tenant Leads</div>
         </div>
         <div class="text-3xl font-black text-coral-500">{{ $tenantCount }}</div>
     </a>
@@ -59,7 +59,7 @@
        class="rounded-2xl border-2 p-5 flex items-center justify-between transition {{ request('inquiry_type') === 'owner' ? 'border-coral-500 bg-coral-50' : 'border-ink-900/10 bg-white hover:border-coral-300' }}">
         <div>
             <div class="text-xs uppercase font-bold text-ink-900/50">Wants to list their PG</div>
-            <div class="font-display font-black text-2xl">🏠 Owner Leads</div>
+            <div class="font-display font-black text-2xl"><i class="fa-solid fa-house fa-fw"></i> Owner Leads</div>
         </div>
         <div class="text-3xl font-black text-coral-500">{{ $ownerCount }}</div>
     </a>
@@ -81,8 +81,8 @@
     </select>
     <button type="button" onclick="submitBulk('{{ route('admin.leads.bulk-assign') }}', true)" class="px-3 py-1.5 rounded-lg bg-blue-500 font-semibold">Assign</button>
     <button type="button" onclick="submitBulk('{{ route('admin.leads.bulk-verify') }}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 font-semibold">✓ Verify</button>
-    <button type="button" onclick="submitBulk('{{ route('admin.leads.bulk-junk') }}')" class="px-3 py-1.5 rounded-lg bg-amber-500 font-semibold">🚩 Junk</button>
-    <button type="button" onclick="if(confirm('Delete selected leads? This cannot be undone.')) submitBulk('{{ route('admin.leads.bulk-delete') }}')" class="px-3 py-1.5 rounded-lg bg-red-500 font-semibold">🗑 Delete</button>
+    <button type="button" onclick="submitBulk('{{ route('admin.leads.bulk-junk') }}')" class="px-3 py-1.5 rounded-lg bg-amber-500 font-semibold"><i class="fa-solid fa-flag fa-fw"></i> Junk</button>
+    <button type="button" onclick="if(confirm('Delete selected leads? This cannot be undone.')) submitBulk('{{ route('admin.leads.bulk-delete') }}')" class="px-3 py-1.5 rounded-lg bg-red-500 font-semibold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete</button>
 </div>
 
 <form id="bulkForm" method="POST">
@@ -119,7 +119,7 @@
                     <div class="text-xs text-ink-900/50 mt-1">
                         {{ $lead->phone }}
                         @if($lead->is_duplicate_phone)
-                            <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px] font-bold">🔁 DUPLICATE</span>
+                            <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 text-[10px] font-bold"><i class="fa-solid fa-repeat fa-fw"></i> DUPLICATE</span>
                         @endif
                     </div>
                     @php $srcBadge = $lead->sourceBadge(); @endphp
@@ -131,7 +131,7 @@
                 </td>
                 <td class="px-3 py-3 border border-ink-900/10 text-xs">
                     {{ $lead->property?->name ?? 'General inquiry' }}
-                    <div class="text-ink-900/50">📍 {{ $lead->display_location }}</div>
+                    <div class="text-ink-900/50"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $lead->display_location }}</div>
                 </td>
                 <td class="px-3 py-3 border border-ink-900/10 text-xs">
                     <span class="px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap bg-ink-900/5 text-ink-900/70">{{ str_replace('_', ' ', $lead->status ?? 'new') }}</span>
@@ -139,13 +139,13 @@
                <td class="px-3 py-3 border border-ink-900/10 text-xs">
                     @if($lead->is_locked && $lead->locked_by_user_id)
                         @php $claimedAt = $lead->unlocks->firstWhere('user_id', $lead->locked_by_user_id)?->created_at; @endphp
-                        <span class="text-green-600 font-semibold block">🔓 Claimed</span>
+                        <span class="text-green-600 font-semibold block"><i class="fa-solid fa-lock-open fa-fw"></i> Claimed</span>
                         <span class="text-ink-900/60 block">{{ $lead->lockedBy?->name ?? 'Owner #' . $lead->locked_by_user_id }}</span>
                         @if($claimedAt)
                             <span class="text-ink-900/40 block">{{ $claimedAt->format('d M, h:i A') }}</span>
                         @endif
                     @elseif($lead->edit_locked_by && $lead->edit_locked_at && \Carbon\Carbon::parse($lead->edit_locked_at)->diffInMinutes(now()) <= 15)
-                        <span class="text-red-600 font-semibold block">✏️ Being edited</span>
+                        <span class="text-red-600 font-semibold block"><i class="fa-solid fa-pencil fa-fw"></i> Being edited</span>
                         <span class="text-ink-900/50 block">{{ optional(\App\Models\User::find($lead->edit_locked_by))->name ?? 'Someone' }}</span>
                     @endif
                 </td>
@@ -160,14 +160,14 @@
                             onclick="openEditModal({{ $lead->id }})" 
                             class="px-2 py-1 bg-blue-500 text-white text-xs rounded font-semibold hover:bg-blue-600"
                         >
-                            ✏️ Edit
+                            <i class="fa-solid fa-pencil fa-fw"></i> Edit
                         </button>
 
                         <button 
                             onclick="openRemarkModal({{ $lead->id }})" 
                             class="px-2 py-1 bg-purple-500 text-white text-xs rounded font-semibold hover:bg-purple-600"
                         >
-                            💬 Remark
+                            <i class="fa-solid fa-comment-dots fa-fw"></i> Remark
                         </button>
 
                         <form method="POST" action="{{ route('admin.leads.assign', $lead) }}" class="flex gap-1">
@@ -197,7 +197,7 @@
                         <form method="POST" action="{{ route('admin.leads.junk', $lead) }}" class="inline">
                             @csrf @method('PATCH')
                             <button class="px-2 py-1 bg-amber-500 text-white text-xs rounded font-semibold hover:bg-amber-600">
-                                🚩 Junk
+                                <i class="fa-solid fa-flag fa-fw"></i> Junk
                             </button>
                         </form>
                         @endif
@@ -205,7 +205,7 @@
                         <form method="POST" action="{{ route('admin.leads.destroy', $lead) }}" class="inline" onsubmit="return confirm('Delete this lead? This cannot be undone.')">
                             @csrf @method('DELETE')
                             <button class="px-2 py-1 bg-red-500 text-white text-xs rounded font-semibold hover:bg-red-600">
-                                🗑 Delete
+                                <i class="fa-solid fa-trash-can fa-fw"></i> Delete
                             </button>
                         </form>
                     </div>
@@ -250,9 +250,9 @@
             <div>
                 <label class="block text-xs uppercase text-ink-900/60 mb-1">Inquiry Type</label>
                 <select id="editInquiryType" name="inquiry_type" class="w-full px-3 py-2 rounded-lg border border-ink-900/15">
-                    <option value="tenant">🧳 Tenant — looking for a PG</option>
-                    <option value="owner">🏠 Owner — wants to list a PG</option>
-                    <option value="unknown">❓ Unknown</option>
+                    <option value="tenant">Tenant — looking for a PG</option>
+                    <option value="owner">Owner — wants to list a PG</option>
+                    <option value="unknown">Unknown</option>
                 </select>
             </div>
 

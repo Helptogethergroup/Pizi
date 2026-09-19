@@ -12,7 +12,7 @@
 
 @if($blogs->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">📝</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-pen-to-square fa-fw"></i></div>
         <p class="text-ink-700 mb-4">No blogs yet. Create your first one!</p>
         <a href="{{ route('seo.blogs.create') }}" class="inline-block px-5 py-3 bg-coral-500 text-white rounded-xl font-bold">+ Create Blog</a>
     </div>

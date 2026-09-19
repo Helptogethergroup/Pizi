@@ -50,6 +50,7 @@
         }
     </style>
     @stack('head')
+@include('partials.emoji-icons')
 </head>
 <body class="text-ink-950">
 
@@ -80,108 +81,108 @@
             @php $role = auth()->user()->role; @endphp
 
             @if($role === 'admin')
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Dashboard</a>
-                <a href="{{ route('admin.analytics.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.analytics.*') ? 'bg-cream/10 text-coral-500' : '' }}">📈 Analytics</a>
-              <a href="/admin/chat-analytics" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->path() === 'admin/chat-analytics' ? 'bg-cream/10 text-coral-500' : '' }}">💬 Chat Analytics</a>
-                <a href="{{ route('admin.properties.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.properties.*') ? 'bg-cream/10 text-coral-500' : '' }}">🏠 Properties</a>
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> Dashboard</a>
+                <a href="{{ route('admin.analytics.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.analytics.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-line fa-fw"></i> Analytics</a>
+              <a href="/admin/chat-analytics" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->path() === 'admin/chat-analytics' ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-comment-dots fa-fw"></i> Chat Analytics</a>
+                <a href="{{ route('admin.properties.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.properties.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-house fa-fw"></i> Properties</a>
                 <a href="{{ route('admin.properties.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">+ Add Property</a>
-                <a href="{{ route('admin.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}">🎯 All Leads</a>
-                <a href="{{ route('admin.telecallers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.telecallers.*') ? 'bg-cream/10 text-coral-500' : '' }}">📞 Telecallers</a>
-                <a href="{{ route('admin.ad-lead-forms.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.ad-lead-forms.*') ? 'bg-cream/10 text-coral-500' : '' }}">📋 Ad Form Mapping</a>
-                <a href="{{ route('admin.invoices.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.invoices.*') ? 'bg-cream/10 text-coral-500' : '' }}">🧾 Invoices</a>
+                <a href="{{ route('admin.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bullseye fa-fw"></i> All Leads</a>
+                <a href="{{ route('admin.telecallers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.telecallers.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-phone fa-fw"></i> Telecallers</a>
+                <a href="{{ route('admin.ad-lead-forms.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.ad-lead-forms.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-clipboard-list fa-fw"></i> Ad Form Mapping</a>
+                <a href="{{ route('admin.invoices.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.invoices.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-receipt fa-fw"></i> Invoices</a>
                 <a href="{{ route('leads.manual.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('leads.manual.*') ? 'bg-cream/10 text-coral-500' : '' }}">+ Add Lead</a>
-                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.users.*') ? 'bg-cream/10 text-coral-500' : '' }}">👥 Users</a>
-                <a href="{{ route('admin.users.activity') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.users.activity') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Login Activity</a>
-                <a href="{{ route('admin.wallets.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.wallets.*') ? 'bg-cream/10 text-coral-500' : '' }}">💰 Wallets</a>
-                <a href="{{ route('admin.pricing.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.pricing.*') ? 'bg-cream/10 text-coral-500' : '' }}">💲 Pricing</a>
-                <a href="{{ route('admin.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}">📝 Blogs</a>
-                <a href="{{ route('admin.field-tracker.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.field-tracker.*') ? 'bg-cream/10 text-coral-500' : '' }}">🚗 Field Tracker</a>
-                <a href="{{ route('admin.packages.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.packages.*') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Packages</a>
+                <a href="{{ route('admin.users.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.users.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-users fa-fw"></i> Users</a>
+                <a href="{{ route('admin.users.activity') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.users.activity') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> Login Activity</a>
+                <a href="{{ route('admin.wallets.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.wallets.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> Wallets</a>
+                <a href="{{ route('admin.pricing.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.pricing.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-dollar-sign fa-fw"></i> Pricing</a>
+                <a href="{{ route('admin.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-pen-to-square fa-fw"></i> Blogs</a>
+                <a href="{{ route('admin.field-tracker.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.field-tracker.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-car fa-fw"></i> Field Tracker</a>
+                <a href="{{ route('admin.packages.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.packages.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-credit-card fa-fw"></i> Packages</a>
 
                 <div class="mt-4 mb-2 px-3 text-xs font-bold uppercase text-cream/40">PG Management</div>
-                <a href="{{ route('admin.rooms.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.rooms.*') ? 'bg-cream/10 text-coral-500' : '' }}">🛏️ All Rooms</a>
-                <a href="{{ route('admin.agreements.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.agreements.*') ? 'bg-cream/10 text-coral-500' : '' }}">📄 All Agreements</a>
-                <a href="{{ route('admin.pg.overview') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.pg.*') ? 'bg-cream/10 text-coral-500' : '' }}">📊 PG Overview</a>
-                <a href="{{ route('admin.tenants.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.tenants.*') ? 'bg-cream/10 text-coral-500' : '' }}">👥 All Tenants</a>
-                <a href="{{ route('admin.rent.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.rent.*') ? 'bg-cream/10 text-coral-500' : '' }}">💰 All Rent Bills</a>
-                <a href="{{ route('admin.complaints.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.complaints.*') ? 'bg-cream/10 text-coral-500' : '' }}">🛠️ All Complaints</a>
-                <a href="{{ route('admin.reviews.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.reviews.*') ? 'bg-cream/10 text-coral-500' : '' }}">⭐ Reviews</a>
+                <a href="{{ route('admin.rooms.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.rooms.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bed fa-fw"></i> All Rooms</a>
+                <a href="{{ route('admin.agreements.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.agreements.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-file-lines fa-fw"></i> All Agreements</a>
+                <a href="{{ route('admin.pg.overview') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.pg.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> PG Overview</a>
+                <a href="{{ route('admin.tenants.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.tenants.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-users fa-fw"></i> All Tenants</a>
+                <a href="{{ route('admin.rent.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.rent.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> All Rent Bills</a>
+                <a href="{{ route('admin.complaints.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.complaints.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-screwdriver-wrench fa-fw"></i> All Complaints</a>
+                <a href="{{ route('admin.reviews.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.reviews.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Reviews</a>
 
 @elseif($role === 'owner' || $role === 'pg_manager')
-                <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Dashboard</a>
+                <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> Dashboard</a>
                 @if(auth()->user()->hasFeature('analytics'))
-                <a href="{{ route('owner.analytics') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.analytics') ? 'bg-cream/10 text-coral-500' : '' }}">📈 Analytics</a>
+                <a href="{{ route('owner.analytics') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.analytics') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-line fa-fw"></i> Analytics</a>
                 @endif
                 @if(auth()->user()->hasFeature('properties'))
-                <a href="{{ route('owner.properties.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.properties.*') ? 'bg-cream/10 text-coral-500' : '' }}">🏠 My Properties</a>
+                <a href="{{ route('owner.properties.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.properties.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-house fa-fw"></i> My Properties</a>
                 @endif
                 @if(auth()->user()->role === 'owner')
                 <a href="{{ route('owner.properties.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">+ Add new</a>
                 @endif
                @if(auth()->user()->role === 'owner')
-                <a href="{{ route('owner.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}">🎯 Leads</a>
+                <a href="{{ route('owner.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bullseye fa-fw"></i> Leads</a>
                 @endif
                @if(auth()->user()->hasFeature('tenants'))
-                <a href="{{ route('owner.tenants.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.tenants.*') ? 'bg-cream/10 text-coral-500' : '' }}">👥 My Tenants</a>
+                <a href="{{ route('owner.tenants.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.tenants.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-users fa-fw"></i> My Tenants</a>
                 @endif
                 @if(auth()->user()->role === 'owner')
-                <a href="{{ route('owner.pg-managers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.pg-managers.*') ? 'bg-cream/10 text-coral-500' : '' }}">👨‍💼 PG Managers</a>
+                <a href="{{ route('owner.pg-managers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.pg-managers.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-user fa-fw"></i> PG Managers</a>
                 @endif
 
                 @if(auth()->user()->hasFeature('rent'))
-                <a href="{{ route('owner.rent.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rent.*') ? 'bg-cream/10 text-coral-500' : '' }}">💰 Rent Collection</a>
+                <a href="{{ route('owner.rent.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rent.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> Rent Collection</a>
                 @endif
                 @if(auth()->user()->role === 'owner')
-<a href="{{ route('owner.rent.archive') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rent.archive') ? 'bg-cream/10 text-coral-500' : '' }}">🗄️ Bill Archive</a>
+<a href="{{ route('owner.rent.archive') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rent.archive') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-box-archive fa-fw"></i> Bill Archive</a>
 @endif
                 @if(auth()->user()->hasFeature('complaints'))
-                <a href="{{ route('owner.complaints.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.complaints.*') ? 'bg-cream/10 text-coral-500' : '' }}">🛠️ Complaints</a>
+                <a href="{{ route('owner.complaints.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.complaints.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-screwdriver-wrench fa-fw"></i> Complaints</a>
                 @endif
                 @if(auth()->user()->hasFeature('rooms'))
-                <a href="{{ route('owner.rooms.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rooms.*') ? 'bg-cream/10 text-coral-500' : '' }}">🛏️ Rooms & Beds</a>
+                <a href="{{ route('owner.rooms.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rooms.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bed fa-fw"></i> Rooms & Beds</a>
                 @endif
                 @if(auth()->user()->hasFeature('agreements'))
-                <a href="{{ route('owner.agreements.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.agreements.*') ? 'bg-cream/10 text-coral-500' : '' }}">📄 Agreements</a>
+                <a href="{{ route('owner.agreements.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.agreements.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-file-lines fa-fw"></i> Agreements</a>
                 @endif
                 @if(auth()->user()->hasFeature('blogs'))
-             <a href="{{ route('owner.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}">📝 My Blogs</a>
+             <a href="{{ route('owner.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-pen-to-square fa-fw"></i> My Blogs</a>
                 @endif
                              @if(auth()->user()->role === 'owner')
-                <a href="{{ route('owner.wallet') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.wallet') ? 'bg-cream/10 text-coral-500' : '' }}">💰 Wallet</a>
-                <a href="{{ route('owner.packages') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.packages') || request()->routeIs('owner.checkout') ? 'bg-cream/10 text-coral-500' : '' }}">💳 Buy Credits</a>
-                <a href="{{ route('owner.invoices.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.invoices.*') ? 'bg-cream/10 text-coral-500' : '' }}">🧾 My Invoices</a>
-                <a href="{{ route('owner.billing.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.billing.*') ? 'bg-cream/10 text-coral-500' : '' }}">🏢 Billing & GST Info</a>
-                <a href="{{ route('owner.reviews.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.reviews.*') ? 'bg-cream/10 text-coral-500' : '' }}">⭐ Reviews</a>
+                <a href="{{ route('owner.wallet') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.wallet') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> Wallet</a>
+                <a href="{{ route('owner.packages') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.packages') || request()->routeIs('owner.checkout') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-credit-card fa-fw"></i> Buy Credits</a>
+                <a href="{{ route('owner.invoices.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.invoices.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-receipt fa-fw"></i> My Invoices</a>
+                <a href="{{ route('owner.billing.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.billing.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-building fa-fw"></i> Billing & GST Info</a>
+                <a href="{{ route('owner.reviews.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.reviews.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-star fa-fw" style="color:#f59e0b"></i> Reviews</a>
                 @endif
 
                 @if(auth()->user()->hasFeature('leads') && auth()->user()->role === 'pg_manager')
-                <a href="{{ route('owner.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}">🎯 Leads</a>
+                <a href="{{ route('owner.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bullseye fa-fw"></i> Leads</a>
                 @endif
 
             @elseif($role === 'telecaller')
-                <a href="{{ route('telecaller.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Dashboard</a>
-                <a href="{{ route('telecaller.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}">🎯 My Leads</a>
+                <a href="{{ route('telecaller.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> Dashboard</a>
+                <a href="{{ route('telecaller.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bullseye fa-fw"></i> My Leads</a>
                 <a href="{{ route('leads.manual.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('leads.manual.*') ? 'bg-cream/10 text-coral-500' : '' }}">+ Add Lead</a>
-                <a href="{{ route('telecaller.owner-prospects.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.owner-prospects.*') ? 'bg-cream/10 text-coral-500' : '' }}">🏠 Owner Prospects</a>
+                <a href="{{ route('telecaller.owner-prospects.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.owner-prospects.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-house fa-fw"></i> Owner Prospects</a>
 
             @elseif($role === 'field_executive')
-                <a href="{{ route('field.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('field.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 Dashboard</a>
-                <a href="{{ route('field.visits.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('field.visits.*') ? 'bg-cream/10 text-coral-500' : '' }}">📅 My Visits</a>
-                <a href="{{ route('field.visits.index', ['status' => 'scheduled']) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">⏳ Pending</a>
-                <a href="{{ route('field.visits.index', ['status' => 'completed']) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">✅ Completed</a>
+                <a href="{{ route('field.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('field.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> Dashboard</a>
+                <a href="{{ route('field.visits.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('field.visits.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-calendar-days fa-fw"></i> My Visits</a>
+                <a href="{{ route('field.visits.index', ['status' => 'scheduled']) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5"><i class="fa-solid fa-hourglass-half fa-fw"></i> Pending</a>
+                <a href="{{ route('field.visits.index', ['status' => 'completed']) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5"><i class="fa-solid fa-circle-check fa-fw"></i> Completed</a>
 
             @elseif($role === 'seo_manager')
-                <a href="{{ route('seo.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">📊 SEO Dashboard</a>
-                <a href="{{ route('seo.settings.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.settings.*') ? 'bg-cream/10 text-coral-500' : '' }}">🔍 SEO Pages</a>
-                <a href="{{ route('seo.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}">📝 Blogs</a>
+                <a href="{{ route('seo.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> SEO Dashboard</a>
+                <a href="{{ route('seo.settings.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.settings.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-magnifying-glass fa-fw"></i> SEO Pages</a>
+                <a href="{{ route('seo.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('seo.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-pen-to-square fa-fw"></i> Blogs</a>
             @endif
             
               <a href="{{ route('account.edit') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 mt-4 {{ request()->routeIs('account.*') ? 'bg-cream/10 text-coral-500' : '' }}">
-                👤 My Profile
+                <i class="fa-solid fa-user fa-fw"></i> My Profile
             </a>
 
             <a href="{{ route('notifications.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 mt-4 {{ request()->routeIs('notifications.*') ? 'bg-cream/10 text-coral-500' : '' }}">
-                🔔 Notifications
+                <i class="fa-solid fa-bell fa-fw"></i> Notifications
                 @php $unread = auth()->user()->unreadNotifications->count(); @endphp
                 @if($unread > 0)
                     <span class="ml-auto px-2 py-0.5 rounded-full bg-coral-500 text-white text-xs font-bold">{{ $unread }}</span>
@@ -216,7 +217,7 @@
                 <img src="{{ asset('assets/images/logo.png') }}" alt="Pizi" class="h-7 w-auto">
             </div>
             <a href="{{ route('notifications.index') }}" class="relative p-2 hover:bg-ink-900/5 rounded-lg">
-                <span class="text-xl">🔔</span>
+                <span class="text-xl"><i class="fa-solid fa-bell fa-fw"></i></span>
                 @if($unread > 0)
                     <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-coral-500 text-white text-xs font-bold flex items-center justify-center">{{ $unread > 99 ? '99+' : $unread }}</span>
                 @endif
@@ -227,7 +228,7 @@
         <header class="hidden md:flex bg-white border-b border-ink-900/10 px-6 py-3 items-center justify-end gap-4">
             <div id="notifBell" class="relative">
                 <button onclick="toggleNotifPanel()" class="relative p-2 hover:bg-ink-900/5 rounded-lg">
-                    <span class="text-2xl">🔔</span>
+                    <span class="text-2xl"><i class="fa-solid fa-bell fa-fw"></i></span>
                     <span id="notifCount" class="hidden absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-coral-500 text-white text-xs font-bold flex items-center justify-center">0</span>
                 </button>
                 <div id="notifPanel" class="hidden absolute top-full right-0 mt-2 w-96 max-h-[500px] bg-white rounded-2xl border border-ink-900/10 shadow-xl overflow-hidden z-50">

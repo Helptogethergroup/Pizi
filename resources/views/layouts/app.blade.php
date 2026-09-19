@@ -100,6 +100,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </script>
 <!-- End Google Tag Manager -->
 
+@include('partials.emoji-icons', ['fa' => false])
 </head>
 <body class="text-ink-950 antialiased">
 
@@ -118,10 +119,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <div class="bg-ink-950 text-cream py-2">
     <div class="max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between text-xs">
         <div class="flex items-center gap-4">
-            <a href="tel:{{ $phone }}" class="flex items-center gap-1 hover:text-coral-400">📞 {{ $phone }}</a>
-            <a href="mailto:{{ $email }}" class="hidden sm:flex items-center gap-1 hover:text-coral-400">✉ {{ $email }}</a>
+            <a href="tel:{{ $phone }}" class="flex items-center gap-1 hover:text-coral-400"><i class="fa-solid fa-phone fa-fw"></i> {{ $phone }}</a>
+            <a href="mailto:{{ $email }}" class="hidden sm:flex items-center gap-1 hover:text-coral-400"><i class="fa-solid fa-envelope fa-fw"></i> {{ $email }}</a>
         </div>
-        <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noreferrer" class="flex items-center gap-1 hover:text-emerald-400">💬 WhatsApp</a>
+        <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noreferrer" class="flex items-center gap-1 hover:text-emerald-400"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp</a>
     </div>
 </div>
 <header class="sticky top-0 z-40 bg-cream/80 backdrop-blur-md border-b border-ink-900/10">
@@ -145,29 +146,29 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 {{-- dropdown panel --}}
                 <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition absolute left-0 top-full pt-2 w-52 z-50">
                     <div class="bg-white rounded-2xl shadow-2xl shadow-ink-900/15 border border-ink-900/10 p-2">
-                        <a href="{{ route('city.show', 'delhi') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Delhi</a>
-                        <a href="{{ route('city.show', 'noida') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Noida</a>
-                        <!--<a href="{{ route('city.show', 'gurgaon') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Gurgaon</a>-->
-                        <!--<a href="{{ route('city.show', 'ghaziabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Ghaziabad</a>-->
-                        <!--<a href="{{ route('city.show', 'faridabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Faridabad</a>-->
+                        <a href="{{ route('city.show', 'delhi') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Delhi</a>
+                        <a href="{{ route('city.show', 'noida') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Noida</a>
+                        <!--<a href="{{ route('city.show', 'gurgaon') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Gurgaon</a>-->
+                        <!--<a href="{{ route('city.show', 'ghaziabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Ghaziabad</a>-->
+                        <!--<a href="{{ route('city.show', 'faridabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Faridabad</a>-->
                         
                         @if(in_array('gurgaon', $activeCitySlugs))
-                        <a href="{{ route('city.show', 'gurgaon') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Gurgaon</a>
+                        <a href="{{ route('city.show', 'gurgaon') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Gurgaon</a>
                         @endif
                         @if(in_array('ghaziabad', $activeCitySlugs))
-                        <a href="{{ route('city.show', 'ghaziabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Ghaziabad</a>
+                        <a href="{{ route('city.show', 'ghaziabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Ghaziabad</a>
                         @endif
                         @if(in_array('faridabad', $activeCitySlugs))
-                        <a href="{{ route('city.show', 'faridabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition">📍 Faridabad</a>
+                        <a href="{{ route('city.show', 'faridabad') }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-location-dot fa-fw"></i> Faridabad</a>
                         @endif
                     </div>
                 </div>
             </div>
-            <a href="{{ route('universities.index') }}" class="px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">🎓  pg's Near Universities</a>
+            <a href="{{ route('universities.index') }}" class="px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap"><i class="fa-solid fa-graduation-cap fa-fw"></i>  pg's Near Universities</a>
            <a href="{{ route('blog.index') }}" class="px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">Blog</a>
 <a href="{{ route('about') }}" class="hidden xl:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">About</a>
 <button type="button" onclick="openContactPopup()" class="hidden xl:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">Contact</button>
-<a href="{{ route('chat.page') }}" class="hidden xl:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">💬 AI Chat</a>
+<a href="{{ route('chat.page') }}" class="hidden xl:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap"><i class="fa-solid fa-comment-dots fa-fw"></i> AI Chat</a>
         </nav>
 
              {{-- RIGHT: Phone box + Desktop buttons + Mobile hamburger --}}
@@ -175,7 +176,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             {{-- Prominent phone box --}}
             <a href="tel:{{ $phone }}" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-coral-500/30 hover:border-coral-500 hover:bg-coral-50 transition">
-                <span class="w-8 h-8 rounded-lg bg-coral-500 text-white flex items-center justify-center text-sm flex-shrink-0">📞</span>
+                <span class="w-8 h-8 rounded-lg bg-coral-500 text-white flex items-center justify-center text-sm flex-shrink-0"><i class="fa-solid fa-phone fa-fw"></i></span>
                 <span class="leading-tight">
                     <span class="block text-[10px] text-ink-900/50 font-semibold uppercase tracking-wide">Call us</span>
                     <span class="block text-sm font-bold text-ink-950">{{ $phone }}</span>
@@ -195,7 +196,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </form>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium px-3 py-2 hover:text-coral-600 whitespace-nowrap">Login</a>
-                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="hidden xl:flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-full bg-coral-50 text-coral-600 hover:bg-coral-100 transition whitespace-nowrap">📱 Get App</a>
+                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="hidden xl:flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-full bg-coral-50 text-coral-600 hover:bg-coral-100 transition whitespace-nowrap"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get App</a>
                     <a href="{{ route('register') }}" class="text-sm font-semibold px-4 py-2 rounded-full bg-ink-900 text-cream hover:bg-ink-800 transition whitespace-nowrap">List your PG</a>
                 @endauth
             </div>
@@ -205,7 +206,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <a href="tel:{{ $phone }}"
                class="md:hidden w-10 h-10 rounded-xl bg-coral-500 text-white flex items-center justify-center shadow-md shadow-coral-500/30"
                aria-label="Call {{ $phone }}">
-                <span class="text-lg">📞</span>
+                <span class="text-lg"><i class="fa-solid fa-phone fa-fw"></i></span>
             </a>
                 
             {{-- Mobile hamburger --}}
@@ -245,20 +246,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <div class="space-y-2 pb-3 mb-2 border-b border-ink-900/10">
                 @auth
                     @if(auth()->user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold">⚡ Admin Dashboard</a>
+                        <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-solid fa-bolt fa-fw"></i> Admin Dashboard</a>
                     @elseif(auth()->user()->isOwner())
-                        <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold">📊 My Dashboard</a>
+                        <a href="{{ route('owner.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-solid fa-chart-column fa-fw"></i> My Dashboard</a>
                     @elseif(auth()->user()->isTeleCaller())
-                        <a href="{{ route('telecaller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold">📞 My Leads</a>
+                        <a href="{{ route('telecaller.dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-solid fa-phone fa-fw"></i> My Leads</a>
                     @endif
                 @else
-                    <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold">🔐 Login</a>
-                    <a href="{{ route('register') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-coral-500 text-white font-bold hover:bg-coral-600">➕ List your PG</a>
+                    <a href="{{ route('login') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-solid fa-lock fa-fw"></i> Login</a>
+                    <a href="{{ route('register') }}" class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-coral-500 text-white font-bold hover:bg-coral-600"><i class="fa-solid fa-plus fa-fw"></i> List your PG</a>
                 @endauth
             </div>
 
-            <a href="{{ route('home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">🏠 Home</a>
-            <a href="{{ route('search') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">🔍 Browse PGs</a>
+            <a href="{{ route('home') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-house fa-fw"></i> Home</a>
+            <a href="{{ route('search') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-magnifying-glass fa-fw"></i> Browse PGs</a>
 
        <div class="border-t border-ink-900/10 my-2 pt-2">
                 <div class="px-4 py-1 text-xs uppercase font-bold text-ink-900/40">Cities</div>
@@ -274,36 +275,36 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     @continue(!in_array($slug, $activeCitySlugs))
                     <a href="{{ route('city.show', $slug) }}"
                        class="flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition {{ request()->routeIs('city.show') && request()->segment(2) === $slug ? 'bg-coral-50 text-coral-600' : 'text-ink-900 hover:bg-coral-50 hover:text-coral-600' }}">
-                        📍 {{ $cityName }}
+                        <i class="fa-solid fa-location-dot fa-fw"></i> {{ $cityName }}
                     </a>
                 @endforeach
             </div>
 
             <div class="border-t border-ink-900/10 my-2 pt-2">
                 
-                <a href="{{ route('universities.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">🎓Pg's near Universities</a>
+                <a href="{{ route('universities.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-graduation-cap fa-fw"></i>Pg's near Universities</a>
                 
-                <a href="{{ route('blog.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">📝 Blog</a>
+                <a href="{{ route('blog.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-pen-to-square fa-fw"></i> Blog</a>
                 <a href="{{ route('about') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">ℹ About Us</a>
                 
-                <button type="button" onclick="document.getElementById('piziMobileMenu').classList.add('hidden'); document.body.style.overflow=''; openContactPopup();" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">✉ Contact</button>
-                <a href="{{ route('chat.page') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">💬 AI Chat</a>
+                <button type="button" onclick="document.getElementById('piziMobileMenu').classList.add('hidden'); document.body.style.overflow=''; openContactPopup();" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-envelope fa-fw"></i> Contact</button>
+                <a href="{{ route('chat.page') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-comment-dots fa-fw"></i> AI Chat</a>
             </div>
 
             <div class="border-t border-ink-900/10 my-2 pt-3 space-y-2">
                 @auth
                     <form method="POST" action="{{ route('logout') }}">@csrf
-                        <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-rose-50 hover:text-rose-600 font-medium">🚪 Logout</button>
+                        <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-rose-50 hover:text-rose-600 font-medium"><i class="fa-solid fa-door-open fa-fw"></i> Logout</button>
                     </form>
                 @else
-                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral-50 text-coral-600 font-bold">📱 Get the App</a>
+                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral-50 text-coral-600 font-bold"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get the App</a>
                 @endauth
             </div>
 
             <div class="border-t border-ink-900/10 my-2 pt-3 space-y-2">
-                <a href="tel:8006680092" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 font-bold">📞 Call: 8006680092</a>
-                <a href="mailto:info@pizi.in" class="flex items-center gap-3 px-4 py-2 rounded-xl text-ink-900/80 text-sm">✉ info@pizi.in</a>
-                <!--<a href="https://wa.me/918006680092" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600">💬 WhatsApp Us</a>-->
+                <a href="tel:8006680092" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-50 text-emerald-700 font-bold"><i class="fa-solid fa-phone fa-fw"></i> Call: 8006680092</a>
+                <a href="mailto:info@pizi.in" class="flex items-center gap-3 px-4 py-2 rounded-xl text-ink-900/80 text-sm"><i class="fa-solid fa-envelope fa-fw"></i> info@pizi.in</a>
+                <!--<a href="https://wa.me/918006680092" target="_blank" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-500 text-white font-bold hover:bg-emerald-600"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp Us</a>-->
             </div>
         </nav>
     </div>
@@ -344,10 +345,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 <!--<div class="bg-ink-950 text-cream py-2">-->
 <!--    <div class="max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between text-xs">-->
 <!--        <div class="flex items-center gap-4">-->
-<!--            <a href="tel:{{ $phone }}" class="flex items-center gap-1 hover:text-coral-400">📞 {{ $phone }}</a>-->
-<!--            <a href="mailto:{{ $email }}" class="hidden sm:flex items-center gap-1 hover:text-coral-400">✉ {{ $email }}</a>-->
+<!--            <a href="tel:{{ $phone }}" class="flex items-center gap-1 hover:text-coral-400"><i class="fa-solid fa-phone fa-fw"></i> {{ $phone }}</a>-->
+<!--            <a href="mailto:{{ $email }}" class="hidden sm:flex items-center gap-1 hover:text-coral-400"><i class="fa-solid fa-envelope fa-fw"></i> {{ $email }}</a>-->
 <!--        </div>-->
-<!--        <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noreferrer" class="flex items-center gap-1 hover:text-emerald-400">💬 WhatsApp</a>-->
+<!--        <a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noreferrer" class="flex items-center gap-1 hover:text-emerald-400"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp</a>-->
 <!--    </div>-->
 <!--</div>-->
 
@@ -377,21 +378,21 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <div>
                         <div class="font-display font-black text-2xl text-cream leading-none">Pizi App</div>
-                        <div class="text-[10px] text-coral-400 font-bold tracking-widest uppercase mt-1">📱 Download Now</div>
+                        <div class="text-[10px] text-coral-400 font-bold tracking-widest uppercase mt-1"><i class="fa-solid fa-mobile-screen fa-fw"></i> Download Now</div>
                     </div>
                 </a>
                 <h3 class="font-display font-black text-2xl lg:text-3xl text-cream">Looking for a PG?</h3>
                 <p class="text-cream/60 mt-2">Fill the form — our team will call you within 30 minutes.</p>
                 <div class="mt-4 flex flex-wrap gap-5 text-sm">
-                    <a href="tel:{{ $phone }}" class="flex items-center gap-2 hover:text-coral-400 transition">📞 <span class="font-bold text-cream">{{ $phone }}</span></a>
-                    <a href="mailto:{{ $email }}" class="flex items-center gap-2 hover:text-coral-400 transition">✉ <span class="font-bold text-cream">{{ $email }}</span></a>
+                    <a href="tel:{{ $phone }}" class="flex items-center gap-2 hover:text-coral-400 transition"><i class="fa-solid fa-phone fa-fw"></i> <span class="font-bold text-cream">{{ $phone }}</span></a>
+                    <a href="mailto:{{ $email }}" class="flex items-center gap-2 hover:text-coral-400 transition"><i class="fa-solid fa-envelope fa-fw"></i> <span class="font-bold text-cream">{{ $email }}</span></a>
                 </div>
             </div>
 
             <form id="piziEnquiryForm" class="lg:col-span-3 bg-white text-ink-950 rounded-2xl p-4 lg:p-5 shadow-2xl shadow-black/30">
                 @csrf
-                <div id="piziEnquirySuccess" class="hidden mb-3 p-2.5 bg-emerald-50 border border-emerald-300 rounded-lg text-sm text-emerald-800 font-semibold">✅ Thanks! We will contact you soon.</div>
-                <div id="piziEnquiryError" class="hidden mb-3 p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-sm text-rose-800 font-semibold">❌ Failed to send. Please try again.</div>
+                <div id="piziEnquirySuccess" class="hidden mb-3 p-2.5 bg-emerald-50 border border-emerald-300 rounded-lg text-sm text-emerald-800 font-semibold"><i class="fa-solid fa-circle-check fa-fw"></i> Thanks! We will contact you soon.</div>
+                <div id="piziEnquiryError" class="hidden mb-3 p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-sm text-rose-800 font-semibold"><i class="fa-solid fa-circle-xmark fa-fw"></i> Failed to send. Please try again.</div>
                 <div class="grid sm:grid-cols-2 gap-2.5">
                     <input type="text" id="pizi_enq_name" name="name" required placeholder="Your Name *" class="w-full px-4 py-2.5 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500 text-sm">
                     <input type="tel" id="pizi_enq_phone" name="phone" required pattern="[0-9]{10}" placeholder="Phone (10-digit) *" class="w-full px-4 py-2.5 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500 text-sm">
@@ -457,7 +458,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <li><a href="{{ route('contact') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">Contact</a></li>
                 <li><a href="{{ route('blog.index') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">Blog</a></li>
                 <li><a href="{{ route('register') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">List your PG</a></li>
-                <li><a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">📱 Get the App</a></li>
+                <li><a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get the App</a></li>
                <li> <a href="{{ route('privacy-policy') }}" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
             </ul>
         </div>
@@ -465,9 +466,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         <div>
             <h4 class="font-display font-bold text-cream mb-4">Get in touch</h4>
             <ul class="space-y-3 text-sm">
-                <li class="flex items-start gap-2"><span>📞</span><a href="tel:{{ $phone }}" class="text-cream/60 hover:text-coral-400 font-medium transition">{{ $phone }}</a></li>
-                <li class="flex items-start gap-2"><span>✉</span><a href="mailto:{{ $email }}" class="text-cream/60 hover:text-coral-400 break-all transition">{{ $email }}</a></li>
-                <li><a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-600 text-xs transition shadow-lg shadow-emerald-500/20">💬 WhatsApp Us</a></li>
+                <li class="flex items-start gap-2"><span><i class="fa-solid fa-phone fa-fw"></i></span><a href="tel:{{ $phone }}" class="text-cream/60 hover:text-coral-400 font-medium transition">{{ $phone }}</a></li>
+                <li class="flex items-start gap-2"><span><i class="fa-solid fa-envelope fa-fw"></i></span><a href="mailto:{{ $email }}" class="text-cream/60 hover:text-coral-400 break-all transition">{{ $email }}</a></li>
+                <li><a href="https://wa.me/{{ $whatsapp }}" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-full bg-emerald-500 text-white font-semibold hover:bg-emerald-600 text-xs transition shadow-lg shadow-emerald-500/20"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp Us</a></li>
             </ul>
         </div>
     </div>
@@ -478,7 +479,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <span class="flex items-center gap-4">
                 <a href="#" class="hover:text-coral-400 transition">Privacy</a>
                 <a href="#" class="hover:text-coral-400 transition">Terms</a>
-                <span>Developed By <span class="text-coral-400">♥</span>HelpTogetherGroup</span>
+                <span>Developed By <span class="text-coral-400"><i class="fa-solid fa-heart fa-fw"></i></span>HelpTogetherGroup</span>
             </span>
         </div>
     </div>
@@ -613,17 +614,17 @@ document.getElementById('piziEnquiryForm').addEventListener('submit', async func
         {{-- Header --}}
         <div class="bg-gradient-to-br from-coral-500 to-coral-600 px-6 py-5 relative">
             <button onclick="closeContactPopup()" class="absolute top-4 right-4 text-white/80 hover:text-white text-2xl leading-none">×</button>
-            <h2 class="font-display font-black text-2xl text-white">Yes, I'm interested! 🎉</h2>
+            <h2 class="font-display font-black text-2xl text-white">Yes, I'm interested! <i class="fa-solid fa-champagne-glasses fa-fw"></i></h2>
             <p class="text-white/90 text-sm mt-1">Fill your details — we'll call within 30 minutes.</p>
         </div>
 
         {{-- Body --}}
         <div class="p-6">
             <div id="contactPopupSuccess" class="hidden mb-4 p-3 bg-emerald-50 border border-emerald-300 rounded-xl text-sm text-emerald-800 font-semibold">
-                ✅ Thanks! Our team will contact you soon.
+                <i class="fa-solid fa-circle-check fa-fw"></i> Thanks! Our team will contact you soon.
             </div>
             <div id="contactPopupError" class="hidden mb-4 p-3 bg-rose-50 border border-rose-300 rounded-xl text-sm text-rose-800 font-semibold">
-                ❌ Failed to send. Please try again.
+                <i class="fa-solid fa-circle-xmark fa-fw"></i> Failed to send. Please try again.
             </div>
 
             <form id="contactPopupForm" class="space-y-3">
@@ -636,9 +637,9 @@ document.getElementById('piziEnquiryForm').addEventListener('submit', async func
                 
                 <select id="cp_type" name="lookingfor" class="w-full px-4 py-3 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500 text-sm text-ink-900/70">
                     <option value="">What are you looking for?</option>
-                    <option value="Find a PG">🏠 Find a PG</option>
-                    <option value="List my PG">🏢 List my PG</option>
-                    <option value="General Enquiry">💬 General Enquiry</option>
+                    <option value="Find a PG">Find a PG</option>
+                    <option value="List my PG">List my PG</option>
+                    <option value="General Enquiry">General Enquiry</option>
                 </select>
                 
                 <textarea id="cp_message" name="message" rows="2" placeholder="Message (optional)" class="w-full px-4 py-3 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500 text-sm"></textarea>
@@ -650,9 +651,9 @@ document.getElementById('piziEnquiryForm').addEventListener('submit', async func
 
             {{-- Quick contact --}}
             <div class="mt-4 pt-4 border-t border-ink-900/10 flex items-center justify-center gap-4 text-sm">
-                <a href="tel:8006680092" class="flex items-center gap-1.5 text-coral-600 font-semibold hover:underline">📞 Call</a>
+                <a href="tel:8006680092" class="flex items-center gap-1.5 text-coral-600 font-semibold hover:underline"><i class="fa-solid fa-phone fa-fw"></i> Call</a>
                 <span class="text-ink-900/20">|</span>
-                <a href="https://wa.me/918006680092" target="_blank" class="flex items-center gap-1.5 text-emerald-600 font-semibold hover:underline">💬 WhatsApp</a>
+                <a href="https://wa.me/918006680092" target="_blank" class="flex items-center gap-1.5 text-emerald-600 font-semibold hover:underline"><i class="fa-solid fa-comment-dots fa-fw"></i> WhatsApp</a>
             </div>
         </div>
     </div>

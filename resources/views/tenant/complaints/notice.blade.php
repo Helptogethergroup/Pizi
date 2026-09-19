@@ -7,7 +7,7 @@
 
 @if($tenant->notice_date)
     <div class="mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-6">
-        <h3 class="font-bold text-lg">⏳ Notice Active</h3>
+        <h3 class="font-bold text-lg"><i class="fa-solid fa-hourglass-half fa-fw"></i> Notice Active</h3>
         <p class="text-sm mt-1">Aapne notice de diya hai. Move-out date: <strong>{{ \Carbon\Carbon::parse($tenant->notice_date)->format('d M Y') }}</strong></p>
         @if($tenant->notice_reason)
             <p class="text-sm mt-2 italic">Reason: {{ $tenant->notice_reason }}</p>
@@ -19,7 +19,7 @@
     @csrf
 
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-900">
-        <strong>📌 Note:</strong> Standard notice period generally 30 days hota hai. Apne agreement check kare exact terms ke liye.
+        <strong><i class="fa-solid fa-thumbtack fa-fw"></i> Note:</strong> Standard notice period generally 30 days hota hai. Apne agreement check kare exact terms ke liye.
     </div>
 
     <div>
@@ -34,7 +34,7 @@
     </div>
 
     <button type="submit" class="px-8 py-3 bg-rose-500 hover:bg-rose-600 text-white rounded-xl font-bold" onclick="return confirm('Are you sure? Owner will be notified.')">
-        📤 Submit Notice
+        <i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i> Submit Notice
     </button>
 </form>
 

@@ -29,6 +29,7 @@
             #sidebar { position: relative; transform: none !important; display: flex; }
         }
     </style>
+@include('partials.emoji-icons')
 </head>
 <body class="text-ink-950">
 
@@ -56,24 +57,24 @@
     @endphp
 
     <a href="{{ route('tenant.onboarding') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.onboarding') ? 'bg-cream/10 text-coral-500' : '' }}">
-        📋 Verification Steps   
+        <i class="fa-solid fa-clipboard-list fa-fw"></i> Verification Steps   
         @if(!$journeyComplete)
             <span class="ml-auto text-xs bg-coral-500 text-white px-2 py-0.5 rounded-full font-bold">{{ auth()->user()->journey_stage ?? 0 }}/4</span>
         @endif
     </a>
 
     @if($journeyComplete)
-     <a href="{{ route('tenant.onboarding', ['view' => 1]) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.onboarding') ? 'bg-cream/10 text-coral-500' : '' }}">📋 Verification Steps</a>
-         <a href="{{ route('tenant.profile') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.profile') ? 'bg-cream/10 text-coral-500' : '' }}">👤 My Profile</a>
-        <a href="{{ route('tenant.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}">🏠 Dashboard</a>
-        <a href="{{ route('tenant.kyc') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.kyc') ? 'bg-cream/10 text-coral-500' : '' }}">📄 Upload KYC</a>
+     <a href="{{ route('tenant.onboarding', ['view' => 1]) }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.onboarding') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-clipboard-list fa-fw"></i> Verification Steps</a>
+         <a href="{{ route('tenant.profile') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.profile') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-user fa-fw"></i> My Profile</a>
+        <a href="{{ route('tenant.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-house fa-fw"></i> Dashboard</a>
+        <a href="{{ route('tenant.kyc') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.kyc') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-file-lines fa-fw"></i> Upload KYC</a>
      
       
-        <a href="{{ route('tenant.room') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.room') ? 'bg-cream/10 text-coral-500' : '' }}">🛏️ My Room</a>
-        <a href="{{ route('tenant.rent.history') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.rent.*') ? 'bg-cream/10 text-coral-500' : '' }}">💰 Rent History</a>
-        <a href="{{ route('tenant.complaints.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.complaints.*') ? 'bg-cream/10 text-coral-500' : '' }}">🛠️ Complaints</a>
-        <a href="{{ route('tenant.agreement') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.agreement') ? 'bg-cream/10 text-coral-500' : '' }}">📄 Agreement</a>
-        <a href="{{ route('tenant.notice') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.notice') ? 'bg-cream/10 text-coral-500' : '' }}">📤 Notice Period</a>
+        <a href="{{ route('tenant.room') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.room') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bed fa-fw"></i> My Room</a>
+        <a href="{{ route('tenant.rent.history') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.rent.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> Rent History</a>
+        <a href="{{ route('tenant.complaints.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.complaints.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-screwdriver-wrench fa-fw"></i> Complaints</a>
+        <a href="{{ route('tenant.agreement') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.agreement') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-file-lines fa-fw"></i> Agreement</a>
+        <a href="{{ route('tenant.notice') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('tenant.notice') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-arrow-up-from-bracket fa-fw"></i> Notice Period</a>
     @endif
 
 

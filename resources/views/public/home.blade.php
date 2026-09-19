@@ -737,7 +737,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8">
         <div class="pzi-headbox pzi-headbox-rose flex items-center justify-between mb-5 px-5 py-4 rounded-2xl">
             <div class="flex items-center gap-4">
-                <span class="pzi-icon-circle bg-rose-500">🆕</span>
+                <span class="pzi-icon-circle bg-rose-500"><i class="fa-solid fa-certificate fa-fw"></i></span>
                 <div>
                     <span class="inline-flex items-center gap-1.5 text-rose-100 font-bold text-xs tracking-widest uppercase">
                         <span class="w-1.5 h-1.5 rounded-full bg-white pzi-pulse"></span>

@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="mb-6">
-    <h1 class="font-display font-black text-3xl">👥 All Tenants</h1>
+    <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-users fa-fw"></i> All Tenants</h1>
     <p class="text-ink-900/60 mt-1">Platform-wide tenant management</p>
 </div>
 
@@ -53,7 +53,7 @@
 
 @if($tenants->isEmpty())
     <div class="bg-white p-12 rounded-2xl border border-ink-100 text-center">
-        <div class="text-5xl mb-3">👥</div>
+        <div class="text-5xl mb-3"><i class="fa-solid fa-users fa-fw"></i></div>
         <p class="text-ink-700">No tenants found.</p>
     </div>
 @else
@@ -72,11 +72,11 @@
                             @if($tenant->kyc_status === 'approved')
                                 <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">✓ KYC</span>
                             @elseif($tenant->kyc_status === 'submitted')
-                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold">📋 Review</span>
+                                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-clipboard-list fa-fw"></i> Review</span>
                             @elseif($tenant->kyc_status === 'rejected')
-                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold">❌ Rejected</span>
+                                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-circle-xmark fa-fw"></i> Rejected</span>
                             @else
-                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold">⏳ Pending</span>
+                                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-hourglass-half fa-fw"></i> Pending</span>
                             @endif
 
                             @if($tenant->status !== 'active')
@@ -84,9 +84,9 @@
                             @endif
                         </div>
                         <div class="flex items-center gap-3 text-xs text-ink-700 flex-wrap">
-                            <span>📞 {{ $tenant->phone }}</span>
-                            <span>🏠 {{ $tenant->property?->name }}</span>
-                            <span>👤 Owner: <strong>{{ $tenant->owner?->name }}</strong></span>
+                            <span><i class="fa-solid fa-phone fa-fw"></i> {{ $tenant->phone }}</span>
+                            <span><i class="fa-solid fa-house fa-fw"></i> {{ $tenant->property?->name }}</span>
+                            <span><i class="fa-solid fa-user fa-fw"></i> Owner: <strong>{{ $tenant->owner?->name }}</strong></span>
                         </div>
                     </div>
 

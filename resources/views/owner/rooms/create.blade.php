@@ -11,7 +11,7 @@
     @csrf
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">🏠 Basic Info</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-house fa-fw"></i> Basic Info</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
                 <label class="text-xs font-bold uppercase text-ink-500">Property *</label>
@@ -44,16 +44,16 @@
             <div>
                 <label class="text-xs font-bold uppercase text-ink-500">Gender *</label>
                 <select name="gender" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
-                    <option value="male">👨 Boys</option>
-                    <option value="female">👩 Girls</option>
-                    <option value="unisex">👥 Unisex</option>
+                    <option value="male">Boys</option>
+                    <option value="female">Girls</option>
+                    <option value="unisex">Unisex</option>
                 </select>
             </div>
         </div>
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">💰 Pricing</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-sack-dollar fa-fw"></i> Pricing</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
                 <label class="text-xs font-bold uppercase text-ink-500">Monthly Rent ₹</label>
@@ -68,7 +68,7 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
-        <h2 class="font-display font-bold text-lg mb-4">✨ Amenities</h2>
+        <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-wand-magic-sparkles fa-fw"></i> Amenities</h2>
         <p class="text-xs text-ink-500 mb-3">Is room mein kya-kya available hai, select kar.</p>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             @forelse($amenities as $a)
@@ -86,7 +86,7 @@
         <label class="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" name="auto_create_beds" value="1" checked class="mt-1 rounded w-5 h-5">
             <div>
-                <div class="font-bold text-emerald-900">✨ Auto-create beds</div>
+                <div class="font-bold text-emerald-900"><i class="fa-solid fa-wand-magic-sparkles fa-fw"></i> Auto-create beds</div>
                 <p class="text-sm text-emerald-800 mt-1">Automatically create beds based on room type (A, B, C, D...). You can edit them later.</p>
             </div>
         </label>

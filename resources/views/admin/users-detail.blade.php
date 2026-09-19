@@ -62,7 +62,7 @@
         <div class="bg-white rounded-2xl border border-ink-900/10 p-6">
             <h2 class="font-bold text-lg mb-2">Reset Password</h2>
             <p class="text-xs text-ink-900/50 mb-4">
-                🔒 For security, existing passwords are encrypted and cannot be viewed by anyone — including admins.
+                <i class="fa-solid fa-lock fa-fw"></i> For security, existing passwords are encrypted and cannot be viewed by anyone — including admins.
                 You can only set a new one below.
             </p>
             <form method="POST" action="{{ route('admin.users.resetPassword', $user) }}" class="flex gap-3">

@@ -9,7 +9,7 @@
 
     {{-- PG INFO --}}
     <div class="lg:col-span-2 bg-white rounded-2xl border border-ink-900/10 p-6">
-        <h2 class="font-display font-bold text-xl mb-4">🏠 My PG</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-house fa-fw"></i> My PG</h2>
         
         @if($tenant->property)
             <div class="flex gap-4 flex-wrap">
@@ -24,7 +24,7 @@
                     <div class="mt-4 flex flex-wrap gap-2">
                         <a href="{{ route('property.show', $tenant->property->slug) }}" target="_blank" class="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-bold">View Property</a>
                         @if($tenant->property->latitude && $tenant->property->longitude)
-                            <a href="https://www.google.com/maps?q={{ $tenant->property->latitude }},{{ $tenant->property->longitude }}" target="_blank" class="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold">🗺️ Get Directions</a>
+                            <a href="https://www.google.com/maps?q={{ $tenant->property->latitude }},{{ $tenant->property->longitude }}" target="_blank" class="px-4 py-2 bg-emerald-500 text-white rounded-lg text-sm font-bold"><i class="fa-solid fa-map fa-fw"></i> Get Directions</a>
                         @endif
                     </div>
                 </div>
@@ -34,7 +34,7 @@
 
     {{-- ROOM DETAILS --}}
     <div class="bg-white rounded-2xl border border-ink-900/10 p-6">
-        <h2 class="font-display font-bold text-xl mb-4">🛏️ Room Details</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-bed fa-fw"></i> Room Details</h2>
         <div class="space-y-3 text-sm">
             <div class="flex justify-between border-b border-ink-900/5 pb-2">
                 <span class="text-ink-900/60">Room Number</span>
@@ -70,7 +70,7 @@
 
 {{-- ROOMMATES --}}
 <div class="mt-6 bg-white rounded-2xl border border-ink-900/10 p-6">
-    <h2 class="font-display font-bold text-xl mb-4">👥 My Roommates ({{ $roommates->count() }})</h2>
+    <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-users fa-fw"></i> My Roommates ({{ $roommates->count() }})</h2>
     
     @if($roommates->count())
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -90,7 +90,7 @@
             @endforeach
         </div>
     @else
-        <p class="text-ink-900/50 text-center py-8">No roommates - you have the room all to yourself! 🎉</p>
+        <p class="text-ink-900/50 text-center py-8">No roommates - you have the room all to yourself! <i class="fa-solid fa-champagne-glasses fa-fw"></i></p>
     @endif
 </div>
 

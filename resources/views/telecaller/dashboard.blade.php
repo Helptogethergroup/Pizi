@@ -21,7 +21,7 @@
 @php $progressPct = $callTarget > 0 ? min(100, round($attendedToday / $callTarget * 100)) : 0; @endphp
 <div class="mt-6 bg-white p-5 rounded-2xl border border-ink-900/10">
     <div class="flex justify-between text-xs text-ink-900/50 mb-1">
-        <span>📞 Today's call target</span>
+        <span><i class="fa-solid fa-phone fa-fw"></i> Today's call target</span>
         <span>{{ $attendedToday }} / {{ $callTarget }}</span>
     </div>
     <div class="h-2.5 rounded-full bg-ink-100 overflow-hidden">
@@ -31,12 +31,12 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-10">
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">🔥 Top priority leads — call these first</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-fire fa-fw"></i> Top priority leads — call these first</h2>
         @forelse($priorityLeads as $lead)
             <a href="{{ route('telecaller.leads.show', $lead) }}" class="flex items-center justify-between py-3 border-t border-ink-900/5 first:border-t-0 hover:bg-ink-900/5 px-2 rounded">
                 <div>
                     <div class="font-semibold">{{ $lead->name }}</div>
-                    <div class="text-xs text-ink-900/50">📞 {{ $lead->phone }} · {{ $lead->property?->name ?? 'General' }}</div>
+                    <div class="text-xs text-ink-900/50"><i class="fa-solid fa-phone fa-fw"></i> {{ $lead->phone }} · {{ $lead->property?->name ?? 'General' }}</div>
                 </div>
                 <div class="text-xs text-ink-900/40">{{ $lead->created_at->diffForHumans() }}</div>
             </a>
@@ -46,12 +46,12 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">📅 Follow-ups today</h2>
+        <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-calendar-days fa-fw"></i> Follow-ups today</h2>
         @forelse($todaysFollowUps as $lead)
             <a href="{{ route('telecaller.leads.show', $lead) }}" class="flex items-center justify-between py-3 border-t border-ink-900/5 first:border-t-0 hover:bg-ink-900/5 px-2 rounded">
                 <div>
                     <div class="font-semibold">{{ $lead->name }}</div>
-                    <div class="text-xs text-ink-900/50">📞 {{ $lead->phone }}</div>
+                    <div class="text-xs text-ink-900/50"><i class="fa-solid fa-phone fa-fw"></i> {{ $lead->phone }}</div>
                 </div>
                 <span class="px-2 py-1 rounded-full text-xs {{ $lead->statusBadge() }}">{{ str_replace('_',' ',$lead->status) }}</span>
             </a>
