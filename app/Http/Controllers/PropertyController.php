@@ -308,7 +308,19 @@ class PropertyController extends Controller
             ->limit(6)
             ->get();
 
+        // A pin is "approximate" when several PGs share the exact same point or when
+        // it only has 2 decimals (~1 km precision) — usually a rough city/area pin.
+        $shared = Property::active()->where('is_verified', true)
+            ->whereNotNull('latitude')->whereNotNull('longitude')
+            ->selectRaw('ROUND(latitude, 4) as la, ROUND(longitude, 4) as lo, COUNT(*) as c')
+            ->groupBy('la', 'lo')->having('c', '>', 1)->get()
+            ->mapWithKeys(fn ($r) => [$r->la . ',' . $r->lo => true]);
+
         return response()->json(['data' => $rows->map(fn ($p) => [
+            'approx' => isset($shared[round((float) $p->latitude, 4) . ',' . round((float) $p->longitude, 4)])
+                || round((float) $p->latitude, 2) == (float) $p->latitude,
+            'lat' => (float) $p->latitude,
+            'lng' => (float) $p->longitude,
             'name' => $p->name,
             'url' => route('property.show', $p->slug),
             'image' => $p->cover_image

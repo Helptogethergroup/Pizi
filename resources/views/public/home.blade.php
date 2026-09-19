@@ -389,17 +389,6 @@
 </section>
 @endif
 
-{{-- RECENTLY VIEWED (filled from the visitor's browser) --}}
-<section id="pzRecent" class="hidden py-5">
-    <div class="max-w-7xl mx-auto px-4 lg:px-8">
-        <div class="flex items-center justify-between gap-3 mb-3">
-            <h2 class="font-display font-black text-xl lg:text-2xl flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-coral-500"></i> Pick up where you left off</h2>
-            <button type="button" id="pzRecentClear" class="text-xs font-semibold text-ink-900/50 hover:text-coral-600 transition"><i class="fa-solid fa-trash-can"></i> Clear</button>
-        </div>
-        <div id="pzRecentTrack" class="pzi-slider flex gap-3 overflow-x-auto pb-2 scrollbar-hide"></div>
-    </div>
-</section>
-
 
 
 {{--
@@ -1168,48 +1157,6 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-{{-- FAQ --}}
-@php
-    $pzFaqs = [
-        ['What makes Pizi the best platform to find PGs in India?', "Pizi is one of the best platforms to find PGs in India because it offers verified listings, easy search filters, transparent pricing, and a seamless booking experience. Whether you're a student or a working professional, Pizi helps you discover safe, comfortable, and affordable PG accommodations across multiple cities, making the entire process faster and hassle-free."],
-        ['What information is available in Pizi PG listings?', 'Pizi PG listings include essential details such as property photos, room types, monthly rent, available amenities, location, occupancy options, and contact information. This helps users make informed decisions and find the right PG accommodation based on their preferences and budget.'],
-        ['Can I compare PGs on Pizi before making a decision?', 'Yes, Pizi allows you to compare different PGs based on factors such as rent, room types, amenities, location, and occupancy options. Tap the compare icon on any PG card, pick up to three, and open the side-by-side view. This makes it easier to evaluate your choices and select the PG that best matches your needs and budget.'],
-        ['How can I search for PGs based on my budget on Pizi?', 'Pizi makes it easy to find PGs within your budget. You can use filters to narrow down listings based on your preferred price range, location, room type, and amenities, helping you quickly discover PG accommodations that suit your needs and budget.'],
-        ['Do I have to pay any brokerage?', 'No. Pizi does not charge tenants any brokerage. You can browse, shortlist, and book a free site visit without paying anything to Pizi.'],
-        ['How does the free site visit work?', 'Share your name and mobile number, and a Pizi advisor will call you within 30 minutes. We schedule a convenient time and a member of our field team accompanies you to the PGs you like, so you can see everything before you pay.'],
-        ['Are the PGs on Pizi really verified?', 'Yes. Every PG is physically inspected by our field team before it gets the Verified badge. We check the property, the photos, and the rent so that what you see online matches what you find on arrival.'],
-        ['How can I list my PG on Pizi?', 'Click "List your PG", register as an owner, and add your property details and photos. Our team verifies the listing, and you only pay credits when you choose to unlock a real, qualified lead.'],
-    ];
-@endphp
-<section id="pzFaq" class="py-8 pz-reveal">
-    <div class="max-w-4xl mx-auto px-4 lg:px-8">
-        <div class="text-center mb-6">
-            <span class="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-coral-600"><i class="fa-solid fa-circle-question"></i> Questions, answered</span>
-            <h2 class="font-display font-black text-3xl lg:text-4xl mt-2 text-ink-950">Everything you want to know.</h2>
-            <p class="text-ink-900/60 mt-2">Quick answers about finding, comparing, and booking a PG with Pizi.</p>
-        </div>
-        <div class="space-y-3">
-            @foreach($pzFaqs as $i => [$question, $answer])
-                <div class="pz-faq bg-white rounded-2xl border border-ink-900/10 overflow-hidden transition hover:border-coral-300" data-faq>
-                    <button type="button" class="w-full flex items-center justify-between gap-4 text-left px-5 py-4 font-display font-bold text-base lg:text-lg" aria-expanded="false" aria-controls="pzFaqBody{{ $i }}" id="pzFaqBtn{{ $i }}">
-                        <span>{{ $question }}</span>
-                        <span class="pz-faq-icon w-8 h-8 rounded-full bg-coral-50 text-coral-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-plus text-sm"></i></span>
-                    </button>
-                    <div class="pz-faq-body" id="pzFaqBody{{ $i }}" role="region" aria-labelledby="pzFaqBtn{{ $i }}">
-                        <div><p class="px-5 pb-5 text-ink-900/70 leading-relaxed">{{ $answer }}</p></div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-        <div class="text-center mt-6">
-            <p class="text-sm text-ink-900/60">Still have a question?</p>
-            <div class="mt-3 flex flex-wrap items-center justify-center gap-3">
-                <button type="button" onclick="toggleChat()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-ink-900 text-cream text-sm font-bold hover:bg-ink-800 transition"><i class="fa-solid fa-comment-dots"></i> Ask our AI assistant</button>
-                <a href="tel:8006680092" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-ink-900/15 text-sm font-bold hover:border-coral-500 hover:text-coral-600 transition"><i class="fa-solid fa-phone"></i> Call 8006680092</a>
-            </div>
-        </div>
-    </div>
-</section>
 {{-- MOBILE QUICK-ACTION BAR --}}
 <div id="pzMobileBar" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-ink-900/10 px-3 pt-2 grid grid-cols-3 gap-2" style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));">
     <a href="tel:8006680092" class="inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-ink-900/15 text-sm font-bold text-ink-900">
@@ -1667,78 +1614,3 @@ function piziUpdateBudget(val) {
 </script>
 @endpush
 
-@push('head')
-<style>
-    .pz-faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s cubic-bezier(.16, 1, .3, 1); }
-    .pz-faq-body > div { overflow: hidden; }
-    .pz-faq.pz-open { border-color: #ff8c7e; box-shadow: 0 12px 30px rgba(255, 107, 91, .12); }
-    .pz-faq.pz-open .pz-faq-body { grid-template-rows: 1fr; }
-    .pz-faq-icon { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), background-color .25s, color .25s; }
-    .pz-faq.pz-open .pz-faq-icon { transform: rotate(135deg); background: #ed4e3d; color: #fff; }
-    @media (prefers-reduced-motion: reduce) { .pz-faq-body, .pz-faq-icon { transition: none; } }
-</style>
-@endpush
-
-@push('scripts')
-<script>
-(function () {
-    var $ = function (id) { return document.getElementById(id); };
-
-    /* FAQ accordion (one open at a time) */
-    var faqs = [].slice.call(document.querySelectorAll('[data-faq]'));
-    faqs.forEach(function (box) {
-        var btn = box.querySelector('button');
-        btn.addEventListener('click', function () {
-            var open = !box.classList.contains('pz-open');
-            faqs.forEach(function (o) { o.classList.remove('pz-open'); o.querySelector('button').setAttribute('aria-expanded', 'false'); });
-            if (open) { box.classList.add('pz-open'); btn.setAttribute('aria-expanded', 'true'); }
-        });
-    });
-
-    /* Recently viewed PGs (saved in this browser by the PG detail page) */
-    var recent = [];
-    try { recent = JSON.parse(localStorage.getItem('pz_recent_pgs') || '[]'); } catch (e) {}
-    var section = $('pzRecent'), track = $('pzRecentTrack');
-    if (section && track && recent.length) {
-        recent.slice(0, 10).forEach(function (p, i) {
-            var a = document.createElement('a');
-            a.href = p.url;
-            a.className = 'group flex-shrink-0 w-52 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition';
-            a.style.animation = 'pzFadeUp .5s cubic-bezier(.16,1,.3,1) both'; a.style.animationDelay = (i * 60) + 'ms';
-            var media = document.createElement('div');
-            media.className = 'h-28 bg-cream relative overflow-hidden flex items-center justify-center text-coral-300 text-3xl';
-            if (p.img) { var img = document.createElement('img'); img.src = p.img; img.alt = p.name; img.loading = 'lazy'; img.className = 'w-full h-full object-cover group-hover:scale-105 transition duration-500'; media.appendChild(img); }
-            else { media.innerHTML = '<i class="fa-solid fa-house"></i>'; }
-            var body = document.createElement('div'); body.className = 'p-3';
-            var h = document.createElement('h3'); h.className = 'font-bold text-sm leading-tight line-clamp-1 group-hover:text-coral-600 transition'; h.textContent = p.name;
-            var more = document.createElement('div'); more.className = 'text-xs text-coral-600 font-semibold mt-1.5 inline-flex items-center gap-1'; more.innerHTML = 'View again <i class="fa-solid fa-arrow-right text-[10px]"></i>';
-            body.appendChild(h); body.appendChild(more); a.appendChild(media); a.appendChild(body); track.appendChild(a);
-        });
-        section.classList.remove('hidden');
-        var clear = $('pzRecentClear');
-        if (clear) clear.addEventListener('click', function () {
-            try { localStorage.removeItem('pz_recent_pgs'); } catch (e) {}
-            section.style.transition = 'opacity .3s'; section.style.opacity = '0';
-            setTimeout(function () { section.classList.add('hidden'); }, 300);
-            if (window.pzToast) pzToast('Recently viewed cleared', 'fa-trash-can');
-        });
-    }
-
-    /* Remembered city: offer to continue where the visitor was browsing */
-    var city = null;
-    try { city = localStorage.getItem('pz_city'); } catch (e) {}
-    var form = $('pzHeroForm');
-    if (city && form && /^[a-z-]+$/.test(city)) {
-        var chip = document.createElement('a');
-        chip.href = '/pg-in-' + city;
-        chip.className = 'mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-coral-500/30 text-sm font-semibold text-coral-700 hover:bg-coral-50 hover:-translate-y-0.5 transition';
-        chip.style.animation = 'pzFadeUp .6s cubic-bezier(.16,1,.3,1) 1s both';
-        var label = city.charAt(0).toUpperCase() + city.slice(1);
-        chip.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';
-        chip.appendChild(document.createTextNode('Continue browsing PGs in ' + label));
-        chip.insertAdjacentHTML('beforeend', ' <i class="fa-solid fa-arrow-right text-xs"></i>');
-        form.parentNode.insertBefore(chip, form);
-    }
-})();
-</script>
-@endpush
