@@ -115,6 +115,17 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     $whatsapp = '918006680092';
 @endphp
 
+{{-- ===== ANNOUNCEMENT BAR (dismissible) ===== --}}
+<div id="pzAnnounce" class="text-white text-xs sm:text-sm font-semibold">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 py-2 pr-10 flex items-center justify-center gap-3 relative text-center">
+        <i class="fa-solid fa-bullhorn"></i>
+        <span>Free site visits on every booking. Zero brokerage on verified PGs.</span>
+        <a href="{{ route('home') }}#pzVisit" class="hidden sm:inline underline underline-offset-2 whitespace-nowrap">Book yours <i class="fa-solid fa-arrow-right text-[10px]"></i></a>
+        <button type="button" id="pzAnnounceClose" class="absolute right-2 lg:right-6 w-7 h-7 rounded-full hover:bg-white/20 transition" aria-label="Dismiss announcement"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+</div>
+<script>try{if(localStorage.getItem('pz_ann_v1')){document.getElementById('pzAnnounce').remove();}}catch(e){}</script>
+
 {{-- ===== TOP CONTACT BAR ===== --}}
 <div class="bg-ink-950 text-cream py-2">
     <div class="max-w-7xl mx-auto px-4 lg:px-8 flex items-center justify-between text-xs">
@@ -129,8 +140,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <div class="max-w-[1600px] mx-auto px-4 lg:px-8 h-20 flex items-center justify-between">
 
         {{-- LEFT: Logo --}}
-        <a href="{{ route('home') }}" class="flex items-center group">
-            <img src="{{ asset('assets/images/logo.png') }}" alt="Pizi" class="logo-img" style="height:5rem; width:auto;">
+        <a href="{{ route('home') }}" class="flex items-center group flex-shrink-0">
+            <img src="{{ asset('assets/images/logo.png') }}" alt="Pizi" class="logo-img flex-shrink-0" style="height:5rem; width:auto;">
         </a>
 
     {{-- CENTER: Desktop nav --}}
@@ -164,18 +175,22 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                 </div>
             </div>
-            <a href="{{ route('universities.index') }}" class="px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap"><i class="fa-solid fa-graduation-cap fa-fw"></i>  pg's Near Universities</a>
+            <a href="{{ route('universities.index') }}" class="px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap"><i class="fa-solid fa-graduation-cap fa-fw"></i> Near Universities</a>
            <a href="{{ route('blog.index') }}" class="px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">Blog</a>
 <a href="{{ route('about') }}" class="hidden xl:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">About</a>
 <button type="button" onclick="openContactPopup()" class="hidden xl:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">Contact</button>
-<a href="{{ route('chat.page') }}" class="hidden xl:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap"><i class="fa-solid fa-comment-dots fa-fw"></i> AI Chat</a>
+<button type="button" onclick="toggleChat()" class="hidden min-[1340px]:inline-block px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap"><i class="fa-solid fa-comment-dots fa-fw"></i> AI Chat</button>
         </nav>
 
              {{-- RIGHT: Phone box + Desktop buttons + Mobile hamburger --}}
         <div class="flex items-center gap-2 lg:gap-3">
 
+            {{-- Quick actions: search + saved PGs --}}
+            <button type="button" id="pzSearchBtn" class="pz-iconbtn" aria-label="Search PGs" title="Search (press /)"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <a id="pzHeaderVisit" href="{{ route('home') }}#pzVisit" class="hidden xl:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-coral-500 hover:bg-coral-600 text-white text-sm font-bold shadow-md shadow-coral-500/30 hover:-translate-y-0.5 transition whitespace-nowrap"><i class="fa-solid fa-calendar-check"></i> Book visit</a>
+
             {{-- Prominent phone box --}}
-            <a href="tel:{{ $phone }}" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-coral-500/30 hover:border-coral-500 hover:bg-coral-50 transition">
+            <a href="tel:{{ $phone }}" class="hidden sm:flex xl:hidden 2xl:flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-coral-500/30 hover:border-coral-500 hover:bg-coral-50 transition">
                 <span class="w-8 h-8 rounded-lg bg-coral-500 text-white flex items-center justify-center text-sm flex-shrink-0"><i class="fa-solid fa-phone fa-fw"></i></span>
                 <span class="leading-tight">
                     <span class="block text-[10px] text-ink-900/50 font-semibold uppercase tracking-wide">Call us</span>
@@ -184,19 +199,35 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </a>
             <div class="hidden md:flex items-center gap-2">
                 @auth
-                    @if(auth()->user()->isAdmin())
-                        <a href="{{ route('admin.dashboard') }}" class="text-sm font-medium px-3 py-2 hover:text-coral-600">Admin</a>
-                    @elseif(auth()->user()->isOwner())
-                        <a href="{{ route('owner.dashboard') }}" class="text-sm font-medium px-3 py-2 hover:text-coral-600">Dashboard</a>
-                    @elseif(auth()->user()->isTeleCaller())
-                        <a href="{{ route('telecaller.dashboard') }}" class="text-sm font-medium px-3 py-2 hover:text-coral-600">Leads</a>
-                    @endif
-                    <form method="POST" action="{{ route('logout') }}" class="inline">@csrf
-                        <button class="text-sm font-medium px-3 py-2 hover:text-coral-600">Logout</button>
-                    </form>
+                    @php
+                        $pzUser = auth()->user();
+                        $pzDash = $pzUser->isAdmin() ? route('admin.dashboard') : ($pzUser->isOwner() ? route('owner.dashboard') : ($pzUser->isTeleCaller() ? route('telecaller.dashboard') : null));
+                        $pzDashLabel = $pzUser->isAdmin() ? 'Admin panel' : ($pzUser->isOwner() ? 'My dashboard' : 'My leads');
+                    @endphp
+                    <div class="relative group">
+                        <button type="button" class="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full hover:bg-coral-50 transition" aria-haspopup="true" aria-label="Account menu">
+                            <span class="w-9 h-9 rounded-full bg-gradient-to-br from-coral-400 to-coral-600 text-white font-bold flex items-center justify-center shadow-md shadow-coral-500/30">{{ strtoupper(mb_substr($pzUser->name ?: 'U', 0, 1)) }}</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] transition group-hover:rotate-180"></i>
+                        </button>
+                        <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition absolute right-0 top-full pt-2 w-56 z-50">
+                            <div class="bg-white rounded-2xl shadow-2xl shadow-ink-900/15 border border-ink-900/10 p-2">
+                                <div class="px-3 py-2 border-b border-ink-900/10 mb-1">
+                                    <div class="text-sm font-bold truncate">{{ $pzUser->name }}</div>
+                                    <div class="text-xs text-ink-900/50 capitalize">{{ $pzUser->role }}</div>
+                                </div>
+                                @if($pzDash)
+                                    <a href="{{ $pzDash }}" class="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-solid fa-gauge-high fa-fw"></i> {{ $pzDashLabel }}</a>
+                                @endif
+                                <button type="button" onclick="window.pzOpenSaved && pzOpenSaved()" class="w-full text-left flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm hover:bg-coral-50 hover:text-coral-600 transition"><i class="fa-regular fa-heart fa-fw"></i> Saved PGs</button>
+                                <form method="POST" action="{{ route('logout') }}">@csrf
+                                    <button type="submit" class="w-full text-left flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm hover:bg-rose-50 hover:text-rose-600 transition"><i class="fa-solid fa-door-open fa-fw"></i> Logout</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium px-3 py-2 hover:text-coral-600 whitespace-nowrap">Login</a>
-                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="hidden xl:flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-full bg-coral-50 text-coral-600 hover:bg-coral-100 transition whitespace-nowrap"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get App</a>
+                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="hidden min-[1340px]:flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-full bg-coral-50 text-coral-600 hover:bg-coral-100 transition whitespace-nowrap"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get App</a>
                     <a href="{{ route('register') }}" class="text-sm font-semibold px-4 py-2 rounded-full bg-ink-900 text-cream hover:bg-ink-800 transition whitespace-nowrap">List your PG</a>
                 @endauth
             </div>
@@ -282,13 +313,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
             <div class="border-t border-ink-900/10 my-2 pt-2">
                 
-                <a href="{{ route('universities.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-graduation-cap fa-fw"></i>Pg's near Universities</a>
+                <a href="{{ route('universities.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-graduation-cap fa-fw"></i> PGs near Universities</a>
                 
                 <a href="{{ route('blog.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-pen-to-square fa-fw"></i> Blog</a>
-                <a href="{{ route('about') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium">ℹ About Us</a>
+                <a href="{{ route('about') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-circle-info fa-fw"></i> About Us</a>
                 
                 <button type="button" onclick="document.getElementById('piziMobileMenu').classList.add('hidden'); document.body.style.overflow=''; openContactPopup();" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-envelope fa-fw"></i> Contact</button>
-                <a href="{{ route('chat.page') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-comment-dots fa-fw"></i> AI Chat</a>
+                <button type="button" onclick="document.getElementById('piziMobileMenu').classList.add('hidden'); document.body.style.overflow=''; toggleChat();" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-coral-50 hover:text-coral-600 font-medium"><i class="fa-solid fa-comment-dots fa-fw"></i> AI Chat</button>
             </div>
 
             <div class="border-t border-ink-900/10 my-2 pt-3 space-y-2">
@@ -403,6 +434,43 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
     </div>
 
+    {{-- ===== WHATSAPP ALERTS + POPULAR SEARCHES ===== --}}
+    <div class="relative border-b border-cream/10">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8 grid lg:grid-cols-2 gap-8">
+            <div>
+                <h4 class="font-display font-bold text-cream text-lg flex items-center gap-2"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Get new PG alerts on WhatsApp</h4>
+                <p class="text-sm text-cream/60 mt-1">Be the first to know when a verified PG opens near you. No spam, ever.</p>
+                <form id="pzAlertForm" class="mt-4 flex gap-2" novalidate>
+                    <input id="pzAlertPhone" type="tel" inputmode="numeric" maxlength="14" autocomplete="tel" placeholder="Your WhatsApp number" aria-label="WhatsApp number"
+                           class="flex-1 min-w-0 px-4 py-2.5 rounded-xl bg-white/10 border border-white/15 text-cream placeholder:text-cream/40 text-sm focus:outline-none focus:border-coral-400 transition">
+                    <button type="submit" id="pzAlertBtn" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-bold transition whitespace-nowrap"><i class="fa-solid fa-bell"></i> Notify me</button>
+                </form>
+                <p id="pzAlertMsg" class="text-xs mt-2 hidden" role="status" aria-live="polite"></p>
+            </div>
+            <div>
+                <h4 class="font-display font-bold text-cream text-lg flex items-center gap-2"><i class="fa-solid fa-magnifying-glass text-coral-400"></i> Popular searches</h4>
+                <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                    @foreach([
+                        ['Girls PG in Delhi', ['city' => 'delhi', 'gender' => 'female']],
+                        ['Boys PG in Delhi', ['city' => 'delhi', 'gender' => 'male']],
+                        ['Girls PG in Noida', ['city' => 'noida', 'gender' => 'female']],
+                        ['Boys PG in Noida', ['city' => 'noida', 'gender' => 'male']],
+                        ['PG under ₹8,000', ['budget_max' => 8000]],
+                        ['PG under ₹10,000', ['budget_max' => 10000]],
+                        ['PG under ₹15,000', ['budget_max' => 15000]],
+                        ['PG with food', ['food' => 1]],
+                        ['Unisex PG', ['gender' => 'unisex']],
+                        ['Co-living', ['type' => 'coliving']],
+                        ['Hostels', ['type' => 'hostel']],
+                    ] as [$pzLabel, $pzParams])
+                        <a href="{{ route('search', $pzParams) }}" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-cream/70 hover:bg-coral-500 hover:border-coral-500 hover:text-white hover:-translate-y-0.5 transition">{{ $pzLabel }}</a>
+                    @endforeach
+                    <a href="{{ route('universities.index') }}" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-cream/70 hover:bg-coral-500 hover:border-coral-500 hover:text-white hover:-translate-y-0.5 transition">PGs near universities</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ===== LINKS ===== --}}
     <div class="relative max-w-7xl mx-auto px-4 lg:px-8 py-14 grid grid-cols-2 md:grid-cols-4 gap-10">
         <div class="col-span-2 md:col-span-1">
@@ -473,11 +541,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </div>
     </div>
 
+    <div class="relative border-t border-cream/10 py-5">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-cream/70">
+            <div class="flex items-center gap-2"><i class="fa-solid fa-shield-halved text-coral-400 text-base"></i> Field-verified listings</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-hand-holding-dollar text-coral-400 text-base"></i> Zero brokerage</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-route text-coral-400 text-base"></i> Free site visits</div>
+            <div class="flex items-center gap-2"><i class="fa-solid fa-headset text-coral-400 text-base"></i> 24x7 support</div>
+        </div>
+    </div>
+
     <div class="relative border-t border-cream/10 py-6">
         <div class="max-w-7xl mx-auto px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-cream/50">
             <span>&copy; {{ date('Y') }} Pizi.in · All rights reserved</span>
             <span class="flex items-center gap-4">
-                <a href="#" class="hover:text-coral-400 transition">Privacy</a>
+                <a href="{{ route('privacy-policy') }}" class="hover:text-coral-400 transition">Privacy</a>
                 <a href="#" class="hover:text-coral-400 transition">Terms</a>
                 <span>Developed By <span class="text-coral-400"><i class="fa-solid fa-heart fa-fw"></i></span>HelpTogetherGroup</span>
             </span>
@@ -763,6 +840,7 @@ document.getElementById('contactPopupForm').addEventListener('submit', async fun
 })();
 </script>
 
+@include('partials.site-enhancements')
 @stack('scripts')
 
 

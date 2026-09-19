@@ -18,7 +18,7 @@ class PropertyController extends Controller
     {
         $q = Property::active()
             ->where('is_verified', true)
-            ->with(['city', 'locality', 'amenities']);
+            ->with(['city', 'locality', 'amenities', 'images']);
 
         // Free-text search across name, locality, city, address
         if ($request->filled('q')) {
@@ -77,7 +77,25 @@ class PropertyController extends Controller
         }
 
         // Sort
+        if ($request->filled('nearby_university_id')) {
+            $q->where('nearby_university_id', (int) $request->nearby_university_id);
+        }
+
+        // Lightweight JSON modes used by the homepage (live result count, PGs near me).
+        if ($request->query('json') === 'count') {
+            return response()->json(['count' => (clone $q)->count()]);
+        }
+        if ($request->query('json') === 'compare') {
+            return $this->compareJson($request);
+        }
+        if ($request->query('json') === 'nearby') {
+            return $this->nearbyJson($request);
+        }
         $sort = $request->get('sort', 'latest');
+        if ($sort === 'nearest' && $request->filled('lat') && $request->filled('lng')) {
+            $q->whereNotNull('latitude')->whereNotNull('longitude')
+              ->orderByRaw($this->distanceSql(), [(float) $request->lat, (float) $request->lng, (float) $request->lat]);
+        }
         match ($sort) {
             'price_low' => $q->orderBy('rent_min', 'asc'),
             'price_high' => $q->orderBy('rent_min', 'desc'),
@@ -268,4 +286,82 @@ class PropertyController extends Controller
             ->header('Content-Type', 'application/xml');
     }
     
+
+    /**
+     * Nearest verified PGs to a coordinate — JSON for the homepage "PGs near you" block.
+     */
+    private function nearbyJson(Request $request)
+    {
+        $lat = (float) $request->query('lat');
+        $lng = (float) $request->query('lng');
+        if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180 || ($lat == 0 && $lng == 0)) {
+            return response()->json(['data' => []], 422);
+        }
+
+        $rows = Property::active()
+            ->where('is_verified', true)
+            ->whereNotNull('latitude')->whereNotNull('longitude')
+            ->where('latitude', '!=', 0)
+            ->with(['city', 'locality'])
+            ->selectRaw('properties.*, ' . $this->distanceSql() . ' as distance_km', [$lat, $lng, $lat])
+            ->orderBy('distance_km')
+            ->limit(6)
+            ->get();
+
+        return response()->json(['data' => $rows->map(fn ($p) => [
+            'name' => $p->name,
+            'url' => route('property.show', $p->slug),
+            'image' => $p->cover_image
+                ? (str_starts_with($p->cover_image, 'http') ? $p->cover_image : asset('storage/' . $p->cover_image))
+                : null,
+            'locality' => $p->locality?->name,
+            'city' => $p->city?->name,
+            'gender' => $p->gender,
+            'rent_min' => $p->rent_min,
+            'distance_km' => round((float) $p->distance_km, 1),
+        ])->values()]);
+    }
+
+    /** Haversine distance in km; bindings are [lat, lng, lat]. */
+    private function distanceSql(): string
+    {
+        return '(6371 * acos(LEAST(1, cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))))';
+    }
+
+    /**
+     * Side-by-side data for up to 3 PGs (slugs come from the visitor's compare tray).
+     */
+    private function compareJson(Request $request)
+    {
+        $slugs = collect(explode(',', (string) $request->query('slugs')))
+            ->map(fn ($s) => trim($s))->filter()->unique()->take(3)->values();
+        if ($slugs->isEmpty()) {
+            return response()->json(['data' => []]);
+        }
+
+        $rows = Property::active()
+            ->where('is_verified', true)
+            ->whereIn('slug', $slugs)
+            ->with(['city', 'locality', 'amenities'])
+            ->get()
+            ->sortBy(fn ($p) => $slugs->search($p->slug))
+            ->values();
+
+        return response()->json(['data' => $rows->map(fn ($p) => [
+            'slug' => $p->slug,
+            'name' => $p->name,
+            'url' => route('property.show', $p->slug),
+            'image' => $p->cover_image
+                ? (str_starts_with($p->cover_image, 'http') ? $p->cover_image : asset('storage/' . $p->cover_image))
+                : null,
+            'type' => $p->property_type,
+            'gender' => $p->gender,
+            'rent_min' => $p->rent_min,
+            'rent_max' => $p->rent_max,
+            'food_included' => (bool) $p->food_included,
+            'locality' => $p->locality?->name,
+            'city' => $p->city?->name,
+            'amenities' => $p->amenities->pluck('name')->values(),
+        ])->values()]);
+    }
 }

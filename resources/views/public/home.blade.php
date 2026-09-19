@@ -211,12 +211,12 @@
                     Verified by Pizi field team
                 </span>
                 <h1 class="pz-anim pz-d2 font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] font-black text-ink-950">
-                    Find your PG that <span class="italic text-coral-600">feels like home.</span>
+                    Find your PG that <span id="pzTyped" class="italic text-coral-600" data-phrases='["feels like home.","fits your budget.","is truly verified.","is close to campus."]'>feels like home.</span><span class="pz-caret" aria-hidden="true"></span>
                 </h1>
                 <p class="pz-anim pz-d3 text-lg text-ink-900/70 mt-6 max-w-xl leading-relaxed">
                     Verified listings, real photos, honest rents. Across Delhi, Noida, Gurgaon &amp; Ghaziabad — book a free site visit in 60 seconds.
                 </p>
-<form action="{{ route('search') }}" method="GET" class="mt-8 bg-white shadow-xl shadow-ink-900/5 rounded-2xl p-3 flex flex-wrap gap-2 w-full max-w-5xl">
+<form id="pzHeroForm" action="{{ route('search') }}" method="GET" class="mt-8 bg-white shadow-xl shadow-ink-900/5 rounded-2xl p-3 flex flex-wrap gap-2 w-full max-w-5xl">
     
     {{-- Location Input (MAIN) --}}
     <input type="text" name="q" placeholder="Locality, college, metro station..." 
@@ -252,9 +252,14 @@
         @endforeach
     </select>
     
-    {{-- Search Button --}}
-    <button type="submit" class="px-6 py-2.5 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm rounded-xl transition shadow-coral-500/30 whitespace-nowrap">
-        Search →
+    {{-- Near me --}}
+    <button type="button" id="pzNearBtn" class="px-4 py-2.5 text-sm font-semibold border border-ink-900/10 rounded-xl bg-cream hover:border-coral-500 hover:text-coral-600 transition whitespace-nowrap inline-flex items-center gap-2">
+        <i class="fa-solid fa-location-crosshairs"></i> Near me
+    </button>
+
+    {{-- Search Button (label shows the live number of matching PGs) --}}
+    <button type="submit" class="px-6 py-2.5 bg-coral-500 hover:bg-coral-600 text-white font-bold text-sm rounded-xl transition shadow-coral-500/30 whitespace-nowrap inline-flex items-center gap-2">
+        <span id="pzSearchLabel">Search</span> <i class="fa-solid fa-arrow-right text-xs"></i>
     </button>
 </form>
 
@@ -340,6 +345,62 @@
     </div>
 </section>
 
+{{-- PGS NEAR YOU (filled after the visitor taps "Near me") --}}
+<section id="pzNearby" class="hidden py-5 scroll-mt-24">
+    <div class="max-w-6xl mx-auto px-4 lg:px-8">
+        <div class="flex items-end justify-between gap-3 flex-wrap mb-3">
+            <div>
+                <span class="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-coral-600">
+                    <i class="fa-solid fa-location-crosshairs"></i> Near you
+                </span>
+                <h2 class="font-display font-black text-xl lg:text-2xl text-ink-950 mt-1">Verified PGs close to your location</h2>
+                <p id="pzNearStatus" class="text-sm text-ink-900/60 mt-1" role="status" aria-live="polite"></p>
+            </div>
+            <a id="pzNearAll" href="{{ route('search') }}" class="hidden inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-ink-900/15 text-sm font-semibold hover:border-coral-500 hover:text-coral-600 transition">
+                See all near me <i class="fa-solid fa-arrow-right text-xs"></i>
+            </a>
+        </div>
+        <div id="pzNearGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </div>
+</section>
+
+{{-- UNIVERSITY MARQUEE --}}
+@if(isset($universities) && $universities->count())
+<section class="py-6 border-y border-ink-900/8 bg-white/60">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8 text-center mb-4">
+        <span class="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ink-900/60">
+            <i class="fa-solid fa-graduation-cap text-coral-500"></i> Stay close to your campus
+        </span>
+    </div>
+    <div class="pz-marquee">
+        <div class="pz-marquee-track">
+            @foreach([0, 1] as $copy)
+            <div class="pz-marquee-set" @if($copy) aria-hidden="true" @endif>
+                @foreach($universities as $uni)
+                    <a href="{{ route('search', ['nearby_university_id' => $uni->id]) }}" @if($copy) tabindex="-1" @endif
+                       class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-ink-900/10 text-sm font-semibold text-ink-900 whitespace-nowrap hover:border-coral-500 hover:text-coral-600 transition">
+                        <i class="fa-solid fa-graduation-cap text-coral-500 text-xs"></i> {{ $uni->abbreviation ?: $uni->name }}
+                    </a>
+                @endforeach
+            </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
+{{-- RECENTLY VIEWED (filled from the visitor's browser) --}}
+<section id="pzRecent" class="hidden py-5">
+    <div class="max-w-7xl mx-auto px-4 lg:px-8">
+        <div class="flex items-center justify-between gap-3 mb-3">
+            <h2 class="font-display font-black text-xl lg:text-2xl flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-coral-500"></i> Pick up where you left off</h2>
+            <button type="button" id="pzRecentClear" class="text-xs font-semibold text-ink-900/50 hover:text-coral-600 transition"><i class="fa-solid fa-trash-can"></i> Clear</button>
+        </div>
+        <div id="pzRecentTrack" class="pzi-slider flex gap-3 overflow-x-auto pb-2 scrollbar-hide"></div>
+    </div>
+</section>
+
+
 
 {{--
     ========================================================================
@@ -379,7 +440,7 @@
     ['budget-15000rs-img.jpeg', 'Under ₹15,000', '15000', 'Premium PGs'],
     ] as [$image, $label, $val, $tag])
                         <a href="{{ route('search', ['budget_max' => $val]) }}"
-                           class="group relative overflow-hidden rounded-2xl bg-white border border-gray-200 p-5 shadow-sm hover:border-coral-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                           class="max-sm:[&:last-child:nth-child(odd)]:col-span-2 group relative overflow-hidden rounded-2xl bg-white border border-gray-200 p-5 shadow-sm hover:border-coral-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                             <div class="mb-3">
                             <img src="{{ asset('assets/images/' . $image) }}"
                              alt="{{ $label }}"
@@ -423,6 +484,12 @@
             <div class="bg-white/[0.06] backdrop-blur border border-white/10 rounded-3xl p-6 lg:p-8 shadow-xl shadow-black/20">
                 <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> By City</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
+                  @php
+    $cityCounts = \Illuminate\Support\Facades\Cache::remember('home_city_pg_counts', 600, fn () => \DB::table('properties')
+        ->join('cities', 'cities.id', '=', 'properties.city_id')
+        ->where('properties.is_active', 1)->where('properties.is_verified', 1)->whereNull('properties.deleted_at')
+        ->selectRaw('cities.slug as slug, count(*) as c')->groupBy('cities.slug')->pluck('c', 'slug')->toArray());
+@endphp
                   @foreach([
     ['Delhi', 'delhi', 'delhi-img.jpeg'],
     ['Noida', 'noida', 'noida-img.jpeg'],
@@ -431,7 +498,12 @@
     ['Faridabad', 'faridabad', 'faridabad-img.jpeg'],
 ] as [$cityName, $slug, $image])
                    <a href="{{ route('city.show', $slug) }}"
-   class="group bg-white border border-gray-200 rounded-2xl p-6 text-center hover:border-coral-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+   class="max-sm:[&:last-child:nth-child(odd)]:col-span-2 group relative overflow-hidden bg-white border border-gray-200 rounded-2xl p-6 text-center hover:border-coral-400 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+
+   <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-coral-100/70 via-coral-50/40 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></span>
+   @if(!empty($cityCounts[$slug]))
+   <span class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-ink-950 text-white text-[10px] font-bold">{{ $cityCounts[$slug] }} PGs</span>
+   @endif
 
    <div class="flex justify-center mb-4">
     <img loading="lazy" src="{{ asset('assets/images/' . $image) }}"
@@ -439,12 +511,12 @@
          class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
 </div>
 
-    <h4 class="font-display font-bold text-xl text-slate-900">
+    <h4 class="relative font-display font-bold text-xl text-slate-900 transition duration-300 group-hover:-translate-y-1">
         {{ $cityName }}
     </h4>
 
-    <p class="text-coral-500 font-semibold mt-3">
-        Explore →
+    <p class="relative text-coral-500 font-semibold mt-3 inline-flex items-center gap-1.5 translate-y-1 opacity-70 group-hover:translate-y-0 group-hover:opacity-100 transition duration-300">
+        Explore <i class="fa-solid fa-arrow-right text-xs transition group-hover:translate-x-1"></i>
     </p>
 
 </a>
@@ -924,6 +996,66 @@
     </div>
 </section>
 
+{{-- FREE SITE VISIT --}}
+<section id="pzVisit" class="relative py-5 pz-reveal scroll-mt-24">
+    <div class="max-w-5xl mx-auto px-4 lg:px-8">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-ink-950 via-ink-900 to-ink-800 text-cream p-5 lg:p-6 shadow-xl shadow-ink-900/15 grid lg:grid-cols-5 gap-5 items-center">
+            <div class="pz-blob pointer-events-none absolute -top-16 -right-10 w-72 h-72 bg-coral-500/25 rounded-full blur-3xl"></div>
+
+            <div class="relative lg:col-span-2">
+                <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-bold tracking-wider uppercase">
+                    <i class="fa-solid fa-route text-coral-400"></i> Free site visit
+                </span>
+                <h2 class="font-display font-black text-2xl lg:text-3xl mt-3 leading-tight">
+                    See it before you pay. <span class="text-coral-400">We will take you there.</span>
+                </h2>
+                <p class="text-cream/70 mt-2 text-sm leading-relaxed">
+                    Share your number and a Pizi advisor will call you within 30 minutes to schedule a free visit to verified PGs that match your budget.
+                </p>
+                <ul class="mt-3 space-y-1.5 text-xs text-cream/85">
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-400"></i> No brokerage, no hidden charges</li>
+                    <li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-emerald-400"></i> A Pizi team member accompanies you</li>
+                </ul>
+            </div>
+
+            <form id="pzVisitForm" class="relative lg:col-span-3 bg-white text-ink-950 rounded-xl p-4 grid sm:grid-cols-2 gap-2.5" novalidate>
+                <div>
+                    <label for="pzVisitName" class="block text-xs font-bold uppercase tracking-wide text-ink-900/60 mb-1">Your name</label>
+                    <input id="pzVisitName" name="name" type="text" required maxlength="120" autocomplete="name" placeholder="e.g. Rahul Sharma"
+                           class="w-full px-3 py-2.5 text-sm border border-ink-900/15 rounded-xl focus:outline-none focus:border-coral-500">
+                </div>
+                <div>
+                    <label for="pzVisitPhone" class="block text-xs font-bold uppercase tracking-wide text-ink-900/60 mb-1">Mobile number</label>
+                    <input id="pzVisitPhone" name="phone" type="tel" required inputmode="numeric" maxlength="14" autocomplete="tel" placeholder="10-digit mobile number"
+                           class="w-full px-3 py-2.5 text-sm border border-ink-900/15 rounded-xl focus:outline-none focus:border-coral-500">
+                </div>
+                <div>
+                    <label for="pzVisitCity" class="block text-xs font-bold uppercase tracking-wide text-ink-900/60 mb-1">Preferred city</label>
+                    <select id="pzVisitCity" name="city" class="w-full px-3 py-2.5 text-sm border border-ink-900/15 rounded-xl bg-white focus:outline-none focus:border-coral-500">
+                        <option value="">Select a city</option>
+                        <option>Delhi</option><option>Noida</option><option>Gurgaon</option><option>Ghaziabad</option><option>Faridabad</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="pzVisitTime" class="block text-xs font-bold uppercase tracking-wide text-ink-900/60 mb-1">Best time to call</label>
+                    <select id="pzVisitTime" name="time" class="w-full px-3 py-2.5 text-sm border border-ink-900/15 rounded-xl bg-white focus:outline-none focus:border-coral-500">
+                        <option value="">Any time</option>
+                        <option>Morning (9 AM - 12 PM)</option>
+                        <option>Afternoon (12 PM - 4 PM)</option>
+                        <option>Evening (4 PM - 8 PM)</option>
+                    </select>
+                </div>
+                <input type="text" name="website" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
+                <button type="submit" id="pzVisitBtn" class="sm:col-span-2 inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-coral-500 hover:bg-coral-600 text-white font-bold transition shadow-lg shadow-coral-500/30">
+                    <i class="fa-solid fa-calendar-check"></i> <span>Book my free visit</span>
+                </button>
+                <p id="pzVisitMsg" class="sm:col-span-2 text-sm font-medium hidden" role="status" aria-live="polite"></p>
+                <p class="sm:col-span-2 text-xs text-ink-900/50 flex items-center gap-1.5"><i class="fa-solid fa-lock"></i> Your number is only used to arrange your visit.</p>
+            </form>
+        </div>
+    </div>
+</section>
+
 
 
 
@@ -1035,6 +1167,61 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+
+{{-- FAQ --}}
+@php
+    $pzFaqs = [
+        ['What makes Pizi the best platform to find PGs in India?', "Pizi is one of the best platforms to find PGs in India because it offers verified listings, easy search filters, transparent pricing, and a seamless booking experience. Whether you're a student or a working professional, Pizi helps you discover safe, comfortable, and affordable PG accommodations across multiple cities, making the entire process faster and hassle-free."],
+        ['What information is available in Pizi PG listings?', 'Pizi PG listings include essential details such as property photos, room types, monthly rent, available amenities, location, occupancy options, and contact information. This helps users make informed decisions and find the right PG accommodation based on their preferences and budget.'],
+        ['Can I compare PGs on Pizi before making a decision?', 'Yes, Pizi allows you to compare different PGs based on factors such as rent, room types, amenities, location, and occupancy options. Tap the compare icon on any PG card, pick up to three, and open the side-by-side view. This makes it easier to evaluate your choices and select the PG that best matches your needs and budget.'],
+        ['How can I search for PGs based on my budget on Pizi?', 'Pizi makes it easy to find PGs within your budget. You can use filters to narrow down listings based on your preferred price range, location, room type, and amenities, helping you quickly discover PG accommodations that suit your needs and budget.'],
+        ['Do I have to pay any brokerage?', 'No. Pizi does not charge tenants any brokerage. You can browse, shortlist, and book a free site visit without paying anything to Pizi.'],
+        ['How does the free site visit work?', 'Share your name and mobile number, and a Pizi advisor will call you within 30 minutes. We schedule a convenient time and a member of our field team accompanies you to the PGs you like, so you can see everything before you pay.'],
+        ['Are the PGs on Pizi really verified?', 'Yes. Every PG is physically inspected by our field team before it gets the Verified badge. We check the property, the photos, and the rent so that what you see online matches what you find on arrival.'],
+        ['How can I list my PG on Pizi?', 'Click "List your PG", register as an owner, and add your property details and photos. Our team verifies the listing, and you only pay credits when you choose to unlock a real, qualified lead.'],
+    ];
+@endphp
+<section id="pzFaq" class="py-8 pz-reveal">
+    <div class="max-w-4xl mx-auto px-4 lg:px-8">
+        <div class="text-center mb-6">
+            <span class="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-coral-600"><i class="fa-solid fa-circle-question"></i> Questions, answered</span>
+            <h2 class="font-display font-black text-3xl lg:text-4xl mt-2 text-ink-950">Everything you want to know.</h2>
+            <p class="text-ink-900/60 mt-2">Quick answers about finding, comparing, and booking a PG with Pizi.</p>
+        </div>
+        <div class="space-y-3">
+            @foreach($pzFaqs as $i => [$question, $answer])
+                <div class="pz-faq bg-white rounded-2xl border border-ink-900/10 overflow-hidden transition hover:border-coral-300" data-faq>
+                    <button type="button" class="w-full flex items-center justify-between gap-4 text-left px-5 py-4 font-display font-bold text-base lg:text-lg" aria-expanded="false" aria-controls="pzFaqBody{{ $i }}" id="pzFaqBtn{{ $i }}">
+                        <span>{{ $question }}</span>
+                        <span class="pz-faq-icon w-8 h-8 rounded-full bg-coral-50 text-coral-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-plus text-sm"></i></span>
+                    </button>
+                    <div class="pz-faq-body" id="pzFaqBody{{ $i }}" role="region" aria-labelledby="pzFaqBtn{{ $i }}">
+                        <div><p class="px-5 pb-5 text-ink-900/70 leading-relaxed">{{ $answer }}</p></div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+        <div class="text-center mt-6">
+            <p class="text-sm text-ink-900/60">Still have a question?</p>
+            <div class="mt-3 flex flex-wrap items-center justify-center gap-3">
+                <button type="button" onclick="toggleChat()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-ink-900 text-cream text-sm font-bold hover:bg-ink-800 transition"><i class="fa-solid fa-comment-dots"></i> Ask our AI assistant</button>
+                <a href="tel:8006680092" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-ink-900/15 text-sm font-bold hover:border-coral-500 hover:text-coral-600 transition"><i class="fa-solid fa-phone"></i> Call 8006680092</a>
+            </div>
+        </div>
+    </div>
+</section>
+{{-- MOBILE QUICK-ACTION BAR --}}
+<div id="pzMobileBar" class="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur border-t border-ink-900/10 px-3 pt-2 grid grid-cols-3 gap-2" style="padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));">
+    <a href="tel:8006680092" class="inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-ink-900/15 text-sm font-bold text-ink-900">
+        <i class="fa-solid fa-phone"></i> Call
+    </a>
+    <a href="https://wa.me/918006680092" target="_blank" rel="noreferrer" class="inline-flex items-center justify-center gap-2 py-2.5 rounded-xl border border-emerald-500/40 text-sm font-bold text-emerald-700">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp
+    </a>
+    <a href="#pzVisit" id="pzBarVisit" class="inline-flex items-center justify-center gap-2 py-2.5 rounded-xl bg-coral-500 text-sm font-bold text-white">
+        <i class="fa-solid fa-calendar-check"></i> Book visit
+    </a>
+</div>
 
 @endsection
 
@@ -1227,4 +1414,331 @@ function piziUpdateBudget(val) {
 })();
 </script>
 
+@endpush
+
+@push('head')
+<style>
+    .pz-caret { display:inline-block; width:3px; height:.85em; margin-left:4px; background:#ed4e3d; vertical-align:-0.08em; animation: pzBlink 1s steps(1) infinite; }
+    @keyframes pzBlink { 50% { opacity: 0; } }
+
+    .pz-marquee { overflow:hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+    .pz-marquee-track { display:flex; width:max-content; animation: pzMarquee 70s linear infinite; }
+    .pz-marquee:hover .pz-marquee-track { animation-play-state: paused; }
+    .pz-marquee-set { display:flex; gap:.75rem; padding-right:.75rem; }
+    @keyframes pzMarquee { to { transform: translateX(-50%); } }
+
+    @media (prefers-reduced-motion: reduce) {
+        .pz-caret { animation: none; }
+        .pz-marquee { overflow-x:auto; -webkit-mask-image:none; mask-image:none; }
+        .pz-marquee-track { animation: none; }
+    }
+
+    /* Keep page content and the floating widgets clear of the mobile action bar */
+    @media (max-width: 767px) {
+        body { padding-bottom: 68px; }
+        .chat-bubble-wrapper { bottom: 82px !important; }
+        .chat-window { bottom: 150px !important; }
+        #pzContactFab { bottom: 82px !important; }
+        #pziBackToTop { bottom: 150px !important; }
+    }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+(function () {
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var searchUrl = @json(route('search'));
+
+    /* ---------- 1. Rotating hero phrase (typing effect) ---------- */
+    var typed = document.getElementById('pzTyped');
+    if (typed && !reduceMotion) {
+        var phrases = JSON.parse(typed.getAttribute('data-phrases') || '[]');
+        var idx = 0, text = phrases[0] || '', deleting = true;
+        var tick = function () {
+            if (deleting) {
+                text = text.slice(0, -1);
+                typed.textContent = text;
+                if (!text) { deleting = false; idx = (idx + 1) % phrases.length; }
+                setTimeout(tick, 35);
+            } else {
+                text = phrases[idx].slice(0, text.length + 1);
+                typed.textContent = text;
+                if (text === phrases[idx]) { deleting = true; setTimeout(tick, 2600); return; }
+                setTimeout(tick, 70);
+            }
+        };
+        if (phrases.length > 1) setTimeout(tick, 3000);
+    }
+
+    /* ---------- 2. Live result count on the search button ---------- */
+    var form = document.getElementById('pzHeroForm');
+    var label = document.getElementById('pzSearchLabel');
+    if (form && label) {
+        var timer = null, controller = null;
+        var refreshCount = function () {
+            var params = new URLSearchParams();
+            new FormData(form).forEach(function (value, key) { if (value) params.set(key, value); });
+            params.set('json', 'count');
+            if (controller) controller.abort();
+            controller = new AbortController();
+            fetch(searchUrl + '?' + params.toString(), { headers: { 'Accept': 'application/json' }, signal: controller.signal })
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    label.textContent = d.count > 0 ? 'Show ' + d.count + (d.count === 1 ? ' PG' : ' PGs') : 'Search';
+                })
+                .catch(function () {});
+        };
+        var schedule = function () { clearTimeout(timer); timer = setTimeout(refreshCount, 300); };
+        form.addEventListener('input', schedule);
+        form.addEventListener('change', schedule);
+        refreshCount();
+    }
+
+    /* ---------- 3. PGs near me ---------- */
+    var nearBtn = document.getElementById('pzNearBtn');
+    var nearSection = document.getElementById('pzNearby');
+    var nearGrid = document.getElementById('pzNearGrid');
+    var nearStatus = document.getElementById('pzNearStatus');
+    var nearAll = document.getElementById('pzNearAll');
+
+    function el(tag, cls, html) {
+        var node = document.createElement(tag);
+        if (cls) node.className = cls;
+        if (html) node.innerHTML = html;
+        return node;
+    }
+    function setStatus(message) { nearStatus.textContent = message; }
+    function showSkeletons() {
+        nearGrid.innerHTML = '';
+        for (var i = 0; i < 3; i++) {
+            var card = el('div', 'rounded-2xl border border-ink-900/10 bg-white overflow-hidden animate-pulse');
+            card.appendChild(el('div', 'aspect-[16/9] bg-ink-900/5'));
+            var body = el('div', 'p-4 space-y-2');
+            body.appendChild(el('div', 'h-4 w-2/3 rounded bg-ink-900/10'));
+            body.appendChild(el('div', 'h-3 w-1/2 rounded bg-ink-900/5'));
+            card.appendChild(body);
+            nearGrid.appendChild(card);
+        }
+    }
+    function renderCard(p) {
+        var a = el('a', 'pz-stagger group block rounded-2xl border border-ink-900/10 bg-white overflow-hidden hover:border-coral-500 hover:shadow-xl hover:shadow-ink-900/5 transition');
+        a.href = p.url;
+        var media = el('div', 'aspect-[16/9] bg-cream relative overflow-hidden');
+        if (p.image) {
+            var img = el('img', 'w-full h-full object-cover group-hover:scale-105 transition duration-500');
+            img.loading = 'lazy'; img.src = p.image; img.alt = p.name;
+            media.appendChild(img);
+        } else {
+            media.appendChild(el('div', 'w-full h-full flex items-center justify-center text-coral-300 text-4xl bg-gradient-to-br from-coral-50 to-cream', '<i class="fa-solid fa-house"></i>'));
+        }
+        var badge = el('span', 'absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-ink-950/85 text-white text-[11px] font-semibold inline-flex items-center gap-1.5');
+        badge.innerHTML = '<i class="fa-solid fa-location-arrow"></i>';
+        badge.appendChild(document.createTextNode(p.distance_km + ' km away'));
+        media.appendChild(badge);
+        a.appendChild(media);
+
+        var body = el('div', 'p-4');
+        var top = el('div', 'flex items-start justify-between gap-2');
+        var title = el('h3', 'font-display font-bold text-base leading-tight group-hover:text-coral-600 transition');
+        title.textContent = p.name;
+        top.appendChild(title);
+        if (p.gender) { var g = el('span', 'text-xs px-2 py-1 rounded-md bg-ink-100 text-ink-700 capitalize whitespace-nowrap'); g.textContent = p.gender; top.appendChild(g); }
+        body.appendChild(top);
+        var place = el('div', 'text-sm text-ink-900/60 mt-1 truncate flex items-center gap-1.5', '<i class="fa-solid fa-location-dot text-xs"></i>');
+        place.appendChild(document.createTextNode([p.locality, p.city].filter(Boolean).join(', ')));
+        body.appendChild(place);
+        if (p.rent_min) {
+            var price = el('div', 'mt-2.5 pt-2.5 border-t border-ink-900/5 font-display font-black text-base text-ink-950');
+            price.appendChild(document.createTextNode('₹' + Number(p.rent_min).toLocaleString('en-IN')));
+            price.appendChild(el('span', 'text-xs font-normal text-ink-900/50', ' /mo'));
+            body.appendChild(price);
+        }
+        a.appendChild(body);
+        return a;
+    }
+    function showMessage(icon, message) {
+        nearGrid.innerHTML = '';
+        var box = el('div', 'sm:col-span-2 lg:col-span-3 rounded-2xl border border-ink-900/10 bg-white p-8 text-center');
+        box.appendChild(el('div', 'text-3xl text-coral-500 mb-3', '<i class="fa-solid ' + icon + '"></i>'));
+        var t = el('p', 'text-ink-900/70 max-w-md mx-auto'); t.textContent = message;
+        box.appendChild(t);
+        nearGrid.appendChild(box);
+        setStatus('');
+        nearAll.classList.add('hidden');
+    }
+
+    if (nearBtn && nearSection) {
+        nearBtn.addEventListener('click', function () {
+            nearSection.classList.remove('hidden');
+            showSkeletons();
+            setStatus('Finding your location...');
+            nearSection.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+
+            if (!navigator.geolocation) {
+                showMessage('fa-location-crosshairs', 'Your browser does not support location. Please search by locality or college instead.');
+                return;
+            }
+            nearBtn.disabled = true;
+            navigator.geolocation.getCurrentPosition(function (pos) {
+                nearBtn.disabled = false;
+                var lat = pos.coords.latitude, lng = pos.coords.longitude;
+                setStatus('Finding the closest verified PGs...');
+                fetch(searchUrl + '?json=nearby&lat=' + lat + '&lng=' + lng, { headers: { 'Accept': 'application/json' } })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var list = res.data || [];
+                        if (!list.length) {
+                            showMessage('fa-map-location-dot', 'We could not find verified PGs with a map location near you yet. Try searching by locality or college.');
+                            return;
+                        }
+                        nearGrid.innerHTML = '';
+                        list.forEach(function (p, i) { var c = renderCard(p); c.style.transitionDelay = (i * 70) + 'ms'; nearGrid.appendChild(c); requestAnimationFrame(function () { c.classList.add('pz-in'); }); });
+                        setStatus('Showing the ' + list.length + ' closest verified PGs, nearest first.');
+                        nearAll.href = searchUrl + '?sort=nearest&lat=' + lat + '&lng=' + lng;
+                        nearAll.classList.remove('hidden');
+                    })
+                    .catch(function () { showMessage('fa-triangle-exclamation', 'Something went wrong while loading nearby PGs. Please try again.'); });
+            }, function (err) {
+                nearBtn.disabled = false;
+                showMessage('fa-location-crosshairs', err && err.code === 1
+                    ? 'Location access is blocked. Allow location for this site in your browser settings, or search by locality instead.'
+                    : 'We could not detect your location. Please try again or search by locality.');
+            }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 300000 });
+        });
+    }
+
+    /* ---------- 4. Free site visit form ---------- */
+    var visitForm = document.getElementById('pzVisitForm');
+    if (visitForm) {
+        var msg = document.getElementById('pzVisitMsg');
+        var btn = document.getElementById('pzVisitBtn');
+        var say = function (text, ok) {
+            msg.textContent = text;
+            msg.className = 'sm:col-span-2 text-sm font-medium ' + (ok ? 'text-emerald-600' : 'text-red-600');
+        };
+        visitForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var f = visitForm.elements;
+            if (f.website.value) return;
+            var name = f.name.value.trim();
+            var phone = f.phone.value.replace(/\D/g, '').slice(-10);
+            if (name.length < 2) { say('Please enter your name.', false); f.name.focus(); return; }
+            if (!/^[6-9][0-9]{9}$/.test(phone)) { say('Please enter a valid 10-digit mobile number.', false); f.phone.focus(); return; }
+
+            var parts = ['[Free site visit]'];
+            if (f.city.value) parts.push('City: ' + f.city.value + '.');
+            if (f.time.value) parts.push('Best time to call: ' + f.time.value + '.');
+            var payload = { name: name, phone: phone, message: parts.join(' '), source: 'home_visit_form' };
+            if (f.city.value) payload.preferred_city = f.city.value;
+
+            var original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Sending...</span>';
+            var token = document.querySelector('meta[name=csrf-token]');
+            fetch('/leads', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': token ? token.content : '' },
+                body: JSON.stringify(payload)
+            }).then(function (r) {
+                if (!r.ok) throw new Error('failed');
+                visitForm.reset();
+                say('Thank you! Our team will call you within 30 minutes to plan your free visit.', true);
+            }).catch(function () {
+                say('Something went wrong. Please try again or call us on 8006680092.', false);
+            }).finally(function () {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            });
+        });
+    }
+
+    var barVisit = document.getElementById('pzBarVisit');
+    if (barVisit) {
+        barVisit.addEventListener('click', function (e) {
+            var target = document.getElementById('pzVisit');
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+            setTimeout(function () { var n = document.getElementById('pzVisitName'); if (n) n.focus({ preventScroll: true }); }, 600);
+        });
+    }
+})();
+</script>
+@endpush
+
+@push('head')
+<style>
+    .pz-faq-body { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s cubic-bezier(.16, 1, .3, 1); }
+    .pz-faq-body > div { overflow: hidden; }
+    .pz-faq.pz-open { border-color: #ff8c7e; box-shadow: 0 12px 30px rgba(255, 107, 91, .12); }
+    .pz-faq.pz-open .pz-faq-body { grid-template-rows: 1fr; }
+    .pz-faq-icon { transition: transform .35s cubic-bezier(.34, 1.56, .64, 1), background-color .25s, color .25s; }
+    .pz-faq.pz-open .pz-faq-icon { transform: rotate(135deg); background: #ed4e3d; color: #fff; }
+    @media (prefers-reduced-motion: reduce) { .pz-faq-body, .pz-faq-icon { transition: none; } }
+</style>
+@endpush
+
+@push('scripts')
+<script>
+(function () {
+    var $ = function (id) { return document.getElementById(id); };
+
+    /* FAQ accordion (one open at a time) */
+    var faqs = [].slice.call(document.querySelectorAll('[data-faq]'));
+    faqs.forEach(function (box) {
+        var btn = box.querySelector('button');
+        btn.addEventListener('click', function () {
+            var open = !box.classList.contains('pz-open');
+            faqs.forEach(function (o) { o.classList.remove('pz-open'); o.querySelector('button').setAttribute('aria-expanded', 'false'); });
+            if (open) { box.classList.add('pz-open'); btn.setAttribute('aria-expanded', 'true'); }
+        });
+    });
+
+    /* Recently viewed PGs (saved in this browser by the PG detail page) */
+    var recent = [];
+    try { recent = JSON.parse(localStorage.getItem('pz_recent_pgs') || '[]'); } catch (e) {}
+    var section = $('pzRecent'), track = $('pzRecentTrack');
+    if (section && track && recent.length) {
+        recent.slice(0, 10).forEach(function (p, i) {
+            var a = document.createElement('a');
+            a.href = p.url;
+            a.className = 'group flex-shrink-0 w-52 snap-start bg-white rounded-xl border border-ink-900/10 overflow-hidden hover:border-coral-500 hover:shadow-lg transition';
+            a.style.animation = 'pzFadeUp .5s cubic-bezier(.16,1,.3,1) both'; a.style.animationDelay = (i * 60) + 'ms';
+            var media = document.createElement('div');
+            media.className = 'h-28 bg-cream relative overflow-hidden flex items-center justify-center text-coral-300 text-3xl';
+            if (p.img) { var img = document.createElement('img'); img.src = p.img; img.alt = p.name; img.loading = 'lazy'; img.className = 'w-full h-full object-cover group-hover:scale-105 transition duration-500'; media.appendChild(img); }
+            else { media.innerHTML = '<i class="fa-solid fa-house"></i>'; }
+            var body = document.createElement('div'); body.className = 'p-3';
+            var h = document.createElement('h3'); h.className = 'font-bold text-sm leading-tight line-clamp-1 group-hover:text-coral-600 transition'; h.textContent = p.name;
+            var more = document.createElement('div'); more.className = 'text-xs text-coral-600 font-semibold mt-1.5 inline-flex items-center gap-1'; more.innerHTML = 'View again <i class="fa-solid fa-arrow-right text-[10px]"></i>';
+            body.appendChild(h); body.appendChild(more); a.appendChild(media); a.appendChild(body); track.appendChild(a);
+        });
+        section.classList.remove('hidden');
+        var clear = $('pzRecentClear');
+        if (clear) clear.addEventListener('click', function () {
+            try { localStorage.removeItem('pz_recent_pgs'); } catch (e) {}
+            section.style.transition = 'opacity .3s'; section.style.opacity = '0';
+            setTimeout(function () { section.classList.add('hidden'); }, 300);
+            if (window.pzToast) pzToast('Recently viewed cleared', 'fa-trash-can');
+        });
+    }
+
+    /* Remembered city: offer to continue where the visitor was browsing */
+    var city = null;
+    try { city = localStorage.getItem('pz_city'); } catch (e) {}
+    var form = $('pzHeroForm');
+    if (city && form && /^[a-z-]+$/.test(city)) {
+        var chip = document.createElement('a');
+        chip.href = '/pg-in-' + city;
+        chip.className = 'mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-coral-500/30 text-sm font-semibold text-coral-700 hover:bg-coral-50 hover:-translate-y-0.5 transition';
+        chip.style.animation = 'pzFadeUp .6s cubic-bezier(.16,1,.3,1) 1s both';
+        var label = city.charAt(0).toUpperCase() + city.slice(1);
+        chip.innerHTML = '<i class="fa-solid fa-clock-rotate-left"></i>';
+        chip.appendChild(document.createTextNode('Continue browsing PGs in ' + label));
+        chip.insertAdjacentHTML('beforeend', ' <i class="fa-solid fa-arrow-right text-xs"></i>');
+        form.parentNode.insertBefore(chip, form);
+    }
+})();
+</script>
 @endpush
