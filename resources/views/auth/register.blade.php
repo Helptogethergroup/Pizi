@@ -357,6 +357,16 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                     <span>✓ Free to list</span>
                     <span>✓ Go live in 24hr</span>
                 </div>
+                <div class="pz-hero-text mt-6 inline-flex flex-wrap items-center gap-3 p-3 pr-4 rounded-2xl bg-white/70 border border-[#E4D9C8]">
+                    <span class="w-10 h-10 rounded-xl bg-[#16233B] text-white flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-mobile-screen"></i></span>
+                    <span class="text-sm leading-tight">
+                        <span class="block font-bold text-[#16233B]">Manage leads from your phone</span>
+                        <span class="block text-[#4B4438]">Get instant lead alerts with the Pizi Owner app</span>
+                    </span>
+                    <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#16233B] hover:bg-[#0f1a2e] text-white text-sm font-semibold transition">
+                        <i class="fa-brands fa-google-play"></i> Get it on Google Play
+                    </a>
+                </div>
             </div>
 
             <!-- Right: Door animation + stat cards -->
@@ -757,9 +767,14 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
     <div class="max-w-4xl mx-auto px-4 py-20 text-center">
         <h2 class="pz-serif text-3xl md:text-4xl font-bold text-white mb-4">Ready to fill your vacant beds?</h2>
         <p class="text-[#B9C2D4] mb-8 max-w-xl mx-auto">Register your PG on Pizi today and start receiving genuine tenant leads — free, fast, and broker-free.</p>
-        <a href="#plans" class="pz-shimmer inline-flex items-center gap-2 bg-[#FF6551] hover:bg-[#D9432E] text-white font-semibold px-8 py-4 rounded-xl transition">
-            Register your PG now
-        </a>
+        <div class="flex flex-wrap items-center justify-center gap-3">
+            <a href="#plans" class="pz-shimmer inline-flex items-center gap-2 bg-[#FF6551] hover:bg-[#D9432E] text-white font-semibold px-8 py-4 rounded-xl transition">
+                Register your PG now
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 text-white font-semibold px-8 py-4 rounded-xl transition">
+                <i class="fa-brands fa-google-play"></i> Get the Owner app
+            </a>
+        </div>
     </div>
 </div>
 

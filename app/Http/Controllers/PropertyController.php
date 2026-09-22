@@ -218,7 +218,7 @@ class PropertyController extends Controller
 
     private function filteredQuery(Request $request)
 {
-    $q = Property::active()->with(['city', 'locality']);
+    $q = Property::active()->where('is_verified', true)->with(['city', 'locality']);
 
         if ($request->filled('q')) {
             $term = '%' . $request->q . '%';

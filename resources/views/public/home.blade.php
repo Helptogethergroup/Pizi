@@ -474,7 +474,7 @@
                 <h3 class="font-display font-bold text-xl text-slate-900 mb-5 flex items-center gap-2"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg> By City</h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 lg:gap-4">
                   @php
-    $cityCounts = \Illuminate\Support\Facades\Cache::remember('home_city_pg_counts', 600, fn () => \DB::table('properties')
+    $cityCounts = \Illuminate\Support\Facades\Cache::remember('home_city_pg_counts', 120, fn () => \DB::table('properties')
         ->join('cities', 'cities.id', '=', 'properties.city_id')
         ->where('properties.is_active', 1)->where('properties.is_verified', 1)->whereNull('properties.deleted_at')
         ->selectRaw('cities.slug as slug, count(*) as c')->groupBy('cities.slug')->pluck('c', 'slug')->toArray());
@@ -491,7 +491,7 @@
 
    <span class="pointer-events-none absolute inset-0 bg-gradient-to-t from-coral-100/70 via-coral-50/40 to-transparent opacity-0 group-hover:opacity-100 transition duration-500"></span>
    @if(!empty($cityCounts[$slug]))
-   <span class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-ink-950 text-white text-[10px] font-bold">{{ $cityCounts[$slug] }} PGs</span>
+   <span class="absolute top-3 right-3 px-2 py-0.5 rounded-full bg-ink-950 text-white text-[10px] font-bold">{{ $cityCounts[$slug] }} {{ $cityCounts[$slug] === 1 ? 'PG' : 'PGs' }}</span>
    @endif
 
    <div class="flex justify-center mb-4">

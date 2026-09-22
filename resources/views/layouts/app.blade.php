@@ -227,7 +227,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                 @else
                     <a href="{{ route('login') }}" class="text-sm font-medium px-3 py-2 hover:text-coral-600 whitespace-nowrap">Login</a>
-                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="hidden min-[1340px]:flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-full bg-coral-50 text-coral-600 hover:bg-coral-100 transition whitespace-nowrap"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get App</a>
+                    <div class="relative group hidden min-[1340px]:block">
+                        <button type="button" class="flex items-center gap-1.5 text-sm font-semibold px-3 py-2 rounded-full bg-coral-50 text-coral-600 hover:bg-coral-100 transition whitespace-nowrap" aria-haspopup="true"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get App <i class="fa-solid fa-chevron-down text-[9px] transition group-hover:rotate-180"></i></button>
+                        <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100 transition absolute right-0 top-full pt-2 w-72 z-50">
+                            <div class="bg-white rounded-2xl shadow-2xl shadow-ink-900/15 border border-ink-900/10 p-2">
+                                <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-coral-50 transition">
+                                    <span class="w-10 h-10 rounded-xl bg-coral-50 text-coral-600 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-user"></i></span>
+                                    <span class="leading-tight"><span class="block text-sm font-bold text-ink-950">Tenant app</span><span class="block text-xs text-ink-900/55">Find and book verified PGs</span></span>
+                                    <i class="fa-brands fa-google-play ml-auto text-ink-900/40"></i>
+                                </a>
+                                <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-coral-50 transition">
+                                    <span class="w-10 h-10 rounded-xl bg-ink-900 text-cream flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-building"></i></span>
+                                    <span class="leading-tight"><span class="block text-sm font-bold text-ink-950">Owner app</span><span class="block text-xs text-ink-900/55">Manage your PG and tenant leads</span></span>
+                                    <i class="fa-brands fa-google-play ml-auto text-ink-900/40"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
                     <a href="{{ route('register') }}" class="text-sm font-semibold px-4 py-2 rounded-full bg-ink-900 text-cream hover:bg-ink-800 transition whitespace-nowrap">List your PG</a>
                 @endauth
             </div>
@@ -327,9 +343,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <form method="POST" action="{{ route('logout') }}">@csrf
                         <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl text-ink-900 hover:bg-rose-50 hover:text-rose-600 font-medium"><i class="fa-solid fa-door-open fa-fw"></i> Logout</button>
                     </form>
-                @else
-                    <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral-50 text-coral-600 font-bold"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get the App</a>
                 @endauth
+                <div class="px-4 pt-1 text-xs uppercase font-bold text-ink-900/40">Get the app</div>
+                <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral-50 text-coral-600 font-bold"><i class="fa-brands fa-google-play fa-fw"></i> Tenant app</a>
+                <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-brands fa-google-play fa-fw"></i> Owner app</a>
             </div>
 
             <div class="border-t border-ink-900/10 my-2 pt-3 space-y-2">
@@ -399,19 +416,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     <div class="relative border-b border-cream/10">
         <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8 grid lg:grid-cols-5 gap-6 items-center">
                      <div class="lg:col-span-2">
-                            <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener"
-                   class="inline-flex items-center gap-3 mb-5 group hover:opacity-90 transition">
-                    <div class="relative">
-                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-coral-400 to-coral-600 flex items-center justify-center shadow-xl shadow-coral-500/30 group-hover:scale-105 transition">
-                            <span class="text-white font-display font-black text-3xl">P</span>
-                        </div>
-                        <span class="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-400 border-2 border-ink-950 flex items-center justify-center text-xs">✓</span>
+                            <div class="mb-6">
+                    <div class="text-[10px] text-coral-400 font-bold tracking-widest uppercase mb-3"><i class="fa-solid fa-mobile-screen fa-fw"></i> Download the Pizi apps</div>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white hover:-translate-y-0.5 transition">
+                            <i class="fa-brands fa-google-play text-2xl text-coral-400"></i>
+                            <span class="leading-tight"><span class="block text-[10px] uppercase tracking-wider text-cream/60 group-hover:text-ink-900/60 transition">Get it on Google Play</span><span class="block text-sm font-bold text-cream group-hover:text-ink-950 transition">Tenant app</span></span>
+                        </a>
+                        <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white hover:-translate-y-0.5 transition">
+                            <i class="fa-brands fa-google-play text-2xl text-coral-400"></i>
+                            <span class="leading-tight"><span class="block text-[10px] uppercase tracking-wider text-cream/60 group-hover:text-ink-900/60 transition">Get it on Google Play</span><span class="block text-sm font-bold text-cream group-hover:text-ink-950 transition">Owner app</span></span>
+                        </a>
                     </div>
-                    <div>
-                        <div class="font-display font-black text-2xl text-cream leading-none">Pizi App</div>
-                        <div class="text-[10px] text-coral-400 font-bold tracking-widest uppercase mt-1"><i class="fa-solid fa-mobile-screen fa-fw"></i> Download Now</div>
-                    </div>
-                </a>
+                </div>
                 <h3 class="font-display font-black text-2xl lg:text-3xl text-cream">Looking for a PG?</h3>
                 <p class="text-cream/60 mt-2">Fill the form — our team will call you within 30 minutes.</p>
                 <div class="mt-4 flex flex-wrap gap-5 text-sm">
@@ -526,7 +543,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <li><a href="{{ route('contact') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">Contact</a></li>
                 <li><a href="{{ route('blog.index') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">Blog</a></li>
                 <li><a href="{{ route('register') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">List your PG</a></li>
-                <li><a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-solid fa-mobile-screen fa-fw"></i> Get the App</a></li>
+                <li><a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-brands fa-google-play fa-fw"></i> Tenant app</a></li>
+                <li><a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-brands fa-google-play fa-fw"></i> Owner app</a></li>
                <li> <a href="{{ route('privacy-policy') }}" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
             </ul>
         </div>
