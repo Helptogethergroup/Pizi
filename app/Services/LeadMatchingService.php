@@ -127,6 +127,15 @@ public function leadsForOwner($owner, int $limit = 60)
         // leads are other people wanting to LIST their own PG — those are
         // for telecaller outreach, not something an existing owner should see.
         ->where('inquiry_type', '!=', 'owner')
+        // Meta (Facebook/Instagram) ad leads are unconfirmed until a
+        // telecaller actually talks to the person and marks them Verified
+        // — a lot of these are fake numbers, wrong numbers, or people just
+        // tapping the ad by mistake. Every other source (website,
+        // WhatsApp, referral, walk-in) is a direct enquiry and still
+        // reaches owners immediately, as before.
+        ->where(function ($q) {
+            $q->where('source', '!=', 'meta_ads')->orWhereIn('lead_type', ['verified', 'converted']);
+        })
         ->with(['property.locality', 'property.city'])
         ->where(function ($q) use ($lockedByAnyone, $unlockedByMe) {
             $q->whereNotIn('id', $lockedByAnyone)  // Available (not locked)

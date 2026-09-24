@@ -206,7 +206,7 @@
     <div class="max-w-7xl mx-auto px-4 lg:px-8 pt-12 pb-20 lg:pt-20 lg:pb-32">
         <div class="grid lg:grid-cols-2 gap-12 items-stretch">
             <div>
-                <span class="pz-anim pz-d1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-coral-50 text-coral-700 text-xs font-semibold mb-6">
+                <span clWass="pz-anim pz-d1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-coral-50 text-coral-700 text-xs font-semibold mb-6">
                     <span class="w-2 h-2 rounded-full bg-coral-500" style="animation: piziPulse 1.6s ease-in-out infinite;"></span>
                     Verified by Pizi field team
                 </span>
