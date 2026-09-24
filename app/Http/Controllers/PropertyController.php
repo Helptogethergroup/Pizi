@@ -85,9 +85,6 @@ class PropertyController extends Controller
         if ($request->query('json') === 'count') {
             return response()->json(['count' => (clone $q)->count()]);
         }
-        if ($request->query('json') === 'compare') {
-            return $this->compareJson($request);
-        }
         if ($request->query('json') === 'nearby') {
             return $this->nearbyJson($request);
         }
@@ -338,42 +335,5 @@ class PropertyController extends Controller
     private function distanceSql(): string
     {
         return '(6371 * acos(LEAST(1, cos(radians(?)) * cos(radians(latitude)) * cos(radians(longitude) - radians(?)) + sin(radians(?)) * sin(radians(latitude)))))';
-    }
-
-    /**
-     * Side-by-side data for up to 3 PGs (slugs come from the visitor's compare tray).
-     */
-    private function compareJson(Request $request)
-    {
-        $slugs = collect(explode(',', (string) $request->query('slugs')))
-            ->map(fn ($s) => trim($s))->filter()->unique()->take(3)->values();
-        if ($slugs->isEmpty()) {
-            return response()->json(['data' => []]);
-        }
-
-        $rows = Property::active()
-            ->where('is_verified', true)
-            ->whereIn('slug', $slugs)
-            ->with(['city', 'locality', 'amenities'])
-            ->get()
-            ->sortBy(fn ($p) => $slugs->search($p->slug))
-            ->values();
-
-        return response()->json(['data' => $rows->map(fn ($p) => [
-            'slug' => $p->slug,
-            'name' => $p->name,
-            'url' => route('property.show', $p->slug),
-            'image' => $p->cover_image
-                ? (str_starts_with($p->cover_image, 'http') ? $p->cover_image : asset('storage/' . $p->cover_image))
-                : null,
-            'type' => $p->property_type,
-            'gender' => $p->gender,
-            'rent_min' => $p->rent_min,
-            'rent_max' => $p->rent_max,
-            'food_included' => (bool) $p->food_included,
-            'locality' => $p->locality?->name,
-            'city' => $p->city?->name,
-            'amenities' => $p->amenities->pluck('name')->values(),
-        ])->values()]);
     }
 }

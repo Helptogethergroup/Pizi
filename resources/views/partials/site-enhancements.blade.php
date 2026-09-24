@@ -1,4 +1,4 @@
-{{-- Site-wide interactive layer: header search, saved PGs, compare, toasts, sliders, shrinking header. --}}
+{{-- Site-wide interactive layer: header search, saved PGs, toasts, sliders, shrinking header. --}}
 <style>
     /* ---------- announcement bar ---------- */
     #pzAnnounce { position: relative; overflow: hidden; background: linear-gradient(90deg, #ed4e3d, #ff6b5b, #ed4e3d); background-size: 200% 100%; animation: pzAnnGlow 8s linear infinite; max-height: 64px; transition: max-height .4s ease, opacity .3s ease; }
@@ -37,12 +37,11 @@
     #pzSuggest a:hover, #pzSuggest a:focus { background: #fff3f1; outline: none; }
     @keyframes pzFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
-    /* ---------- card action buttons (save / compare) ---------- */
+    /* ---------- card action buttons (save) ---------- */
     .pz-card-actions { position: absolute; right: .5rem; bottom: .5rem; z-index: 5; display: flex; gap: .4rem; }
     .pz-cbtn { width: 2rem; height: 2rem; border-radius: 9999px; background: rgba(255, 255, 255, .95); color: #0f2748; display: inline-flex; align-items: center; justify-content: center; font-size: .8rem; box-shadow: 0 4px 12px rgba(15, 39, 72, .18); transition: transform .2s, background-color .2s, color .2s; cursor: pointer; border: 0; }
     .pz-cbtn:hover { transform: scale(1.12); }
     .pz-cbtn.pz-active { background: #ed4e3d; color: #fff; }
-    .pz-cbtn.pz-active.pz-cmp { background: #0f2748; }
     .pz-cbtn.pz-pop { animation: pzHeartPop .5s cubic-bezier(.34, 1.56, .64, 1); }
     @keyframes pzHeartPop { 0% { transform: scale(1); } 40% { transform: scale(1.55); } 100% { transform: scale(1); } }
 
@@ -52,23 +51,6 @@
     #pzSavedDrawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 91; width: 24rem; max-width: 92vw; background: #fefcf6; box-shadow: -20px 0 50px rgba(10, 26, 48, .25); transform: translateX(105%); transition: transform .4s cubic-bezier(.16, 1, .3, 1); display: flex; flex-direction: column; }
     #pzSavedDrawer.pz-open { transform: none; }
     .pz-saved-row { display: flex; gap: .75rem; padding: .75rem; border-radius: 1rem; background: #fff; border: 1px solid rgba(15, 39, 72, .08); animation: pzFadeUp .4s cubic-bezier(.16, 1, .3, 1) both; }
-
-    /* ---------- compare tray + modal ---------- */
-    #pzCompareTray { position: fixed; left: 50%; bottom: 1rem; z-index: 46; width: min(94vw, 46rem); transform: translate(-50%, 140%); transition: transform .45s cubic-bezier(.16, 1, .3, 1); background: #0f2748; color: #fefcf6; border-radius: 1.1rem; padding: .75rem; box-shadow: 0 24px 50px rgba(10, 26, 48, .4); display: flex; align-items: center; gap: .75rem; }
-    #pzCompareTray.pz-open { transform: translate(-50%, 0); }
-    .pz-slot { position: relative; width: 3.25rem; height: 3.25rem; border-radius: .75rem; background: rgba(255, 255, 255, .1); border: 1px dashed rgba(255, 255, 255, .3); overflow: hidden; flex: 0 0 auto; display: flex; align-items: center; justify-content: center; font-size: .8rem; color: rgba(255, 255, 255, .5); }
-    .pz-slot.pz-filled { border-style: solid; border-color: rgba(255, 255, 255, .5); animation: pzHeartPop .45s cubic-bezier(.34, 1.56, .64, 1); }
-    .pz-slot img { width: 100%; height: 100%; object-fit: cover; }
-    .pz-slot button { position: absolute; top: 1px; right: 1px; width: 1rem; height: 1rem; border-radius: 9999px; background: rgba(0, 0, 0, .65); color: #fff; font-size: .55rem; display: flex; align-items: center; justify-content: center; border: 0; cursor: pointer; }
-    #pzCompareModal { position: fixed; inset: 0; z-index: 92; display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; visibility: hidden; transition: opacity .3s ease, visibility 0s linear .3s; }
-    #pzCompareModal.pz-open { opacity: 1; visibility: visible; transition: opacity .3s ease, visibility 0s; }
-    #pzCompareModal .pz-modal-card { width: min(64rem, 100%); max-height: 90vh; overflow: auto; background: #fefcf6; border-radius: 1.5rem; box-shadow: 0 40px 80px rgba(10, 26, 48, .45); transform: translateY(24px) scale(.96); transition: transform .4s cubic-bezier(.16, 1, .3, 1); }
-    #pzCompareModal.pz-open .pz-modal-card { transform: none; }
-    .pz-cmp-table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 34rem; }
-    .pz-cmp-table th, .pz-cmp-table td { padding: .7rem .9rem; text-align: left; vertical-align: middle; border-bottom: 1px solid rgba(15, 39, 72, .08); font-size: .85rem; }
-    .pz-cmp-table th.pz-label { width: 9rem; font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: rgba(15, 39, 72, .55); font-weight: 700; position: sticky; left: 0; background: #fefcf6; }
-    .pz-cmp-table tr { animation: pzFadeUp .45s cubic-bezier(.16, 1, .3, 1) both; }
-    .pz-best { display: inline-flex; align-items: center; gap: .3rem; margin-left: .4rem; padding: .1rem .5rem; border-radius: 9999px; background: #d1fae5; color: #047857; font-size: .65rem; font-weight: 700; animation: pzHeartPop .6s .5s cubic-bezier(.34, 1.56, .64, 1) both; }
 
     /* ---------- toast ---------- */
     #pzToastHost { position: fixed; left: 50%; bottom: 5.5rem; transform: translateX(-50%); z-index: 95; display: flex; flex-direction: column; gap: .5rem; align-items: center; pointer-events: none; }
@@ -98,16 +80,11 @@
     @keyframes pzSkeleton { to { background-position: -200% 0; } }
 
     @media (max-width: 767px) {
-        #pzCompareTray { bottom: .5rem; }
-        body:has(#pzMobileBar) #pzCompareTray { bottom: 4.6rem; }
-        body.pz-tray-open .chat-bubble-wrapper, body.pz-tray-open #pzContactFab { bottom: 5.4rem !important; }
-        body:has(#pzMobileBar).pz-tray-open .chat-bubble-wrapper, body:has(#pzMobileBar).pz-tray-open #pzContactFab { bottom: 9.6rem !important; }
         #pzToastHost { bottom: 7.5rem; }
-        .pz-slot { width: 2.75rem; height: 2.75rem; }
     }
     @media (prefers-reduced-motion: reduce) {
-        #pzAnnounce, .pz-toast, .pz-saved-row, .pz-cmp-table tr, #pzSuggest a, .pz-skeleton { animation: none !important; }
-        #pzSearchPanel, #pzSavedDrawer, #pzCompareTray, #pzCompareModal .pz-modal-card { transition: none; }
+        #pzAnnounce, .pz-toast, .pz-saved-row, #pzSuggest a, .pz-skeleton { animation: none !important; }
+        #pzSearchPanel, #pzSavedDrawer { transition: none; }
     }
 </style>
 
@@ -145,34 +122,13 @@
     </div>
 </aside>
 
-{{-- Compare tray + modal --}}
-<div id="pzCompareTray" role="region" aria-label="Compare PGs">
-    <div id="pzCompareSlots" class="flex items-center gap-2"></div>
-    <div class="flex-1 min-w-0 hidden sm:block">
-        <div class="text-sm font-bold">Compare PGs</div>
-        <div id="pzCompareHint" class="text-xs text-cream/60">Pick 2 or 3 PGs to compare side by side.</div>
-    </div>
-    <button type="button" id="pzCompareGo" class="ml-auto px-4 py-2.5 rounded-xl bg-coral-500 text-white text-sm font-bold whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed hover:bg-coral-600 transition" disabled><i class="fa-solid fa-scale-balanced"></i> Compare</button>
-    <button type="button" id="pzCompareClear" class="w-9 h-9 rounded-xl text-cream/60 hover:text-white hover:bg-white/10 transition" aria-label="Clear comparison"><i class="fa-solid fa-xmark"></i></button>
-</div>
-<div id="pzCompareModal" aria-hidden="true">
-    <div class="absolute inset-0 bg-ink-950/60 backdrop-blur-sm" id="pzCompareBackdrop"></div>
-    <div class="pz-modal-card relative">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-ink-900/10 sticky top-0 bg-cream z-10">
-            <h3 class="font-display font-black text-xl flex items-center gap-2"><i class="fa-solid fa-scale-balanced text-coral-500"></i> Compare PGs</h3>
-            <button type="button" id="pzCompareClose" class="w-9 h-9 rounded-xl hover:bg-coral-50 hover:text-coral-600 transition" aria-label="Close comparison"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div id="pzCompareBody" class="overflow-x-auto"></div>
-    </div>
-</div>
-
 <div id="pzToastHost" aria-live="polite"></div>
 
 <script>
 (function () {
     'use strict';
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var SAVED = 'pz_saved_pgs', COMPARE = 'pz_compare_pgs', RECENT = 'pz_recent_pgs', CITY = 'pz_city';
+    var SAVED = 'pz_saved_pgs', RECENT = 'pz_recent_pgs', CITY = 'pz_city';
     var searchUrl = @json(route('search'));
     var suggestUrl = @json(route('search.suggestions'));
 
@@ -180,7 +136,6 @@
     function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
     function $(id) { return document.getElementById(id); }
     function h(tag, cls, html) { var n = document.createElement(tag); if (cls) n.className = cls; if (html) n.innerHTML = html; return n; }
-    function money(v) { return '₹' + Number(v).toLocaleString('en-IN'); }
     function txt(node, s) { node.textContent = s; return node; }
 
     /* ---------- toast ---------- */
@@ -228,7 +183,7 @@
     if (sBtn) sBtn.addEventListener('click', function () { panel && panel.classList.contains('pz-open') ? closeSearch() : openSearch(); });
     if ($('pzSearchClose')) $('pzSearchClose').addEventListener('click', closeSearch);
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') { closeSearch(); closeSaved(); closeCompare(); }
+        if (e.key === 'Escape') { closeSearch(); closeSaved(); }
         if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement || {}).tagName || '') && !(document.activeElement || {}).isContentEditable) { e.preventDefault(); openSearch(); }
     });
     document.addEventListener('click', function (e) {
@@ -252,14 +207,14 @@
                         mid.appendChild(txt(h('span', 'block text-sm font-semibold truncate'), p.name));
                         mid.appendChild(txt(h('span', 'block text-xs text-ink-900/55 truncate'), [p.locality, p.city].filter(Boolean).join(', ')));
                         a.appendChild(mid);
-                        if (p.rent_min) a.appendChild(txt(h('span', 'text-sm font-bold text-ink-950 whitespace-nowrap'), money(p.rent_min)));
+                        if (p.rent_min) a.appendChild(txt(h('span', 'text-sm font-bold text-ink-950 whitespace-nowrap'), '₹' + Number(p.rent_min).toLocaleString('en-IN')));
                         sBox.appendChild(a);
                     });
                 }).catch(function () {});
         }, 250);
     });
 
-    /* ---------- saved PGs + compare ---------- */
+    /* ---------- saved PGs ---------- */
     function cardData(a) {
         var m = (a.getAttribute('href') || '').match(/\/pg\/([^\/?#]+)/); if (!m) return null;
         var t = a.querySelector('h3, h4'); if (!t) return null;
@@ -268,7 +223,6 @@
     }
     function mediaBox(a) { return a.querySelector('.pz-card-carousel') || a.querySelector('div.relative.overflow-hidden'); }
     function isSaved(slug) { return load(SAVED).some(function (x) { return x.slug === slug; }); }
-    function inCompare(slug) { return load(COMPARE).some(function (x) { return x.slug === slug; }); }
 
     function enhance(a) {
         if (a.dataset.pzEnh) return;
@@ -276,14 +230,11 @@
         if (!d || !box) return;
         a.dataset.pzEnh = '1';
         var bar = h('div', 'pz-card-actions');
-        var cmp = h('button', 'pz-cbtn pz-cmp', '<i class="fa-solid fa-scale-balanced"></i>');
-        cmp.type = 'button'; cmp.title = 'Add to compare'; cmp.setAttribute('aria-label', 'Add ' + d.name + ' to compare'); cmp.dataset.slug = d.slug;
         var heart = h('button', 'pz-cbtn pz-heart', '<i class="fa-regular fa-heart"></i>');
         heart.type = 'button'; heart.title = 'Save this PG'; heart.setAttribute('aria-label', 'Save ' + d.name); heart.dataset.slug = d.slug;
-        [cmp, heart].forEach(function (b) { b.addEventListener('mousedown', function (e) { e.stopPropagation(); }); });
-        cmp.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); toggleCompare(cardData(a) || d, cmp); });
+        heart.addEventListener('mousedown', function (e) { e.stopPropagation(); });
         heart.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); toggleSave(cardData(a) || d, heart); });
-        bar.appendChild(cmp); bar.appendChild(heart); box.appendChild(bar);
+        bar.appendChild(heart); box.appendChild(bar);
         syncButtons();
     }
     function scanCards(root) {
@@ -297,27 +248,12 @@
         else { list.unshift({ slug: d.slug, name: d.name, img: d.img, price: d.price, url: d.url }); pzToast('Saved to your list', 'fa-heart', { label: 'View', run: openSaved }); }
         store(SAVED, list.slice(0, 40)); syncButtons(); renderSaved(); pop(btn);
     }
-    function toggleCompare(d, btn) {
-        var list = load(COMPARE), i = list.findIndex(function (x) { return x.slug === d.slug; });
-        if (i > -1) list.splice(i, 1);
-        else {
-            if (list.length >= 3) { pzToast('You can compare up to 3 PGs at a time', 'fa-circle-exclamation'); return; }
-            list.push({ slug: d.slug, name: d.name, img: d.img });
-        }
-        store(COMPARE, list); syncButtons(); renderTray(); pop(btn);
-    }
     function syncButtons() {
         document.querySelectorAll('.pz-heart').forEach(function (b) {
             var on = isSaved(b.dataset.slug);
             b.classList.toggle('pz-active', on);
             b.firstElementChild.className = on ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
             b.title = on ? 'Remove from saved' : 'Save this PG';
-            b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-        document.querySelectorAll('.pz-cmp').forEach(function (b) {
-            var on = inCompare(b.dataset.slug);
-            b.classList.toggle('pz-active', on);
-            b.title = on ? 'Remove from compare' : 'Add to compare';
             b.setAttribute('aria-pressed', on ? 'true' : 'false');
         });
         var n = load(SAVED).length, badge = $('pzSavedCount');
@@ -363,81 +299,6 @@
     if ($('pzSavedClose')) $('pzSavedClose').addEventListener('click', closeSaved);
     if (overlay) overlay.addEventListener('click', closeSaved);
     if ($('pzSavedClear')) $('pzSavedClear').addEventListener('click', function () { store(SAVED, []); syncButtons(); renderSaved(); pzToast('Saved list cleared', 'fa-trash-can'); });
-
-    /* compare tray */
-    var tray = $('pzCompareTray');
-    function renderTray() {
-        if (!tray) return;
-        var list = load(COMPARE), slots = $('pzCompareSlots'); slots.innerHTML = '';
-        for (var i = 0; i < 3; i++) {
-            var p = list[i], s = h('div', 'pz-slot' + (p ? ' pz-filled' : ''));
-            if (p) {
-                if (p.img) { var im = document.createElement('img'); im.src = p.img; im.alt = p.name; s.appendChild(im); } else { s.innerHTML = '<i class="fa-solid fa-house"></i>'; }
-                (function (slug) {
-                    var x = h('button', '', '<i class="fa-solid fa-xmark"></i>'); x.type = 'button'; x.setAttribute('aria-label', 'Remove from compare');
-                    x.addEventListener('click', function () { store(COMPARE, load(COMPARE).filter(function (q) { return q.slug !== slug; })); syncButtons(); renderTray(); });
-                    s.appendChild(x);
-                })(p.slug);
-            } else { s.innerHTML = '<i class="fa-solid fa-plus"></i>'; }
-            slots.appendChild(s);
-        }
-        $('pzCompareGo').disabled = list.length < 2;
-        $('pzCompareHint').textContent = list.length < 2 ? 'Pick at least 2 PGs to compare side by side.' : 'Ready. Compare rent, amenities and more.';
-        tray.classList.toggle('pz-open', list.length > 0);
-        document.body.classList.toggle('pz-tray-open', list.length > 0);
-    }
-    if ($('pzCompareClear')) $('pzCompareClear').addEventListener('click', function () { store(COMPARE, []); syncButtons(); renderTray(); });
-
-    var modal = $('pzCompareModal');
-    function closeCompare() { if (!modal) return; modal.classList.remove('pz-open'); modal.setAttribute('aria-hidden', 'true'); document.body.style.overflow = ''; }
-    function openCompare() {
-        var list = load(COMPARE); if (list.length < 2) return;
-        var body = $('pzCompareBody');
-        body.innerHTML = '<div class="p-10 text-center text-ink-900/60"><i class="fa-solid fa-spinner fa-spin text-2xl text-coral-500"></i><p class="mt-3 text-sm">Loading comparison...</p></div>';
-        modal.classList.add('pz-open'); modal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden';
-        fetch(searchUrl + '?json=compare&slugs=' + encodeURIComponent(list.map(function (p) { return p.slug; }).join(',')), { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (res) { renderCompare(res.data || []); })
-            .catch(function () { body.innerHTML = '<div class="p-10 text-center text-rose-600 text-sm">Could not load the comparison. Please try again.</div>'; });
-    }
-    function renderCompare(data) {
-        var body = $('pzCompareBody');
-        if (data.length < 2) { body.innerHTML = '<div class="p-10 text-center text-ink-900/60 text-sm">These PGs are no longer available to compare.</div>'; return; }
-        var best = Math.min.apply(null, data.map(function (p) { return p.rent_min || Infinity; }));
-        var table = h('table', 'pz-cmp-table'), delay = 0;
-        function row(label, fn) {
-            var tr = document.createElement('tr'); tr.style.animationDelay = (delay += 60) + 'ms';
-            tr.appendChild(txt(h('th', 'pz-label'), label));
-            data.forEach(function (p) { var td = document.createElement('td'); fn(td, p); tr.appendChild(td); });
-            table.appendChild(tr);
-        }
-        row('PG', function (td, p) {
-            var a = h('a', 'block group'); a.href = p.url;
-            var im = h('div', 'w-full aspect-[16/10] rounded-xl bg-cream overflow-hidden mb-2 flex items-center justify-center text-coral-300 text-3xl');
-            if (p.image) { var i = document.createElement('img'); i.src = p.image; i.alt = p.name; i.className = 'w-full h-full object-cover group-hover:scale-105 transition duration-500'; im.appendChild(i); } else { im.innerHTML = '<i class="fa-solid fa-house"></i>'; }
-            a.appendChild(im); a.appendChild(txt(h('div', 'font-display font-bold text-base leading-tight group-hover:text-coral-600 transition'), p.name));
-            td.appendChild(a);
-        });
-        row('Rent / month', function (td, p) {
-            var r = p.rent_min ? money(p.rent_min) + (p.rent_max && p.rent_max !== p.rent_min ? ' - ' + money(p.rent_max) : '') : 'On request';
-            td.appendChild(txt(h('span', 'font-black text-base'), r));
-            if (p.rent_min && p.rent_min === best) td.appendChild(h('span', 'pz-best', '<i class="fa-solid fa-trophy"></i> Lowest'));
-        });
-        row('Location', function (td, p) { td.textContent = [p.locality, p.city].filter(Boolean).join(', ') || '-'; });
-        row('Type', function (td, p) { td.className = 'capitalize'; td.textContent = p.type || '-'; });
-        row('For', function (td, p) { td.className = 'capitalize'; td.textContent = p.gender || '-'; });
-        row('Food included', function (td, p) { td.innerHTML = p.food_included ? '<i class="fa-solid fa-circle-check text-emerald-500"></i> Yes' : '<i class="fa-solid fa-circle-xmark text-ink-900/30"></i> No'; });
-        var counts = {};
-        data.forEach(function (p) { (p.amenities || []).forEach(function (a) { counts[a] = (counts[a] || 0) + 1; }); });
-        Object.keys(counts).sort(function (a, b) { return counts[b] - counts[a] || a.localeCompare(b); }).slice(0, 14).forEach(function (name) {
-            row(name, function (td, p) { td.innerHTML = (p.amenities || []).indexOf(name) > -1 ? '<i class="fa-solid fa-check text-emerald-500"></i>' : '<i class="fa-solid fa-minus text-ink-900/25"></i>'; });
-        });
-        row('', function (td, p) { var a = h('a', 'inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-coral-500 hover:bg-coral-600 text-white text-xs font-bold transition', 'View details <i class="fa-solid fa-arrow-right"></i>'); a.href = p.url; td.appendChild(a); });
-        var body2 = $('pzCompareBody'); body2.innerHTML = ''; body2.appendChild(table);
-    }
-    if ($('pzCompareGo')) $('pzCompareGo').addEventListener('click', openCompare);
-    if ($('pzCompareClose')) $('pzCompareClose').addEventListener('click', closeCompare);
-    if ($('pzCompareBackdrop')) $('pzCompareBackdrop').addEventListener('click', closeCompare);
 
     /* ---------- recently viewed (record) + remembered city ---------- */
     var path = location.pathname;
@@ -526,12 +387,12 @@
         (root.querySelectorAll ? root.querySelectorAll('img[loading="lazy"]') : []).forEach(watchImage);
     }
     function init() {
-        scan(document); syncButtons(); renderTray(); renderSaved();
+        scan(document); syncButtons(); renderSaved();
         new MutationObserver(function (muts) {
             muts.forEach(function (m) { m.addedNodes.forEach(function (n) { if (n.nodeType === 1) { if (n.matches && n.matches('a[href*="/pg/"]')) enhance(n); scan(n); } }); });
         }).observe(document.body, { childList: true, subtree: true });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
-    window.addEventListener('storage', function () { syncButtons(); renderTray(); renderSaved(); });
+    window.addEventListener('storage', function () { syncButtons(); renderSaved(); });
 })();
 </script>
