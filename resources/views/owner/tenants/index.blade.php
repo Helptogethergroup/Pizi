@@ -121,7 +121,7 @@
 
                 @if(is_null($tenant->owner_id))
                     <div id="claimForm{{ $tenant->id }}" class="hidden mt-4 pt-4 border-t border-dashed border-amber-300">
-                        <form method="POST" action="{{ route('owner.tenants.claim', $tenant) }}" class="grid sm:grid-cols-3 gap-3">
+                        <form method="POST" action="{{ route('owner.tenants.claim', $tenant) }}" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                             @csrf
                             <select name="property_id" required class="px-3 py-2 rounded-lg border border-ink-200 text-sm sm:col-span-1">
                                 <option value="">Select your property...</option>

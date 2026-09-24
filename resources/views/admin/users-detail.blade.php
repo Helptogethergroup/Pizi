@@ -15,7 +15,7 @@
     </div>
 @endif
 
-<div class="grid md:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
     <div class="md:col-span-2 space-y-6">
 
@@ -32,7 +32,7 @@
                            class="w-full px-4 py-2.5 border border-ink-900/15 rounded-lg">
                 </div>
 
-                <div class="grid sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-ink-900/70 mb-1.5">Email</label>
                         <input type="email" name="email" value="{{ old('email', $user->email) }}" required
@@ -65,11 +65,11 @@
                 <i class="fa-solid fa-lock fa-fw"></i> For security, existing passwords are encrypted and cannot be viewed by anyone — including admins.
                 You can only set a new one below.
             </p>
-            <form method="POST" action="{{ route('admin.users.resetPassword', $user) }}" class="flex gap-3">
+            <form method="POST" action="{{ route('admin.users.resetPassword', $user) }}" class="flex flex-col sm:flex-row gap-3">
                 @csrf
                 @method('PATCH')
                 <input type="password" name="new_password" required minlength="6" placeholder="New password (min 6 chars)"
-                       class="flex-1 px-4 py-2.5 border border-ink-900/15 rounded-lg">
+                       class="flex-1 min-w-0 px-4 py-2.5 border border-ink-900/15 rounded-lg">
                 <button class="px-6 py-2.5 bg-ink-950 text-cream rounded-lg font-bold text-sm whitespace-nowrap">Reset password</button>
             </form>
         </div>

@@ -204,7 +204,7 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 lg:px-8 pt-12 pb-20 lg:pt-20 lg:pb-32">
-        <div class="grid lg:grid-cols-2 gap-12 items-stretch">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
             <div>
                 <span clWass="pz-anim pz-d1 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-coral-50 text-coral-700 text-xs font-semibold mb-6">
                     <span class="w-2 h-2 rounded-full bg-coral-500" style="animation: piziPulse 1.6s ease-in-out infinite;"></span>
@@ -360,7 +360,7 @@
                 See all near me <i class="fa-solid fa-arrow-right text-xs"></i>
             </a>
         </div>
-        <div id="pzNearGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        <div id="pzNearGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </div>
 </section>
 
@@ -919,7 +919,7 @@
         </div>
 
         {{-- Feature grid --}}
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6">
          @foreach([
     ['bed-sharing-img.jpeg', 'Bed Sharing', 'From single occupancy to 4-sharing rooms — pick the option that fits your budget and comfort.'],
     ['food-img.jpeg', 'Food Included', 'Hygienic kitchens, branded groceries and home-style meals. Most PGs come with food included.'],
@@ -964,7 +964,7 @@
             <span class="text-coral-600 font-semibold text-sm tracking-wider uppercase">How it works</span>
             <h2 class="font-display font-black text-3xl lg:text-5xl mt-2">Three steps to your new home.</h2>
         </div>
-        <div class="grid md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
            @foreach([
     ['1', 'Search', 'Browse verified PGs in your preferred locality and budget.', 'search-img.jpeg'],
     ['2', 'Visit', 'Schedule a free site visit. Our field team accompanies you.', 'visit-img.jpeg'],
@@ -988,7 +988,7 @@
 {{-- FREE SITE VISIT --}}
 <section id="pzVisit" class="relative py-5 pz-reveal scroll-mt-24">
     <div class="max-w-5xl mx-auto px-4 lg:px-8">
-        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-ink-950 via-ink-900 to-ink-800 text-cream p-5 lg:p-6 shadow-xl shadow-ink-900/15 grid lg:grid-cols-5 gap-5 items-center">
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-ink-950 via-ink-900 to-ink-800 text-cream p-5 lg:p-6 shadow-xl shadow-ink-900/15 grid grid-cols-1 lg:grid-cols-5 gap-5 items-center">
             <div class="pz-blob pointer-events-none absolute -top-16 -right-10 w-72 h-72 bg-coral-500/25 rounded-full blur-3xl"></div>
 
             <div class="relative lg:col-span-2">
@@ -1007,7 +1007,7 @@
                 </ul>
             </div>
 
-            <form id="pzVisitForm" class="relative lg:col-span-3 bg-white text-ink-950 rounded-xl p-4 grid sm:grid-cols-2 gap-2.5" novalidate>
+            <form id="pzVisitForm" class="relative lg:col-span-3 bg-white text-ink-950 rounded-xl p-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5" novalidate>
                 <div>
                     <label for="pzVisitName" class="block text-xs font-bold uppercase tracking-wide text-ink-900/60 mb-1">Your name</label>
                     <input id="pzVisitName" name="name" type="text" required maxlength="120" autocomplete="name" placeholder="e.g. Rahul Sharma"
@@ -1087,7 +1087,7 @@
             <div><span class="text-coral-600 font-semibold text-sm tracking-wider uppercase">Guides &amp; tips</span><h2 class="font-display font-black text-3xl lg:text-5xl mt-2">From the blog</h2></div>
             <a href="{{ route('blog.index') }}" class="hidden sm:inline-flex items-center gap-1 text-sm font-semibold hover:text-coral-600">Read all →</a>
         </div>
-        <div class="grid md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @foreach($recentBlogs as $blog)
                 <a href="{{ route('blog.show', $blog->slug) }}" class="group block rounded-2xl border border-ink-900/10 overflow-hidden hover:border-coral-500 transition">
                     @if($blog->cover_image)

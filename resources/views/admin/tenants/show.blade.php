@@ -86,7 +86,7 @@
                             @if(empty($tenant->property_id))
                                 <div class="p-3 bg-amber-50 border border-amber-200 rounded-lg">
                                     <div class="text-xs font-bold text-amber-900 mb-2"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Property assign nahi hai — abhi assign karo (journey complete karne ke liye zaroori):</div>
-                                    <div class="grid sm:grid-cols-3 gap-2">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                         <select name="property_id" required class="px-3 py-2 border border-ink-200 rounded-lg text-sm">
                                             <option value="">Select Property *</option>
                                             @foreach($properties as $p)

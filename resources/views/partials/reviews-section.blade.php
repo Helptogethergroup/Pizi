@@ -54,7 +54,7 @@
         @endif
 
         {{-- ===== AGGREGATE HEADER ===== --}}
-        <div class="grid md:grid-cols-3 gap-6 bg-white rounded-2xl border border-ink-900/10 p-6 lg:p-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-white rounded-2xl border border-ink-900/10 p-6 lg:p-8">
             <div class="flex flex-col items-center justify-center text-center md:border-r border-ink-900/10">
                 <div class="font-display font-black text-5xl text-ink-950">{{ number_format($avg, 1) }}</div>
                 <div class="text-2xl leading-none mt-1">{!! $stars($avg) !!}</div>
@@ -106,7 +106,7 @@
                     <input type="hidden" name="rating" id="ratingInput" value="" required>
                 </div>
 
-                <div class="grid sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @foreach (['cleanliness' => 'Cleanliness', 'food' => 'Food', 'staff' => 'Staff', 'value_for_money' => 'Value for Money', 'amenities' => 'Amenities'] as $key => $label)
                         <div>
                             <label class="block text-sm text-ink-700 mb-1 font-semibold">{{ $label }}</label>
@@ -119,7 +119,7 @@
                 </div>
 
                 @guest
-                    <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input type="text" name="reviewer_name" placeholder="Your name *" required
                             class="w-full px-4 py-3 rounded-xl border border-ink-900/15 focus:border-coral-500 outline-none text-sm">
                         <input type="text" name="reviewer_phone" placeholder="Phone (optional)"

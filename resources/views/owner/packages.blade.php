@@ -104,7 +104,7 @@
 </div>
 
 {{-- Info Section --}}
-<div class="mt-16 grid md:grid-cols-2 gap-8">
+<div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8">
     <div class="p-8 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-50/50 border border-blue-200">
         <h3 class="font-display font-bold text-xl text-blue-900 mb-4"><i class="fa-solid fa-lightbulb fa-fw"></i> How Credits Work</h3>
         <ul class="space-y-3 text-sm text-blue-900/80">

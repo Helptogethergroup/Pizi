@@ -16,7 +16,7 @@
         </div>
     </form>
 
-    <div class="grid lg:grid-cols-3 gap-10 mt-10">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-10">
         <div class="lg:col-span-2">
 
             {{-- Featured hero post --}}

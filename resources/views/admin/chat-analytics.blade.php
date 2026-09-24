@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<div class="grid lg:grid-cols-3 gap-6 mb-6">
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
     {{-- Messages over time --}}
     <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-ink-900/10">
         <h2 class="font-display font-bold text-xl mb-1">Messages — last 7 days</h2>

@@ -145,7 +145,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </a>
 
     {{-- CENTER: Desktop nav --}}
-        <nav class="hidden md:flex items-center gap-1 lg:gap-2 text-sm font-medium">
+        <nav class="hidden lg:flex items-center gap-1 lg:gap-2 text-sm font-medium">
             <a href="{{ route('search') }}" class="px-3 py-2 rounded-lg hover:bg-coral-50 hover:text-coral-600 transition whitespace-nowrap">Browse PGs</a>
 
             {{-- Cities dropdown --}}
@@ -190,14 +190,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             <a id="pzHeaderVisit" href="{{ route('home') }}#pzVisit" class="hidden xl:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-coral-500 hover:bg-coral-600 text-white text-sm font-bold shadow-md shadow-coral-500/30 hover:-translate-y-0.5 transition whitespace-nowrap"><i class="fa-solid fa-calendar-check"></i> Book visit</a>
 
             {{-- Prominent phone box --}}
-            <a href="tel:{{ $phone }}" class="hidden sm:flex xl:hidden 2xl:flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-coral-500/30 hover:border-coral-500 hover:bg-coral-50 transition">
+            <a href="tel:{{ $phone }}" class="hidden lg:flex xl:hidden 2xl:flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-coral-500/30 hover:border-coral-500 hover:bg-coral-50 transition">
                 <span class="w-8 h-8 rounded-lg bg-coral-500 text-white flex items-center justify-center text-sm flex-shrink-0"><i class="fa-solid fa-phone fa-fw"></i></span>
                 <span class="leading-tight">
                     <span class="block text-[10px] text-ink-900/50 font-semibold uppercase tracking-wide">Call us</span>
                     <span class="block text-sm font-bold text-ink-950">{{ $phone }}</span>
                 </span>
             </a>
-            <div class="hidden md:flex items-center gap-2">
+            <div class="hidden lg:flex items-center gap-2">
                 @auth
                     @php
                         $pzUser = auth()->user();
@@ -251,7 +251,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             
             {{-- Mobile call icon --}}
             <a href="tel:{{ $phone }}"
-               class="md:hidden w-10 h-10 rounded-xl bg-coral-500 text-white flex items-center justify-center shadow-md shadow-coral-500/30"
+               class="lg:hidden w-10 h-10 rounded-xl bg-coral-500 text-white flex items-center justify-center shadow-md shadow-coral-500/30"
                aria-label="Call {{ $phone }}">
                 <span class="text-lg"><i class="fa-solid fa-phone fa-fw"></i></span>
             </a>
@@ -259,7 +259,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             {{-- Mobile hamburger --}}
             <button type="button"
                     onclick="document.getElementById('piziMobileMenu').classList.remove('hidden'); document.body.style.overflow='hidden';"
-                    class="md:hidden p-2 text-ink-900 hover:text-coral-600 transition"
+                    class="lg:hidden p-2 text-ink-900 hover:text-coral-600 transition"
                     aria-label="Open menu">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
@@ -270,7 +270,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 </header>
 
 {{-- ===== MOBILE MENU OVERLAY ===== --}}
-<div id="piziMobileMenu" class="hidden fixed inset-0 z-[100] md:hidden">
+<div id="piziMobileMenu" class="hidden fixed inset-0 z-[100] lg:hidden">
     <div onclick="document.getElementById('piziMobileMenu').classList.add('hidden'); document.body.style.overflow='';"
          class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
     <div class="absolute right-0 top-0 bottom-0 w-80 max-w-[85vw] bg-cream shadow-2xl overflow-y-auto">
@@ -414,7 +414,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     {{-- ===== COMPACT ENQUIRY STRIP ===== --}}
     <div class="relative border-b border-cream/10">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8 grid lg:grid-cols-5 gap-6 items-center">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
                      <div class="lg:col-span-2">
                             <div class="mb-6">
                     <div class="text-[10px] text-coral-400 font-bold tracking-widest uppercase mb-3"><i class="fa-solid fa-mobile-screen fa-fw"></i> Download the Pizi apps</div>
@@ -441,7 +441,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 @csrf
                 <div id="piziEnquirySuccess" class="hidden mb-3 p-2.5 bg-emerald-50 border border-emerald-300 rounded-lg text-sm text-emerald-800 font-semibold"><i class="fa-solid fa-circle-check fa-fw"></i> Thanks! We will contact you soon.</div>
                 <div id="piziEnquiryError" class="hidden mb-3 p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-sm text-rose-800 font-semibold"><i class="fa-solid fa-circle-xmark fa-fw"></i> Failed to send. Please try again.</div>
-                <div class="grid sm:grid-cols-2 gap-2.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <input type="text" id="pizi_enq_name" name="name" required placeholder="Your Name *" class="w-full px-4 py-2.5 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500 text-sm">
                     <input type="tel" id="pizi_enq_phone" name="phone" required pattern="[0-9]{10}" placeholder="Phone (10-digit) *" class="w-full px-4 py-2.5 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500 text-sm">
                 </div>
@@ -453,7 +453,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 
     {{-- ===== WHATSAPP ALERTS + POPULAR SEARCHES ===== --}}
     <div class="relative border-b border-cream/10">
-        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8 grid lg:grid-cols-2 gap-8">
+        <div class="max-w-7xl mx-auto px-4 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div>
                 <h4 class="font-display font-bold text-cream text-lg flex items-center gap-2"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Get new PG alerts on WhatsApp</h4>
                 <p class="text-sm text-cream/60 mt-1">Be the first to know when a verified PG opens near you. No spam, ever.</p>

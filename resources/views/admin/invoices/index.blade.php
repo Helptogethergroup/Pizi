@@ -17,14 +17,14 @@
     <div class="mb-6 bg-rose-50 border-l-4 border-rose-500 px-4 py-3 rounded text-rose-700 text-sm">{{ session('error') }}</div>
 @endif
 
-<form method="GET" class="flex gap-3 mb-6">
-    <input type="text" name="owner" value="{{ request('owner') }}" placeholder="Owner name / phone…" class="px-4 py-2.5 rounded-xl border border-ink-200 flex-1 max-w-xs">
-    <select name="type" class="px-4 py-2.5 rounded-xl border border-ink-200">
+<form method="GET" class="flex flex-wrap gap-3 mb-6">
+    <input type="text" name="owner" value="{{ request('owner') }}" placeholder="Owner name / phone…" class="px-4 py-2.5 rounded-xl border border-ink-200 w-full sm:flex-1 sm:max-w-xs min-w-0">
+    <select name="type" class="px-4 py-2.5 rounded-xl border border-ink-200 w-full sm:w-auto min-w-0">
         <option value="">All types</option>
         <option value="auto" @selected(request('type')==='auto')>Auto (Package purchase)</option>
         <option value="manual" @selected(request('type')==='manual')>Manual</option>
     </select>
-    <button class="px-5 py-2.5 bg-ink-900 text-white rounded-xl font-bold">Filter</button>
+    <button class="px-5 py-2.5 bg-ink-900 text-white rounded-xl font-bold w-full sm:w-auto">Filter</button>
 </form>
 
 <div class="bg-white rounded-2xl border border-ink-100 overflow-x-auto">

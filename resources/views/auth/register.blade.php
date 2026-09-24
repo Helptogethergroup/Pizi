@@ -158,7 +158,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
 
         <!-- STEP 2: Registration Form -->
         <div id="mStep2" class="modal-step p-6 md:p-8">
-            <div class="grid md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <!-- Left: Selected plan summary -->
                 <div>
                     <button onclick="goToStep1()" class="text-sm text-[#8A8071] hover:text-[#16233B] mb-4 flex items-center gap-1">← Back to plans</button>
@@ -332,7 +332,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
     <div class="pz-orb" style="width:200px;height:200px;top:30%;left:3%;animation-delay:-6s;animation-duration:9s;"></div>
 
     <div class="px-6 md:px-12 lg:px-20 py-16 md:py-24 relative z-10">
-        <div class="grid md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
 
             <!-- Left: Text -->
             <div>
@@ -417,7 +417,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
         <h2 class="pz-serif text-3xl md:text-4xl font-bold text-[#16233B]">Everything an owner needs, nothing you don't.</h2>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
         @php
             $benefits = [
                 ['Verified, ready-to-move tenants', 'Every lead is screened before it reaches you. Spend your time closing move-ins, not chasing dead enquiries.'],
@@ -457,7 +457,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
             ];
         @endphp
 
-        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             @foreach($steps as $i => $s)
                 <div class="pz-reveal bg-white border border-[#EBE2D3] rounded-2xl p-6">
                     <div class="pz-mono w-9 h-9 rounded-full bg-[#FF6551] text-white text-sm font-bold flex items-center justify-center mb-4">{{ $i + 1 }}</div>
@@ -477,7 +477,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
         <p class="text-[#5C5344] mt-3">Every lead includes the tenant's name, contact number, preferred room type, and move-in timeline.</p>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         @php
             $leadTypes = [
                 ['🔥', 'Ready-to-move', 'Tenant is looking to shift immediately. Highest intent — best chance to close fast.'],
@@ -515,7 +515,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
             </a>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-8 mt-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-10">
 
             <!-- LEFT: PACKAGES -->
             <div class="md:col-span-2">
@@ -712,7 +712,7 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
         <h2 class="pz-serif text-3xl md:text-4xl font-bold text-[#16233B]">Numbers that keep beds filled.</h2>
     </div>
 
-    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         @php
             $stats = [
                 ['🏠', 500, '+', 'PGs listed across Delhi NCR'],

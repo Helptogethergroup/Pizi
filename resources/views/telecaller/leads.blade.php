@@ -2,25 +2,25 @@
 @section('title', 'My Leads')
 @section('content')
 
-<div class="flex items-center justify-between mb-6">
-      <div class="flex items-center gap-3">
+<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-6">
+      <div class="flex items-center gap-3 flex-wrap">
         <h1 class="font-display font-black text-3xl">My leads</h1>
         <a href="{{ route('leads.manual.create') }}" class="px-4 py-2 bg-coral-500 text-white rounded-lg font-semibold text-sm">+ Add Lead</a>
     </div>
-    <form class="flex gap-2">
-        <input name="search" value="{{ request('search') }}" placeholder="Name / phone…" class="px-3 py-2 rounded-lg border border-ink-900/15">
-        <select name="status" class="px-3 py-2 rounded-lg border border-ink-900/15">
+    <form class="flex flex-wrap gap-2">
+        <input name="search" value="{{ request('search') }}" placeholder="Name / phone…" class="px-3 py-2 rounded-lg border border-ink-900/15 w-full sm:w-auto min-w-0">
+        <select name="status" class="px-3 py-2 rounded-lg border border-ink-900/15 w-full sm:w-auto min-w-0">
             <option value="">All</option>
             @foreach(['new','contacted','interested','follow_up','visit_scheduled','visit_done','closed_won','closed_lost','junk'] as $s)
                 <option value="{{ $s }}" @selected(request('status') === $s)>{{ str_replace('_',' ',$s) }}</option>
             @endforeach
         </select>
-        <select name="lead_type" class="px-3 py-2 rounded-lg border border-ink-900/15">
+        <select name="lead_type" class="px-3 py-2 rounded-lg border border-ink-900/15 w-full sm:w-auto min-w-0">
             <option value="">All Types</option>
             <option value="verified" @selected(request('lead_type') == 'verified')>Verified</option>
             <option value="manual" @selected(request('lead_type') == 'manual')>Direct</option>
         </select>
-        <button class="px-4 py-2 bg-ink-900 text-cream rounded-lg">Filter</button>
+        <button class="px-4 py-2 bg-ink-900 text-cream rounded-lg w-full sm:w-auto">Filter</button>
     </form>
 </div>
 

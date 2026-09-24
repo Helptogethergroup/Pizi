@@ -2,7 +2,7 @@
 @section('title', 'Complete Your Purchase')
 @section('content')
 
-<div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
     
     {{-- LEFT: Order Summary --}}
     <div>

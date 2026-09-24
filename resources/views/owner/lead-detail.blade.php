@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <div class="grid md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
         <!-- LEFT: Lead details + status + remark form -->
         <div class="md:col-span-2 space-y-6">
@@ -115,7 +115,7 @@
 
                 <div id="statusError" class="hidden bg-red-50 text-red-700 text-sm px-3 py-2 rounded-lg mb-3"></div>
 
-                <div class="grid sm:grid-cols-2 gap-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 uppercase mb-1.5">New Status</label>
                         <select id="statusSelect" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-coral-500">

@@ -170,7 +170,7 @@
             <h2 class="reveal delay-1 font-display font-black text-3xl lg:text-4xl mt-3">The Pizi promise.</h2>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="reveal group p-8 rounded-2xl bg-white border border-ink-900/10 hover:border-coral-300 hover:shadow-xl transition-all hover:-translate-y-1">
                 <div class="text-5xl mb-4 inline-block group-hover:scale-110 transition"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5.5c0 4.6-3 8.1-7 9.5-4-1.4-7-4.9-7-9.5V6l7-3z"/></svg>️</div>
                 <h3 class="font-display font-bold text-2xl">Verified properties</h3>
@@ -208,7 +208,7 @@
             <p class="reveal delay-2 text-cream/60 mt-4 max-w-2xl mx-auto text-lg">No property goes live on Pizi until it clears every one of these checks.</p>
         </div>
 
-        <div class="grid md:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div class="reveal p-6 rounded-2xl bg-white/5 border border-cream/10">
                 <div class="text-4xl mb-3"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.5 7-12a7 7 0 1 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
                 <div class="text-xs font-bold text-coral-400 uppercase tracking-wider mb-1">Step 1</div>
@@ -283,7 +283,7 @@
 
 {{-- ===== FOR OWNERS ===== --}}
 <section class="py-16 bg-gradient-to-br from-coral-50 to-cream">
-    <div class="max-w-5xl mx-auto px-4 lg:px-8 grid lg:grid-cols-2 gap-10 items-center">
+    <div class="max-w-5xl mx-auto px-4 lg:px-8 grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
         <div class="reveal">
             <span class="text-coral-600 font-semibold text-sm tracking-wider uppercase">For PG Owners</span>
             <h2 class="font-display font-black text-3xl lg:text-4xl mt-3">Reach genuine tenants. Pay zero commission.</h2>

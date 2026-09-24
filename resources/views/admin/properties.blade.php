@@ -81,7 +81,7 @@
                         <form method="POST" action="{{ route('admin.properties.assign', $property) }}" class="mt-2 flex items-center gap-2 flex-wrap">
                             @csrf @method('PATCH')
                             <label class="text-xs font-bold text-ink-500 uppercase">Owner:</label>
-                            <select name="owner_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-lg border border-ink-200 text-xs font-bold bg-white">
+                            <select name="owner_id" onchange="this.form.submit()" class="px-3 py-1.5 rounded-lg border border-ink-200 text-xs font-bold bg-white w-full sm:w-auto sm:max-w-[220px] min-w-0">
                                 <option value="">— Unassigned —</option>
                                 @foreach($allOwners as $o)
                                     <option value="{{ $o->id }}" @selected($property->owner_id == $o->id)>

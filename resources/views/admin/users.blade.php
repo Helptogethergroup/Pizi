@@ -31,16 +31,16 @@
             class="px-4 py-2 bg-coral-500 text-white rounded-lg font-semibold">+ Create user</button>
     </div>
 
-    <form class="flex gap-2 mb-6">
+    <form class="flex flex-col sm:flex-row gap-2 mb-6">
         <input name="search" value="{{ request('search') }}" placeholder="Search name / email"
-            class="px-3 py-2 rounded-lg border border-ink-900/15">
-        <select name="role" class="px-3 py-2 rounded-lg border border-ink-900/15">
+            class="px-3 py-2 rounded-lg border border-ink-900/15 w-full sm:w-auto sm:flex-1 min-w-0">
+        <select name="role" class="px-3 py-2 rounded-lg border border-ink-900/15 w-full sm:w-auto min-w-0">
             <option value="">All roles</option>
            @foreach(['admin', 'owner', 'tenant', 'telecaller', 'field_executive', 'seo_manager', 'guest'] as $r)
                 <option value="{{ $r }}" @selected(request('role') === $r)>{{ ucfirst(str_replace('_', ' ', $r)) }}</option>
             @endforeach
         </select>
-        <button class="px-4 py-2 bg-ink-900 text-cream rounded-lg">Filter</button>
+        <button class="px-4 py-2 bg-ink-900 text-cream rounded-lg w-full sm:w-auto">Filter</button>
     </form>
 
     <div class="bg-white rounded-2xl border border-ink-900/10 overflow-hidden">

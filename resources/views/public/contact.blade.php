@@ -72,7 +72,7 @@
 
 {{-- CONTACT CARDS (Compact) --}}
 <section class="pb-10">
-    <div class="max-w-5xl mx-auto px-4 grid md:grid-cols-3 gap-4">
+    <div class="max-w-5xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <a href="https://wa.me/918006680092?text=Hi%2C%20I%20need%20help%20with%20Pizi" class="pz-tilt-card pz-reveal2 p-6 rounded-2xl border border-ink-900/10 hover:border-emerald-500 hover:shadow-md transition group">
             <div class="w-11 h-11 rounded-xl bg-emerald-100 flex items-center justify-center text-xl mb-3"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.5 9 9 0 0 1-3.6-.7L3 21l1.7-5.5A8.4 8.4 0 0 1 12.6 3a8.4 8.4 0 0 1 8.4 8.5z"/></svg></div>
             <h2 class="font-display font-bold text-lg">WhatsApp</h2>
@@ -96,7 +96,7 @@
 
 {{-- FORM + INFO (2-column) --}}
 <section class="pb-12">
-    <div class="max-w-5xl mx-auto px-4 grid lg:grid-cols-5 gap-6">
+    <div class="max-w-5xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-5 gap-6">
         
         {{-- LEFT: Form --}}
         <div class="lg:col-span-3 bg-white p-6 lg:p-8 rounded-2xl border border-ink-900/10 pz-reveal2">
@@ -122,7 +122,7 @@
                             </label>
                         </div>
                     </div>
-                    <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="text-xs font-semibold text-ink-900/60 uppercase">Name *</label>
                             <input name="name" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-900/15 focus:border-coral-500 outline-none transition">

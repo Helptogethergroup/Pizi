@@ -10,7 +10,7 @@
             <p class="text-xl text-gray-600">Start listing your PG today</p>
         </div>
 
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             <!-- LEFT: PACKAGES -->
             <div class="bg-white rounded-2xl shadow-lg p-8">

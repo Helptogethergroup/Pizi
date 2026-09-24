@@ -20,7 +20,7 @@
 <div class="max-w-7xl mx-auto px-4 lg:px-8 py-16">
     <a href="{{ route('blog.index') }}" class="text-sm text-coral-600 font-semibold hover:text-coral-700 transition">← Back to Blog</a>
 
-    <div class="grid lg:grid-cols-3 gap-10 mt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-6">
         <article class="lg:col-span-2 max-w-none">
             <span class="text-xs font-semibold text-coral-600 uppercase tracking-wider">{{ $blog->published_at?->format('M d, Y') }} · {{ $blog->reading_time }} min read · {{ number_format($blog->view_count) }} views</span>
             <h1 class="font-display font-black text-4xl md:text-5xl leading-[1.1] mt-3">{{ $blog->title }}</h1>
