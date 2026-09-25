@@ -24,15 +24,10 @@
                     <span class="font-bold">{{ $p->rent_range }}</span>
                     <span class="text-ink-900/50">{{ $p->view_count }} views · {{ $p->lead_count }} leads</span>
                 </div>
-                <div class="grid grid-cols-3 gap-2 mt-4">
-                    <a href="{{ route('owner.properties.edit', $p) }}" class="text-center text-xs py-2 rounded-lg bg-ink-900 text-cream font-semibold">Edit</a>
-                    <form method="POST" action="{{ route('owner.properties.toggle', $p) }}" class="contents">@csrf @method('PATCH')
-                        <button class="text-xs py-2 rounded-lg border border-ink-900/15 font-semibold">{{ $p->is_active ? 'Pause' : 'Resume' }}</button>
-                    </form>
-                    <form method="POST" action="{{ route('owner.properties.destroy', $p) }}" class="contents" onsubmit="return confirm('Delete this property?')">@csrf @method('DELETE')
-                        <button class="text-xs py-2 rounded-lg border border-rose-300 text-rose-600 font-semibold">Delete</button>
-                    </form>
+                <div class="mt-4">
+                    <a href="{{ route('owner.properties.edit', $p) }}" class="block text-center text-xs py-2 rounded-lg bg-ink-900 text-cream font-semibold">Edit</a>
                 </div>
+                <p class="text-[11px] text-ink-900/40 mt-2 text-center">To pause or remove a listing, contact support.</p>
             </div>
         </div>
     @empty
