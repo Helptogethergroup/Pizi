@@ -255,9 +255,16 @@ class OwnerController extends Controller
 
         'city_id' => 'required|integer|exists:cities,id',
 
-        'locality_id' => 'required|integer|exists:localities,id',
+        // Either pick an existing locality, or type a new one — locality_name
+        // creates it (scoped to city_id) if it doesn't exist yet.
+        'locality_id' => 'required_without:locality_name|nullable|integer|exists:localities,id',
+        'locality_name' => 'required_without:locality_id|nullable|string|max:120',
 
+        // Same pattern for university: pick an existing one, or type a new
+        // name (+ optional abbreviation) to create it.
         'nearby_university_id' => 'nullable|integer',
+        'university_name' => 'nullable|string|max:150',
+        'university_abbreviation' => 'nullable|string|max:20',
 
         'address_line' => 'required|string',
 
@@ -285,7 +292,12 @@ class OwnerController extends Controller
 
         'guest_entry_allowed' => 'nullable|boolean',
 
+        // Either send sharing_options directly as {"single": 8000, "double": 6000, "triple": 5000},
+        // or the three flat fields below — both are accepted (flat fields win if both are sent).
         'sharing_options' => 'nullable|array',
+        'sharing_single' => 'nullable|numeric|min:0',
+        'sharing_double' => 'nullable|numeric|min:0',
+        'sharing_triple' => 'nullable|numeric|min:0',
 
         'pincode' => 'nullable|string',
 
@@ -299,7 +311,20 @@ class OwnerController extends Controller
 
         'available_rooms' => 'nullable|integer',
 
+        // Either send a ready-made path/URL as a string, OR upload the
+        // actual file — both are accepted (see propertyStore body below).
         'cover_image' => 'nullable|string',
+        'cover_image_file' => 'nullable|image|max:5120',
+
+        'nearby_police_station' => 'nullable|string|max:255',
+
+        'amenities' => 'nullable|array',
+        'amenities.*' => 'integer|exists:amenities,id',
+
+        // Optional: upload gallery photos in the same request that creates
+        // the property, instead of a separate call per photo afterwards.
+        'images' => 'nullable|array',
+        'images.*' => 'image|max:5120',
 
     ]);
 
@@ -317,7 +342,9 @@ class OwnerController extends Controller
 
     $slug = Str::slug($request->name) . '-' . uniqid();
 
-
+    $localityId = $this->resolveLocality($request);
+    $universityId = $this->resolveUniversity($request);
+    $sharingOptions = $this->buildSharingOptions($request);
 
     $id = DB::table('properties')->insertGetId([
 
@@ -327,9 +354,9 @@ class OwnerController extends Controller
 
         'city_id' => $request->city_id,
 
-        'locality_id' => $request->locality_id,
+        'locality_id' => $localityId,
 
-        'nearby_university_id' => $request->nearby_university_id,
+        'nearby_university_id' => $universityId,
 
 
 
@@ -371,13 +398,15 @@ class OwnerController extends Controller
 
         'guest_entry_allowed' => $request->guest_entry_allowed ?? false,
 
-        'sharing_options' => json_encode($request->sharing_options),
+        'sharing_options' => json_encode($sharingOptions),
 
 
 
         'address_line' => $request->address_line,
 
         'landmark' => $request->landmark,
+
+        'nearby_police_station' => $request->nearby_police_station,
 
         'pincode' => $request->pincode,
 
@@ -413,7 +442,9 @@ class OwnerController extends Controller
 
 
 
-        'cover_image' => $request->cover_image,
+        'cover_image' => $request->hasFile('cover_image_file')
+            ? $request->file('cover_image_file')->store('properties/covers', 'public')
+            : $request->cover_image,
 
 
 
@@ -435,6 +466,8 @@ class OwnerController extends Controller
     ]);
 
     $this->syncLandmarks($request, $id);
+    $this->syncAmenities($request, $id);
+    $this->storeGalleryImages($request, $id);
 
     return $this->ok([
 
@@ -445,6 +478,100 @@ class OwnerController extends Controller
     ]);
 
 }
+
+    // Amenities — expects amenities: [1, 4, 9] (amenity IDs).
+    // Existing locality by ID, or create one (scoped to the given city) from
+    // locality_name when the app is listing a locality that isn't seeded yet.
+    // $cityId falls back to the property's existing city on a partial update
+    // where city_id wasn't sent again.
+    private function resolveLocality(Request $request, ?int $cityId = null): ?int
+    {
+        if ($request->filled('locality_id')) return (int) $request->locality_id;
+        if (!$request->filled('locality_name')) return null;
+        $cityId = $cityId ?? $request->city_id;
+        if (!$cityId) return null;
+
+        $locality = \App\Models\Locality::firstOrCreate(
+            ['city_id' => $cityId, 'name' => trim($request->locality_name)],
+            ['slug' => Str::slug($request->locality_name) . '-' . Str::random(4), 'is_active' => true]
+        );
+        return $locality->id;
+    }
+
+    // Same idea for the nearby university: existing ID, or create one from
+    // university_name (+ optional university_abbreviation) if it's new.
+    private function resolveUniversity(Request $request, ?int $cityId = null): ?int
+    {
+        if ($request->filled('nearby_university_id')) return (int) $request->nearby_university_id;
+        if (!$request->filled('university_name')) return null;
+
+        $uniName = trim($request->university_name);
+        $existing = DB::table('universities')->where('name', $uniName)->first();
+        if ($existing) return $existing->id;
+
+        $city = \App\Models\City::find($cityId ?? $request->city_id);
+        return DB::table('universities')->insertGetId([
+            'name' => $uniName,
+            'abbreviation' => $request->university_abbreviation ?: strtoupper(substr($uniName, 0, 3)),
+            'city' => $city->name ?? 'Unknown',
+            'type' => 'university',
+            // universities.latitude/longitude are NOT NULL — some cities don't
+            // have coordinates set yet, so fall back to 0 rather than a failed insert.
+            'latitude' => $city->latitude ?? 0,
+            'longitude' => $city->longitude ?? 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    // sharing_single/double/triple (flat, matches the website form) take
+    // priority over a raw sharing_options array when both are sent.
+    private function buildSharingOptions(Request $request): array
+    {
+        $flat = [];
+        foreach (['single', 'double', 'triple'] as $type) {
+            if ($request->filled("sharing_$type")) {
+                $flat[$type] = (float) $request->input("sharing_$type");
+            }
+        }
+        if ($flat) return $flat;
+
+        return is_array($request->sharing_options) ? $request->sharing_options : [];
+    }
+
+    private function syncAmenities(Request $request, int $propertyId): void
+    {
+        if (!$request->has('amenities')) return;
+
+        DB::table('property_amenities')->where('property_id', $propertyId)->delete();
+        $rows = collect($request->amenities ?? [])->map(fn ($aid) => [
+            'property_id' => $propertyId, 'amenity_id' => $aid,
+        ])->toArray();
+        if ($rows) DB::table('property_amenities')->insert($rows);
+    }
+
+    // Gallery photos — expects images[] as actual uploaded files (multipart),
+    // e.g. images[]=file1.jpg&images[]=file2.jpg. Safe to call with zero files.
+    private function storeGalleryImages(Request $request, int $propertyId): array
+    {
+        if (!$request->hasFile('images')) return [];
+
+        $order = (int) DB::table('property_images')->where('property_id', $propertyId)->max('display_order');
+        $saved = [];
+        foreach ($request->file('images') as $file) {
+            $path = $file->store('properties/gallery', 'public');
+            $order++;
+            $imgId = DB::table('property_images')->insertGetId([
+                'property_id'   => $propertyId,
+                'image_path'    => $path,
+                'display_order' => $order,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
+            $saved[] = ['id' => $imgId, 'url' => $this->resolveUrl($path)];
+        }
+        return $saved;
+    }
 
     // Nearby locations (metro/hospital/market/etc) — expects
     // landmarks: [{"landmark_id": 6, "distance_km": 1.2}, ...]
@@ -476,7 +603,10 @@ class OwnerController extends Controller
             'rules'                 => 'nullable|string',
             'city_id'               => 'nullable|integer|exists:cities,id',
             'locality_id'           => 'nullable|integer|exists:localities,id',
+            'locality_name'         => 'nullable|string|max:120',
             'nearby_university_id'  => 'nullable|integer',
+            'university_name'       => 'nullable|string|max:150',
+            'university_abbreviation' => 'nullable|string|max:20',
             'gender'                => 'sometimes|required|in:male,female,unisex',
             'property_type'         => 'sometimes|required|in:pg,hostel,coliving,flatmate',
             'rent_min'              => 'sometimes|required|numeric|min:0',
@@ -489,6 +619,9 @@ class OwnerController extends Controller
             'pet_allowed'           => 'nullable|boolean',
             'guest_entry_allowed'   => 'nullable|boolean',
             'sharing_options'       => 'nullable|array',
+            'sharing_single'        => 'nullable|numeric|min:0',
+            'sharing_double'        => 'nullable|numeric|min:0',
+            'sharing_triple'        => 'nullable|numeric|min:0',
             'address_line'          => 'nullable|string',
             'landmark'              => 'nullable|string',
             'nearby_police_station' => 'nullable|string',
@@ -501,41 +634,49 @@ class OwnerController extends Controller
             'meta_title'            => 'nullable|string',
             'meta_description'      => 'nullable|string',
             'cover_image'           => 'nullable|string',
+            'cover_image_file'      => 'nullable|image|max:5120',
             'is_active'             => 'nullable|boolean',
             'amenities'             => 'nullable|array',
+            'amenities.*'           => 'integer|exists:amenities,id',
+            'images'                => 'nullable|array',
+            'images.*'              => 'image|max:5120',
         ]);
         if ($validator->fails()) {
             return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $data = $request->only([
-            'name', 'description', 'rules', 'city_id', 'locality_id', 'nearby_university_id',
+            'name', 'description', 'rules', 'city_id',
             'gender', 'property_type', 'rent_min', 'rent_max', 'security_deposit', 'food_included',
             'food_type', 'construction_year', 'pet_allowed', 'guest_entry_allowed',
             'address_line', 'landmark', 'nearby_police_station', 'pincode', 'latitude', 'longitude',
             'google_map_link', 'total_rooms', 'available_rooms', 'meta_title', 'meta_description',
             'cover_image', 'is_active',
         ]);
-        if ($request->has('sharing_options')) {
-            $data['sharing_options'] = json_encode($request->sharing_options);
+        $effectiveCityId = $request->filled('city_id') ? (int) $request->city_id : $property->city_id;
+        if ($request->filled('locality_id') || $request->filled('locality_name')) {
+            $data['locality_id'] = $this->resolveLocality($request, $effectiveCityId);
+        }
+        if ($request->filled('nearby_university_id') || $request->filled('university_name')) {
+            $data['nearby_university_id'] = $this->resolveUniversity($request, $effectiveCityId);
+        }
+        if ($request->has('sharing_options') || $request->filled('sharing_single') || $request->filled('sharing_double') || $request->filled('sharing_triple')) {
+            $data['sharing_options'] = json_encode($this->buildSharingOptions($request));
         }
         if ($request->has('food_timing')) {
             $data['food_timing'] = json_encode($request->food_timing);
         }
+        if ($request->hasFile('cover_image_file')) {
+            $data['cover_image'] = $request->file('cover_image_file')->store('properties/covers', 'public');
+        }
         $data['updated_at'] = now();
         DB::table('properties')->where('id', $id)->update($data);
 
-        if ($request->has('amenities')) {
-            DB::table('property_amenities')->where('property_id', $id)->delete();
-            $rows = collect($request->amenities ?? [])->map(fn ($aid) => [
-                'property_id' => $id, 'amenity_id' => $aid,
-            ])->toArray();
-            if ($rows) DB::table('property_amenities')->insert($rows);
-        }
-
+        $this->syncAmenities($request, $id);
         $this->syncLandmarks($request, $id);
+        $newImages = $this->storeGalleryImages($request, $id);
 
-        return $this->ok(['message' => 'Updated']);
+        return $this->ok(['message' => 'Updated', 'new_images' => $newImages]);
     }
 
     public function propertyDelete(Request $request, $id)
@@ -552,23 +693,40 @@ class OwnerController extends Controller
         return $this->ok(['message' => 'Toggled']);
     }
 
+    // Accepts either a single file under "image" (original behaviour) OR
+    // several files under "images[]" in one request — use whichever suits
+    // the app. Pass "is_cover": true alongside a single "image" upload to
+    // also set it as the property's cover photo in the same call.
     public function uploadPropertyImage(Request $request, $id)
     {
         $property = DB::table('properties')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
         if (!$property) return $this->notFound();
+
+        if ($request->hasFile('images')) {
+            $saved = $this->storeGalleryImages($request, $id);
+            if (!$saved) {
+                return response()->json(['success' => false, 'message' => 'No images provided'], 422);
+            }
+            return $this->ok(['images' => $saved]);
+        }
 
         if (!$request->hasFile('image')) {
             return response()->json(['success' => false, 'message' => 'No image provided'], 422);
         }
 
         $path = $request->file('image')->store('properties/gallery', 'public');
+        $order = (int) DB::table('property_images')->where('property_id', $id)->max('display_order') + 1;
         $imgId = DB::table('property_images')->insertGetId([
             'property_id'   => $id,
             'image_path'    => $path,
-            'display_order' => 0,
+            'display_order' => $order,
             'created_at'    => now(),
             'updated_at'    => now(),
         ]);
+
+        if ($request->boolean('is_cover')) {
+            DB::table('properties')->where('id', $id)->update(['cover_image' => $path, 'updated_at' => now()]);
+        }
 
         return $this->ok(['id' => $imgId, 'url' => $this->resolveUrl($path)]);
     }

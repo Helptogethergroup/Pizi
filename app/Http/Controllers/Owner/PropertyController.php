@@ -66,8 +66,8 @@ public function store(Request $request)
                     'abbreviation' => $request->university_abbreviation ?? strtoupper(substr($uniName, 0, 3)),
                     'city' => $selectedCity->name ?? 'Unknown',
                     'type' => 'university',
-                    'latitude' => $selectedCity->latitude ?? null,
-                    'longitude' => $selectedCity->longitude ?? null,
+                    'latitude' => $selectedCity->latitude ?? 0,
+                    'longitude' => $selectedCity->longitude ?? 0,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
@@ -244,8 +244,8 @@ public function update(Request $request, Property $property)
                     'abbreviation' => $request->university_abbreviation ?? strtoupper(substr($uniName, 0, 3)),
                     'city' => $selectedCity->name ?? 'Unknown',
                     'type' => 'university',
-                    'latitude' => $selectedCity->latitude ?? null,
-                    'longitude' => $selectedCity->longitude ?? null,
+                    'latitude' => $selectedCity->latitude ?? 0,
+                    'longitude' => $selectedCity->longitude ?? 0,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
