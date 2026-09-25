@@ -30,7 +30,7 @@
 
     @foreach($landmarks as $type => $items)
         <div class="mb-12">
-            <h2 class="font-display font-bold text-2xl mb-6">{{ $typeNames[$type] ?? ucfirst($type) }}</h2>
+            <h2 class="font-display font-bold text-2xl mb-6">{!! $typeNames[$type] ?? ucfirst($type) !!}</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach($items as $landmark)
                     <a href="{{ route('landmark.show', $landmark->slug) }}" class="block p-5 bg-white rounded-2xl border border-ink-900/10 hover:border-coral-500 hover:shadow-lg transition">

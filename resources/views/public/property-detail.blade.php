@@ -301,7 +301,7 @@
                                 @foreach($mealLabels as $meal => $label)
                                     @if(!empty($foodTiming[$meal]) && ($foodTiming[$meal]['days'] ?? 'none') !== 'none')
                                         <div class="p-4 rounded-xl bg-cream border border-ink-900/10">
-                                            <div class="text-sm font-bold text-ink-950">{{ $label }}</div>
+                                            <div class="text-sm font-bold text-ink-950">{!! $label !!}</div>
                                             @if(!empty($foodTiming[$meal]['timing']))
                                                 <div class="text-sm text-ink-700 mt-1">{{ $foodTiming[$meal]['timing'] }}</div>
                                             @endif
