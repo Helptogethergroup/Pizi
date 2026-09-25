@@ -112,7 +112,7 @@ public function index()
         ->get();
 
     $stats = [
-       'properties' => \App\Models\Property::where('is_active', true)->where('is_verified', true)->count(),
+       'properties' => \App\Models\Property::where('is_active', true)->count(),
         'cities' => $citiesWithListings,
         'tenants' => number_format(\App\Models\Lead::count()),
         'owners' => \App\Models\Property::where('is_active', true)->where('is_verified', true)->distinct('owner_id')->count('owner_id'),

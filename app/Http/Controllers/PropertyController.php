@@ -17,7 +17,6 @@ class PropertyController extends Controller
    public function search(Request $request)
     {
         $q = Property::active()
-            ->where('is_verified', true)
             ->with(['city', 'locality', 'amenities', 'images']);
 
         // Free-text search across name, locality, city, address
@@ -124,7 +123,6 @@ class PropertyController extends Controller
         }
 
         $properties = Property::active()
-            ->where('is_verified', true)
             ->where('name', 'like', '%' . $term . '%')
             ->with('locality', 'city')
             ->orderByDesc('is_featured')
@@ -155,7 +153,7 @@ class PropertyController extends Controller
         $properties = $this->filteredQuery($request)->paginate(12)->withQueryString();
      $localities = Locality::where('city_id', $city->id)
     ->where('is_active', true)
-    ->withCount(['properties' => fn ($q) => $q->where('properties.is_active', true)->where('properties.is_verified', true)])
+    ->withCount(['properties' => fn ($q) => $q->where('properties.is_active', true)])
     ->orderBy('name')->get();
         return view('public.city', compact('city', 'properties', 'localities'));
     }
@@ -215,7 +213,7 @@ class PropertyController extends Controller
 
     private function filteredQuery(Request $request)
 {
-    $q = Property::active()->where('is_verified', true)->with(['city', 'locality']);
+    $q = Property::active()->with(['city', 'locality']);
 
         if ($request->filled('q')) {
             $term = '%' . $request->q . '%';
