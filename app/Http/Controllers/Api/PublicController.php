@@ -281,7 +281,8 @@ class PublicController extends Controller
     public function landmarksIndex()
     {
         if (!Schema::hasTable('landmarks')) return $this->ok([]);
-        return $this->ok(DB::table('landmarks')->get());
+        // Same set the owner web form shows — active only, alphabetical.
+        return $this->ok(DB::table('landmarks')->where('is_active', true)->orderBy('name')->get());
     }
 
     public function blogIndex()

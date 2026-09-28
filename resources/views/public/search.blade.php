@@ -6,7 +6,7 @@
 {{-- ===== SEARCH HEADER ===== --}}
 <section class="bg-ink-950 py-8 lg:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="font-display font-black text-2xl lg:text-4xl text-cream mb-4">Browse {{ $properties->total() ?? 0 }} verified PGs</h1>
+        <h1 class="font-display font-black text-2xl lg:text-4xl text-cream mb-4">Browse {{ $properties->total() ?? 0 }} PGs</h1>
 
         {{-- Search bar --}}
         <form method="GET" class="bg-white rounded-2xl p-2 lg:p-3 flex flex-col lg:flex-row gap-2 max-w-4xl relative">
@@ -90,6 +90,17 @@
                                 <option value="hostel" @selected(request('type') === 'hostel')>Hostel</option>
                                 <option value="coliving" @selected(request('type') === 'coliving')>Coliving</option>
                                 <option value="flatmate" @selected(request('type') === 'flatmate')>Flatmate</option>
+                            </select>
+                        </div>
+
+                        {{-- Sharing / room type --}}
+                        <div>
+                            <label class="text-xs font-bold uppercase text-ink-700 block mb-2">Room type</label>
+                            <select name="sharing" class="w-full px-3 py-2.5 rounded-xl border border-ink-200 text-sm">
+                                <option value="">Any sharing</option>
+                                <option value="single" @selected(request('sharing') === 'single')>Single occupancy</option>
+                                <option value="double" @selected(request('sharing') === 'double')>Double sharing</option>
+                                <option value="triple" @selected(request('sharing') === 'triple')>Triple sharing</option>
                             </select>
                         </div>
 

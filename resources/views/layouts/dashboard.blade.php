@@ -70,7 +70,7 @@
             <a href="/" class="flex items-center gap-2 bg-white rounded-xl px-3 py-2">
                 <img src="{{ asset('assets/images/logo.png') }}" alt="Pizi" class="h-9 w-auto">
             </a>
-            <button onclick="closeSidebar()" class="md:hidden p-1 text-cream/70 hover:text-cream">
+            <button onclick="closeSidebar()" aria-label="Close menu" class="md:hidden p-1 text-cream/70 hover:text-cream">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>
@@ -208,7 +208,7 @@
 
         {{-- MOBILE TOP BAR --}}
         <header class="md:hidden bg-white border-b border-ink-900/10 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
-            <button onclick="openSidebar()" class="p-2 hover:bg-ink-900/5 rounded-lg">
+            <button onclick="openSidebar()" aria-label="Open menu" class="p-2 hover:bg-ink-900/5 rounded-lg">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>

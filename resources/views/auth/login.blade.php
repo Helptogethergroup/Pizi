@@ -181,7 +181,7 @@
                         <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-ink-900/35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
                         <input id="loginPasswordInput" name="password" type="password" required placeholder="Password"
                                class="w-full pl-11 pr-11 py-3 rounded-xl border border-ink-900/15 outline-none focus:border-coral-500 transition">
-                        <button type="button" id="togglePasswordBtn" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink-900/40 hover:text-ink-900/70">
+                        <button type="button" id="togglePasswordBtn" aria-label="Show password" class="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink-900/40 hover:text-ink-900/70">
                             <svg id="eyeIcon" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>
                         </button>
                     </div>
@@ -245,10 +245,11 @@
     const eyeIcon = document.getElementById('eyeIcon');
     const eyeOpenPath = '<path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/>';
     const eyeOffPath = '<path d="M3 3l18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c7 0 11 7 11 7a17.6 17.6 0 0 1-3.1 3.8M6.5 6.6C3.7 8.4 2 12 2 12s4 7 11 7c1.4 0 2.7-.3 3.9-.7"/><path d="M14.1 14.1A3 3 0 0 1 9.9 9.9"/>';
-    document.getElementById('togglePasswordBtn')?.addEventListener('click', () => {
+    document.getElementById('togglePasswordBtn')?.addEventListener('click', function () {
         const isPw = pwInput.type === 'password';
         pwInput.type = isPw ? 'text' : 'password';
         eyeIcon.innerHTML = isPw ? eyeOffPath : eyeOpenPath;
+        this.setAttribute('aria-label', isPw ? 'Hide password' : 'Show password');
     });
 
     // Loading state on submit — disables the button and swaps in a spinner

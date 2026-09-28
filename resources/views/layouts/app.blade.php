@@ -280,7 +280,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </a>
             <button type="button"
                     onclick="document.getElementById('piziMobileMenu').classList.add('hidden'); document.body.style.overflow='';"
-                    class="p-2 text-ink-900 hover:text-coral-600">
+                    class="p-2 text-ink-900 hover:text-coral-600"
+                    aria-label="Close menu">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                 </svg>

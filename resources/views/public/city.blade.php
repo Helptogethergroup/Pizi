@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', ($city->meta_title ?: 'PG in ' . $city->name . ' | Verified Hostels & Coliving — PGFind'))
-@section('meta_description', $city->meta_description ?: 'Browse ' . $properties->total() . '+ verified PGs in ' . $city->name . '. Filter by budget, locality, gender. Free site visits, zero brokerage.')
+@section('meta_description', $city->meta_description ?: 'Browse ' . $properties->total() . '+ PGs in ' . $city->name . '. Filter by budget, locality, gender. Free site visits, zero brokerage.')
 
 @section('content')
 <section class="bg-cream grain border-b border-ink-900/10">

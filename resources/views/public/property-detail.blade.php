@@ -566,10 +566,10 @@
 
 {{-- ===== GALLERY LIGHTBOX ===== --}}
 <div id="galleryLightbox" class="hidden fixed inset-0 z-50 bg-black/95 items-center justify-center">
-    <button onclick="closeGallery()" class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl">×</button>
-    <button onclick="prevImg()" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl">‹</button>
-    <button onclick="nextImg()" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl">›</button>
-    <img loading="lazy" id="galleryImg" src="" class="max-w-full max-h-full p-12">
+    <button onclick="closeGallery()" aria-label="Close photo gallery" class="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl">×</button>
+    <button onclick="prevImg()" aria-label="Previous photo" class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl">‹</button>
+    <button onclick="nextImg()" aria-label="Next photo" class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-2xl">›</button>
+    <img loading="lazy" id="galleryImg" src="" alt="{{ $property->name }} photo" class="max-w-full max-h-full p-12">
     <div id="galleryCounter" class="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm bg-black/50 px-3 py-1 rounded-full"></div>
 </div>
 

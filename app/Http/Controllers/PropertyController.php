@@ -75,6 +75,13 @@ class PropertyController extends Controller
             }, '=', count($amenityIds));
         }
 
+        // Room type / sharing — sharing_options is a JSON object like
+        // {"single": 9000, "double": 7000}, so "has this sharing type" just
+        // means that key is present with a real value.
+        if ($request->filled('sharing') && in_array($request->sharing, ['single', 'double', 'triple'])) {
+            $q->whereNotNull('sharing_options->' . $request->sharing);
+        }
+
         // Sort
         if ($request->filled('nearby_university_id')) {
             $q->where('nearby_university_id', (int) $request->nearby_university_id);
@@ -251,6 +258,10 @@ class PropertyController extends Controller
             foreach ($ids as $aid) {
                 $q->whereHas('amenities', fn ($a) => $a->where('amenities.id', $aid));
             }
+        }
+
+        if ($request->filled('sharing') && in_array($request->sharing, ['single', 'double', 'triple'])) {
+            $q->whereNotNull('sharing_options->' . $request->sharing);
         }
 
         $sort = $request->get('sort', 'recommended');

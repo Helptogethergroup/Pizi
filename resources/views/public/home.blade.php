@@ -476,7 +476,7 @@
                   @php
     $cityCounts = \Illuminate\Support\Facades\Cache::remember('home_city_pg_counts', 120, fn () => \DB::table('properties')
         ->join('cities', 'cities.id', '=', 'properties.city_id')
-        ->where('properties.is_active', 1)->where('properties.is_verified', 1)->whereNull('properties.deleted_at')
+        ->where('properties.is_active', 1)->whereNull('properties.deleted_at')
         ->selectRaw('cities.slug as slug, count(*) as c')->groupBy('cities.slug')->pluck('c', 'slug')->toArray());
 @endphp
                   @foreach([
@@ -1091,7 +1091,7 @@
             @foreach($recentBlogs as $blog)
                 <a href="{{ route('blog.show', $blog->slug) }}" class="group block rounded-2xl border border-ink-900/10 overflow-hidden hover:border-coral-500 transition">
                     @if($blog->cover_image)
-                        <img loading="lazy" src="{{ str_starts_with($blog->cover_image, 'http') ? $blog->cover_image : asset('storage/' . $blog->cover_image) }}" class="aspect-[16/10] w-full object-cover" alt="">
+                        <img loading="lazy" src="{{ str_starts_with($blog->cover_image, 'http') ? $blog->cover_image : asset('storage/' . $blog->cover_image) }}" class="aspect-[16/10] w-full object-cover" alt="{{ $blog->title }}">
                     @else
                         <div class="aspect-[16/10] bg-gradient-to-br from-coral-100 to-coral-50 flex items-center justify-center text-4xl"><svg class="inline-block w-[1em] h-[1em] align-[-0.15em]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M13.5 6.5l3 3"/></svg></div>
                     @endif
