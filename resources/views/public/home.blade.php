@@ -211,7 +211,7 @@
                     Verified by Pizi field team
                 </span>
                 <h1 class="pz-anim pz-d2 font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] font-black text-ink-950">
-                    Find your PG that <span id="pzTyped" class="italic text-coral-600" data-phrases='["feels like home.","fits your budget.","is truly verified.","is close to campus."]'>feels like home.</span><span class="pz-caret" aria-hidden="true"></span>
+                    Find your PG  <span id="pzTyped" class="italic text-coral-600" data-phrases='["feels like home.","fits your budget.","is truly verified.","is close to campus."]'>feels like home.</span><span class="pz-caret" aria-hidden="true"></span>
                 </h1>
                 <p class="pz-anim pz-d3 text-lg text-ink-900/70 mt-6 max-w-xl leading-relaxed">
                     Verified listings, real photos, honest rents. Across Delhi, Noida, Gurgaon &amp; Ghaziabad — book a free site visit in 60 seconds.
