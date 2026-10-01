@@ -36,6 +36,12 @@ class LeadController extends Controller
                    ->orWhere('email', 'like', $term);
             });
         }
+        // Leads sitting with nobody assigned — e.g. after a telecaller was
+        // deleted and their leads fell back to unassigned (nullOnDelete).
+        if ($request->boolean('unassigned_only')) {
+            $q->whereNull('assigned_telecaller_id');
+        }
+
         // Duplicate-phone filter — only leads whose phone appears 2+ times.
         if ($request->boolean('duplicates_only')) {
             $dupPhones = Lead::select('phone')->whereNotNull('phone')

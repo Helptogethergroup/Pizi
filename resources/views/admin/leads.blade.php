@@ -42,6 +42,10 @@
             <input type="checkbox" name="duplicates_only" value="1" @checked(request()->boolean('duplicates_only'))>
             <i class="fa-solid fa-repeat fa-fw"></i> Duplicates only
         </label>
+        <label class="flex items-center gap-1.5 text-sm px-2">
+            <input type="checkbox" name="unassigned_only" value="1" @checked(request()->boolean('unassigned_only'))>
+            <i class="fa-solid fa-user-slash fa-fw"></i> Unassigned only
+        </label>
         <button class="px-4 py-2 bg-ink-900 text-cream rounded-lg">Filter</button>
     </form>
 </div>
