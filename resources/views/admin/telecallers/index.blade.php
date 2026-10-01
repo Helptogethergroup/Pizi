@@ -53,14 +53,46 @@
                     <p class="text-xs text-ink-900/50">{{ $tc->phone }} · {{ $tc->email }}</p>
                 </div>
 
-                <form method="POST" action="{{ route('admin.telecallers.target', $tc) }}" class="flex items-center gap-2 flex-wrap">
-                    @csrf @method('PATCH')
-                    <label class="text-xs font-bold uppercase text-ink-900/50">Daily target</label>
-                    <input type="number" name="daily_call_target" value="{{ $tc->daily_call_target }}"
-                           placeholder="{{ config('telecaller.default_daily_call_target', 20) }}"
-                           class="w-20 px-2 py-1.5 rounded-lg border border-ink-100 text-sm">
-                    <button class="px-3 py-1.5 bg-ink-950 text-cream rounded-lg text-xs font-bold">Save</button>
-                </form>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <form method="POST" action="{{ route('admin.telecallers.target', $tc) }}" class="flex items-center gap-2 flex-wrap">
+                        @csrf @method('PATCH')
+                        <label class="text-xs font-bold uppercase text-ink-900/50">Daily target</label>
+                        <input type="number" name="daily_call_target" value="{{ $tc->daily_call_target }}"
+                               placeholder="{{ config('telecaller.default_daily_call_target', 20) }}"
+                               class="w-20 px-2 py-1.5 rounded-lg border border-ink-100 text-sm">
+                        <button class="px-3 py-1.5 bg-ink-950 text-cream rounded-lg text-xs font-bold">Save</button>
+                    </form>
+                    <button type="button" onclick="document.getElementById('editTcModal{{ $tc->id }}').classList.remove('hidden')"
+                        class="px-3 py-1.5 rounded-lg text-xs font-bold border border-ink-900/15">Edit</button>
+                    <button type="button" onclick="openTcDeleteModal({{ $tc->id }}, '{{ addslashes($tc->name) }}')"
+                        class="px-3 py-1.5 rounded-lg bg-rose-600 text-white text-xs font-bold">Delete</button>
+                </div>
+            </div>
+
+            {{-- Edit telecaller modal --}}
+            <div id="editTcModal{{ $tc->id }}" class="hidden fixed inset-0 bg-ink-950/60 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-start mb-6">
+                        <h2 class="font-display font-bold text-2xl">Edit {{ $tc->name }}</h2>
+                        <button type="button" onclick="document.getElementById('editTcModal{{ $tc->id }}').classList.add('hidden')" class="text-2xl">×</button>
+                    </div>
+                    <form method="POST" action="{{ route('admin.users.update', $tc) }}" class="space-y-3">
+                        @csrf @method('PATCH')
+                        <input type="hidden" name="role" value="telecaller">
+                        <input name="name" required value="{{ $tc->name }}" placeholder="Full name" class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+                        <input name="email" type="email" required value="{{ $tc->email }}" placeholder="Email" class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+                        <input name="phone" required value="{{ $tc->phone }}" placeholder="Phone" class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-ink-900/50 mb-1">Leads this telecaller handles</label>
+                            <select name="lead_specialization" required class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+                                <option value="both" @selected($tc->lead_specialization === 'both')>Both tenant & owner leads</option>
+                                <option value="tenant" @selected($tc->lead_specialization === 'tenant')>Tenant leads only</option>
+                                <option value="owner" @selected($tc->lead_specialization === 'owner')>Owner leads only</option>
+                            </select>
+                        </div>
+                        <button class="w-full py-3 bg-coral-500 text-white rounded-xl font-bold">Save changes</button>
+                    </form>
+                </div>
             </div>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
@@ -229,6 +261,32 @@
         </table>
     </div>
 </div>
+
+{{-- Delete telecaller modal --}}
+<div id="deleteTcModal" class="hidden fixed inset-0 bg-ink-950/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full">
+        <div class="flex justify-between items-start mb-4">
+            <h2 class="font-display font-bold text-2xl text-rose-600">Delete Telecaller</h2>
+            <button type="button" onclick="document.getElementById('deleteTcModal').classList.add('hidden')" class="text-2xl">×</button>
+        </div>
+        <p class="text-sm text-ink-900/70 mb-4">
+            You're about to permanently delete <strong id="deleteTcName"></strong>. Their assigned leads will need to be reassigned to someone else — this cannot be undone.
+        </p>
+        <form id="deleteTcForm" method="POST" class="space-y-3">
+            @csrf
+            @method('DELETE')
+            <button class="w-full py-3 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold">Yes, Delete Permanently</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openTcDeleteModal(userId, userName) {
+        document.getElementById('deleteTcName').textContent = userName;
+        document.getElementById('deleteTcForm').action = '/admin/users/' + userId;
+        document.getElementById('deleteTcModal').classList.remove('hidden');
+    }
+</script>
 
 {{-- Create telecaller modal --}}
 <div id="newTelecallerModal" class="hidden fixed inset-0 bg-ink-950/60 z-50 flex items-center justify-center p-4">
