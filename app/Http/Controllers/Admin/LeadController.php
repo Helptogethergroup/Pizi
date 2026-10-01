@@ -140,6 +140,11 @@ class LeadController extends Controller
             return back()->with('error', '⚠️ Lead already assigned to ' . ($existingTc->name ?? 'a telecaller') . '.');
         }
 
+        $telecaller = User::findOrFail($request->telecaller_id);
+        if (!$telecaller->handlesLeadType($lead->inquiry_type)) {
+            return back()->with('error', "⚠️ {$telecaller->name} only handles " . ucfirst($telecaller->lead_specialization) . " leads — this is a " . ucfirst($lead->inquiry_type) . " lead.");
+        }
+
         $lead->update(['assigned_telecaller_id' => $request->telecaller_id]);
         return back()->with('success', 'Lead assigned.');
     }
@@ -184,16 +189,24 @@ class LeadController extends Controller
         $ids = $this->selectedLeadIds($request);
         $request->validate(['telecaller_id' => 'required|exists:users,id']);
 
-        // Same claim/already-assigned guardrails as the single assign() —
-        // just skips those rows instead of failing the whole batch.
-        $updated = Lead::whereIn('id', $ids)
-            ->whereNull('assigned_telecaller_id')
-            ->where(function ($q) {
-                $q->where('is_locked', false)->orWhereNull('locked_by_user_id');
-            })
-            ->update(['assigned_telecaller_id' => $request->telecaller_id]);
+        $telecaller = User::findOrFail($request->telecaller_id);
 
-        return back()->with('success', "✅ Assigned {$updated} lead(s) (claimed/already-assigned ones were skipped).");
+        // Same claim/already-assigned guardrails as the single assign() —
+        // plus lead-type specialization — skips mismatched rows instead of
+        // failing the whole batch.
+        $q = Lead::whereIn('id', $ids)
+            ->whereNull('assigned_telecaller_id')
+            ->where(function ($qb) {
+                $qb->where('is_locked', false)->orWhereNull('locked_by_user_id');
+            });
+
+        if ($telecaller->lead_specialization !== 'both') {
+            $q->where('inquiry_type', $telecaller->lead_specialization);
+        }
+
+        $updated = $q->update(['assigned_telecaller_id' => $request->telecaller_id]);
+
+        return back()->with('success', "✅ Assigned {$updated} lead(s) (claimed/already-assigned/mismatched-type ones were skipped).");
     }
 
     public function bulkVerify(Request $request)

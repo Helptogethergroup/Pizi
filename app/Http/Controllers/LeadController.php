@@ -81,12 +81,20 @@ class LeadController extends Controller
             }
         }
 
-        // Round-robin assign to active tele-callers
+        // Round-robin assign to active tele-callers who handle this lead's
+        // type (tenant/owner) — falls back to any active telecaller if none
+        // are specifically specialized, so a lead never goes unassigned.
         $telecaller = User::where('role', 'telecaller')
             ->where('is_active', true)
+            ->whereIn('lead_specialization', ['both', $data['inquiry_type']])
             ->withCount('assignedLeads')
             ->orderBy('assigned_leads_count')
-            ->first();
+            ->first()
+            ?? User::where('role', 'telecaller')
+                ->where('is_active', true)
+                ->withCount('assignedLeads')
+                ->orderBy('assigned_leads_count')
+                ->first();
 
         if ($telecaller) {
             $data['assigned_telecaller_id'] = $telecaller->id;

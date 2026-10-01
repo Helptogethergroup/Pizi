@@ -175,7 +175,9 @@
                             <select name="telecaller_id" class="text-xs px-2 py-1 rounded border border-ink-900/15">
                                 <option value="">Assign…</option>
                                 @foreach($telecallers as $tc)
-                                    <option value="{{ $tc->id }}" @selected($lead->assigned_telecaller_id === $tc->id)>{{ $tc->name }}</option>
+                                    @if(in_array($tc->lead_specialization, ['both', $lead->inquiry_type]))
+                                        <option value="{{ $tc->id }}" @selected($lead->assigned_telecaller_id === $tc->id)>{{ $tc->name }}</option>
+                                    @endif
                                 @endforeach
                             </select>
                             <button class="text-xs px-2 py-1 rounded bg-ink-900 text-cream">Set</button>

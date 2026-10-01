@@ -7,9 +7,18 @@
         <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-phone fa-fw"></i> Telecaller Monitoring</h1>
         <p class="text-ink-900/60 mt-1">Every telecaller's daily activity — live, straight from their own dashboard use.</p>
     </div>
-    <form method="GET" class="flex items-center gap-2">
-        <input type="date" name="date" value="{{ $date->toDateString() }}" max="{{ now()->toDateString() }}"
-               class="px-4 py-2 rounded-xl border border-ink-100" onchange="this.form.submit()">
+    <form method="GET" class="flex items-center gap-2 flex-wrap">
+        <label class="text-xs font-bold uppercase text-ink-900/50">From</label>
+        <input type="date" name="date_from" value="{{ $from->toDateString() }}" max="{{ now()->toDateString() }}"
+               class="px-3 py-2 rounded-xl border border-ink-100 text-sm">
+        <label class="text-xs font-bold uppercase text-ink-900/50">To</label>
+        <input type="date" name="date_to" value="{{ $to->toDateString() }}" max="{{ now()->toDateString() }}"
+               class="px-3 py-2 rounded-xl border border-ink-100 text-sm">
+        <button class="px-4 py-2 bg-ink-900 text-cream rounded-xl text-sm font-semibold">Apply</button>
+        <a href="{{ route('admin.telecallers.export', ['date_from' => $from->toDateString(), 'date_to' => $to->toDateString()]) }}"
+           class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold">
+            <i class="fa-solid fa-download fa-fw"></i> Download CSV
+        </a>
     </form>
 </div>
 
@@ -19,7 +28,12 @@
         <div class="bg-white p-5 rounded-2xl border border-ink-100">
             <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
                 <div>
-                    <h3 class="font-display font-bold text-lg">{{ $tc->name }}</h3>
+                    <h3 class="font-display font-bold text-lg">{{ $tc->name }}
+                        <span class="ml-2 align-middle px-2 py-0.5 rounded-full text-xs font-semibold capitalize
+                            {{ $tc->lead_specialization === 'tenant' ? 'bg-blue-100 text-blue-700' : ($tc->lead_specialization === 'owner' ? 'bg-amber-100 text-amber-700' : 'bg-ink-900/5 text-ink-900/60') }}">
+                            {{ $tc->lead_specialization === 'both' ? 'tenant + owner' : $tc->lead_specialization }}
+                        </span>
+                    </h3>
                     <p class="text-xs text-ink-900/50">{{ $tc->phone }} · {{ $tc->email }}</p>
                 </div>
 
@@ -33,9 +47,9 @@
                 </form>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-3">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-3">
                 <div class="p-3 rounded-xl bg-ink-900 text-cream">
-                    <div class="text-xs uppercase opacity-70">Total assigned</div>
+                    <div class="text-xs uppercase opacity-70">Total assigned (lifetime)</div>
                     <div class="font-display font-black text-2xl mt-1">{{ $row['assigned_total'] }}</div>
                 </div>
                 <div class="p-3 rounded-xl bg-amber-100 text-amber-900">
@@ -43,23 +57,27 @@
                     <div class="font-display font-black text-2xl mt-1">{{ $row['pending'] }}</div>
                 </div>
                 <div class="p-3 rounded-xl bg-emerald-100 text-emerald-900">
-                    <div class="text-xs uppercase opacity-70">Attended today</div>
+                    <div class="text-xs uppercase opacity-70">Calls made in range</div>
                     <div class="font-display font-black text-2xl mt-1">{{ $row['attended_today'] }}</div>
                 </div>
                 <div class="p-3 rounded-xl bg-rose-100 text-rose-900">
-                    <div class="text-xs uppercase opacity-70">Rejected today</div>
+                    <div class="text-xs uppercase opacity-70">Rejected in range</div>
                     <div class="font-display font-black text-2xl mt-1">{{ $row['rejected_today'] }}</div>
                 </div>
+                <div class="p-3 rounded-xl bg-blue-100 text-blue-900">
+                    <div class="text-xs uppercase opacity-70">Verified in range</div>
+                    <div class="font-display font-black text-2xl mt-1">{{ $row['verified_in_range'] }}</div>
+                </div>
                 <div class="p-3 rounded-xl bg-coral-500 text-white">
-                    <div class="text-xs uppercase opacity-70">Converted today</div>
+                    <div class="text-xs uppercase opacity-70">Converted in range</div>
                     <div class="font-display font-black text-2xl mt-1">{{ $row['converted_today'] }}</div>
                 </div>
             </div>
 
             <div class="mb-4">
                 <div class="flex justify-between text-xs text-ink-900/50 mb-1">
-                    <span>Daily call target progress (tenant leads)</span>
-                    <span>{{ $row['attended_today'] }} / {{ $row['target'] }}</span>
+                    <span>Call target progress for this range (tenant leads)</span>
+                    <span>{{ $row['attended_today'] }} / {{ $row['target_for_range'] }}</span>
                 </div>
                 <div class="h-2 rounded-full bg-ink-100 overflow-hidden">
                     <div class="h-full bg-emerald-500" style="width: {{ $row['progress_pct'] }}%"></div>
@@ -74,23 +92,23 @@
                         <div class="font-display font-black text-xl mt-1">{{ $row['owner_pending'] }}</div>
                     </div>
                     <div class="p-3 rounded-xl bg-blue-50">
-                        <div class="text-xs text-ink-900/50">Called today</div>
+                        <div class="text-xs text-ink-900/50">Called in range</div>
                         <div class="font-display font-black text-xl mt-1">{{ $row['owner_called_today'] }}</div>
                     </div>
                     <div class="p-3 rounded-xl bg-rose-50">
-                        <div class="text-xs text-ink-900/50">Rejected today</div>
+                        <div class="text-xs text-ink-900/50">Rejected in range</div>
                         <div class="font-display font-black text-xl mt-1">{{ $row['owner_rejected_today'] }}</div>
                     </div>
                     <div class="p-3 rounded-xl bg-sky-50">
-                        <div class="text-xs text-ink-900/50">Registered today</div>
+                        <div class="text-xs text-ink-900/50">Registered in range</div>
                         <div class="font-display font-black text-xl mt-1">{{ $row['owner_registered_today'] }}</div>
                     </div>
                     <div class="p-3 rounded-xl bg-emerald-50">
-                        <div class="text-xs text-ink-900/50">Listed today</div>
+                        <div class="text-xs text-ink-900/50">Listed in range</div>
                         <div class="font-display font-black text-xl mt-1">{{ $row['owner_listed_today'] }}</div>
                     </div>
                     <div class="p-3 rounded-xl bg-green-100">
-                        <div class="text-xs text-ink-900/50">Paid plan today</div>
+                        <div class="text-xs text-ink-900/50">Paid plan in range</div>
                         <div class="font-display font-black text-xl mt-1">{{ $row['owner_paid_today'] }}</div>
                     </div>
                 </div>
@@ -105,7 +123,7 @@
 
 @if($rejectionBreakdown->isNotEmpty())
 <div class="mt-10">
-    <h2 class="font-display font-bold text-xl mb-4">✗ Rejection reasons — {{ $date->format('d M Y') }}</h2>
+    <h2 class="font-display font-bold text-xl mb-4">✗ Rejection reasons — {{ $from->format('d M Y') }} to {{ $to->format('d M Y') }}</h2>
     <div class="flex flex-wrap gap-2">
         @php
             $labels = [
@@ -127,8 +145,8 @@
 @endif
 
 <div class="mt-10">
-    <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-pen-to-square fa-fw"></i> Recent status updates (live)</h2>
-    <p class="text-xs text-ink-900/50 mb-3">Every time a telecaller changes a lead's status or call outcome, it shows up here immediately.</p>
+    <h2 class="font-display font-bold text-xl mb-4"><i class="fa-solid fa-pen-to-square fa-fw"></i> Status updates — {{ $from->format('d M') }} to {{ $to->format('d M Y') }}</h2>
+    <p class="text-xs text-ink-900/50 mb-3">Every status/call-outcome change a telecaller made in this date range (most recent 50).</p>
     <div class="bg-white rounded-2xl border border-ink-100 overflow-x-auto">
         <table class="w-full text-sm min-w-[600px]">
             <thead class="bg-cream text-left">

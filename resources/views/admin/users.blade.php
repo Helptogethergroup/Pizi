@@ -64,6 +64,12 @@
                         <td>{{ $u->email }}</td>
                                               <td><span
                                 class="px-2 py-1 rounded-full text-xs bg-ink-900/5 capitalize">{{ str_replace('_', ' ', $u->role) }}</span>
+                            @if($u->role === 'telecaller')
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold capitalize
+                                    {{ $u->lead_specialization === 'tenant' ? 'bg-blue-100 text-blue-700' : ($u->lead_specialization === 'owner' ? 'bg-amber-100 text-amber-700' : 'bg-ink-900/5 text-ink-900/60') }}">
+                                    {{ $u->lead_specialization === 'both' ? 'tenant + owner' : $u->lead_specialization }}
+                                </span>
+                            @endif
                         </td>
                         <td>
                             @if($u->role === 'owner' && $u->properties_count > 0)
@@ -126,7 +132,7 @@
                     class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
                 <input name="phone" required placeholder="Phone"
                     class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
-                <select name="role" required class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+                <select name="role" id="newUserRole" required class="w-full px-4 py-3 rounded-xl border border-ink-900/15" onchange="document.getElementById('newUserSpecWrap').classList.toggle('hidden', this.value !== 'telecaller')">
                     <option value="telecaller">Tele-caller</option>
                     <option value="field_executive">Field Executive</option>
                     <option value="owner">Owner</option>
@@ -134,6 +140,14 @@
                     <option value="seo_manager">SEO Manager</option>
                     <option value="admin">Admin</option>
                 </select>
+                <div id="newUserSpecWrap">
+                    <label class="block text-xs font-bold uppercase text-ink-900/50 mb-1">Leads this telecaller handles</label>
+                    <select name="lead_specialization" class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+                        <option value="both">Both tenant & owner leads</option>
+                        <option value="tenant">Tenant leads only</option>
+                        <option value="owner">Owner leads only</option>
+                    </select>
+                </div>
                 <input name="password" type="password" required placeholder="Password" minlength="6"
                     class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
                 <button class="w-full py-3 bg-coral-500 text-white rounded-xl font-bold">Create</button>

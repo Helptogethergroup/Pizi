@@ -86,9 +86,15 @@ class ManualLeadController extends Controller
         } else {
             $telecaller = User::where('role', 'telecaller')
                 ->where('is_active', true)
+                ->whereIn('lead_specialization', ['both', $data['inquiry_type']])
                 ->withCount('assignedLeads')
                 ->orderBy('assigned_leads_count')
-                ->first();
+                ->first()
+                ?? User::where('role', 'telecaller')
+                    ->where('is_active', true)
+                    ->withCount('assignedLeads')
+                    ->orderBy('assigned_leads_count')
+                    ->first();
 
             if ($telecaller) {
                 $data['assigned_telecaller_id'] = $telecaller->id;

@@ -461,6 +461,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('/ad-lead-forms/{adLeadForm}', [\App\Http\Controllers\Admin\AdLeadFormController::class, 'destroy'])->name('ad-lead-forms.destroy');
 
     Route::get('/telecallers', [\App\Http\Controllers\Admin\TelecallerMonitoringController::class, 'index'])->name('telecallers.index');
+    Route::get('/telecallers/export', [\App\Http\Controllers\Admin\TelecallerMonitoringController::class, 'export'])->name('telecallers.export');
     Route::patch('/telecallers/{telecaller}/target', [\App\Http\Controllers\Admin\TelecallerMonitoringController::class, 'updateTarget'])->name('telecallers.target');
 
     Route::get('/invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('invoices.index');

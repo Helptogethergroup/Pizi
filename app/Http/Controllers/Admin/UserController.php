@@ -41,8 +41,14 @@ class UserController extends Controller
             'phone' => 'required|string|max:15',
             'role' => 'required|in:telecaller,field_executive,owner,tenant,seo_manager,admin',
             'password' => 'required|string|min:6',
+            'lead_specialization' => 'nullable|in:both,tenant,owner',
         ]);
         $data['password'] = Hash::make($data['password']);
+        if ($data['role'] === 'telecaller') {
+            $data['lead_specialization'] = $data['lead_specialization'] ?? 'both';
+        } else {
+            unset($data['lead_specialization']);
+        }
         if ($data['role'] === 'owner') {
             // Admin-created owner — free access, no payment paywall.
             $data['signup_type'] = 'free';
@@ -93,7 +99,14 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'required|string|max:15',
             'role' => 'required|in:telecaller,field_executive,owner,seo_manager,admin,tenant',
+            'lead_specialization' => 'nullable|in:both,tenant,owner',
         ]);
+
+        if ($data['role'] === 'telecaller') {
+            $data['lead_specialization'] = $data['lead_specialization'] ?? 'both';
+        } else {
+            unset($data['lead_specialization']);
+        }
 
         $user->update($data);
 

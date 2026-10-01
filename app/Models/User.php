@@ -15,6 +15,7 @@ class User extends Authenticatable
     'name', 'email', 'phone', 'password', 'role', 'is_active', 'is_test_account', 'avatar', 'signup_type', 'address',
     'owner_id', 'permissions', 'upi_id' ,'dashboard_guide_seen_at',
     'gst_number', 'billing_business_name', 'billing_address', 'billing_state', 'billing_pincode',
+    'daily_call_target', 'lead_specialization',
 ];
 
     protected $hidden = [
@@ -64,6 +65,19 @@ class User extends Authenticatable
     public function isFieldExecutive(): bool
     {
         return $this->role === 'field_executive';
+    }
+
+    /**
+     * Whether this telecaller should receive leads of the given inquiry
+     * type ('tenant' or 'owner'). Non-telecallers never match.
+     */
+    public function handlesLeadType(string $inquiryType): bool
+    {
+        if (!$this->isTeleCaller()) {
+            return false;
+        }
+
+        return in_array($this->lead_specialization, ['both', $inquiryType], true);
     }
 
 

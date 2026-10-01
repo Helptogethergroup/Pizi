@@ -47,10 +47,19 @@
 
                 <div>
                     <label class="block text-sm font-medium text-ink-900/70 mb-1.5">Role</label>
-                    <select name="role" required class="w-full px-4 py-2.5 border border-ink-900/15 rounded-lg">
+                    <select name="role" id="editUserRole" required class="w-full px-4 py-2.5 border border-ink-900/15 rounded-lg" onchange="document.getElementById('editUserSpecWrap').classList.toggle('hidden', this.value !== 'telecaller')">
                         @foreach(['telecaller', 'field_executive', 'owner', 'seo_manager', 'admin', 'tenant'] as $r)
                             <option value="{{ $r }}" @selected($user->role === $r)>{{ ucfirst(str_replace('_',' ',$r)) }}</option>
                         @endforeach
+                    </select>
+                </div>
+
+                <div id="editUserSpecWrap" class="{{ $user->role === 'telecaller' ? '' : 'hidden' }}">
+                    <label class="block text-sm font-medium text-ink-900/70 mb-1.5">Leads this telecaller handles</label>
+                    <select name="lead_specialization" class="w-full px-4 py-2.5 border border-ink-900/15 rounded-lg">
+                        <option value="both" @selected($user->lead_specialization === 'both')>Both tenant & owner leads</option>
+                        <option value="tenant" @selected($user->lead_specialization === 'tenant')>Tenant leads only</option>
+                        <option value="owner" @selected($user->lead_specialization === 'owner')>Owner leads only</option>
                     </select>
                 </div>
 
