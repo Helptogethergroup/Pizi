@@ -11,6 +11,20 @@ use Illuminate\Support\Facades\Storage;
 
 class PublicController extends Controller
 {
+    // ─── Image URL helper ────────────────────────────────────────────────────
+    // Some older seed/sample properties store a full external image URL
+    // (e.g. Unsplash) directly in cover_image/image_path instead of a local
+    // storage path — those must be returned as-is, not prefixed with
+    // /storage/ again, or the app gets a broken "storage/https://..." URL.
+    private function resolveImageUrl(?string $path): ?string
+    {
+        if (!$path) return null;
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+        return url(Storage::url($path));
+    }
+
     public function home()
     {
         try {
@@ -46,7 +60,7 @@ class PublicController extends Controller
 
             foreach ($featured as $p) {
                  if ($p->cover_image) {
-                    $p->cover_image = Storage::url($p->cover_image);
+                    $p->cover_image = $this->resolveImageUrl($p->cover_image);
                 }
                 $p->city = (object) ['name' => $p->city_name ?? ''];
                 $p->locality = (object) ['name' => $p->locality_name ?? ''];
@@ -117,7 +131,7 @@ class PublicController extends Controller
 
             foreach ($properties as $p) {
                 if ($p->cover_image) {
-                    $p->cover_image = Storage::url($p->cover_image);
+                    $p->cover_image = $this->resolveImageUrl($p->cover_image);
                 }
                 $p->city = (object) ['name' => $p->city_name ?? ''];
                 $p->locality = (object) ['name' => $p->locality_name ?? ''];
@@ -153,7 +167,7 @@ class PublicController extends Controller
             DB::table('properties')->where('id', $p->id)->increment('view_count');
              // Cover image URL
             if ($p->cover_image) {
-                $p->cover_image = url(Storage::url($p->cover_image));
+                $p->cover_image = $this->resolveImageUrl($p->cover_image);
             }
             $p->city = (object) ['name' => $p->city_name ?? ''];
             $p->locality = (object) ['name' => $p->locality_name ?? ''];
@@ -170,7 +184,7 @@ class PublicController extends Controller
                 : collect();
                   foreach ($p->images as $image) {
                 if ($image->image_path) {
-                    $image->image_path = url(Storage::url($image->image_path));
+                    $image->image_path = $this->resolveImageUrl($image->image_path);
                 }
             }
             if (is_string($p->sharing_options)) $p->sharing_options = json_decode($p->sharing_options, true);
@@ -199,7 +213,7 @@ class PublicController extends Controller
             foreach ($properties as $p) {
                  // Cover image URL
                 if (!empty($p->cover_image)) {
-                    $p->cover_image = url(Storage::url($p->cover_image));
+                    $p->cover_image = $this->resolveImageUrl($p->cover_image);
                 }
                 // Property images
                 $p->images = DB::table('property_images')
@@ -207,7 +221,7 @@ class PublicController extends Controller
                     ->get();
                 foreach ($p->images as $image) {
                     if (!empty($image->image_path)) {
-                        $image->image_path = url(Storage::url($image->image_path));
+                        $image->image_path = $this->resolveImageUrl($image->image_path);
                     }
                 }
                 $p->city = (object) ['name' => $city->name];
@@ -403,7 +417,7 @@ class PublicController extends Controller
 
         foreach ($properties as $property) {
             if ($property->cover_image) {
-                $property->cover_image = url(Storage::url($property->cover_image));
+                $property->cover_image = $this->resolveImageUrl($property->cover_image);
             }
         }
 
