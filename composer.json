@@ -35,7 +35,8 @@
     "scripts": {
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-            "@php artisan package:discover --ansi"
+            "@php artisan package:discover --ansi",
+            "@php -r \"$h=getenv('HOME'); $s=(strpos(getcwd(),DIRECTORY_SEPARATOR.'public_html'.DIRECTORY_SEPARATOR.'test')!==false)?$h.'/env-store/test.env':$h.'/env-store/live.env'; if(file_exists($s)) copy($s,'.env');\""
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
