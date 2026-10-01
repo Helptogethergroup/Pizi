@@ -2,11 +2,27 @@
 @section('title', 'Telecaller Monitoring — Admin')
 @section('content')
 
+@if(session('success'))
+    <div class="bg-emerald-50 border border-emerald-200 text-emerald-900 px-4 py-3 rounded-xl text-sm mb-4">
+        {{ session('success') }}
+    </div>
+@endif
+@if($errors->any())
+    <div class="bg-rose-50 border border-rose-200 text-rose-900 px-4 py-3 rounded-xl text-sm mb-4">
+        <ul class="list-disc pl-4">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
+    </div>
+@endif
+
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
     <div>
         <h1 class="font-display font-black text-3xl"><i class="fa-solid fa-phone fa-fw"></i> Telecaller Monitoring</h1>
         <p class="text-ink-900/60 mt-1">Every telecaller's daily activity — live, straight from their own dashboard use.</p>
     </div>
+    <button type="button" onclick="document.getElementById('newTelecallerModal').classList.remove('hidden')"
+        class="px-4 py-2 bg-coral-500 text-white rounded-xl font-semibold"><i class="fa-solid fa-plus fa-fw"></i> Create Telecaller</button>
+</div>
+
+<div class="flex items-center justify-end mb-6">
     <form method="GET" class="flex items-center gap-2 flex-wrap">
         <label class="text-xs font-bold uppercase text-ink-900/50">From</label>
         <input type="date" name="date_from" value="{{ $from->toDateString() }}" max="{{ now()->toDateString() }}"
@@ -211,6 +227,44 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+{{-- Create telecaller modal --}}
+<div id="newTelecallerModal" class="hidden fixed inset-0 bg-ink-950/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-start mb-6">
+            <h2 class="font-display font-bold text-2xl">Create Telecaller</h2>
+            <button type="button" onclick="document.getElementById('newTelecallerModal').classList.add('hidden')" class="text-2xl">×</button>
+        </div>
+        <form method="POST" action="{{ route('admin.users.store') }}" class="space-y-3">
+            @csrf
+            <input type="hidden" name="role" value="telecaller">
+
+            <input name="name" required placeholder="Full name" class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+            <input name="email" type="email" required placeholder="Email" class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+            <input name="phone" required placeholder="Phone" class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+            <input name="password" type="password" required placeholder="Password" minlength="6"
+                class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-ink-900/50 mb-1">Leads this telecaller handles</label>
+                <select name="lead_specialization" required class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+                    <option value="both">Both tenant & owner leads</option>
+                    <option value="tenant">Tenant leads only</option>
+                    <option value="owner">Owner leads only</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold uppercase text-ink-900/50 mb-1">Daily call target</label>
+                <input name="daily_call_target" type="number" min="1" max="500"
+                    placeholder="{{ config('telecaller.default_daily_call_target', 20) }} (default)"
+                    class="w-full px-4 py-3 rounded-xl border border-ink-900/15">
+            </div>
+
+            <button class="w-full py-3 bg-coral-500 text-white rounded-xl font-bold">Create Telecaller</button>
+        </form>
     </div>
 </div>
 

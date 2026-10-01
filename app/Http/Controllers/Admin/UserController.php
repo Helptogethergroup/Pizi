@@ -42,12 +42,14 @@ class UserController extends Controller
             'role' => 'required|in:telecaller,field_executive,owner,tenant,seo_manager,admin',
             'password' => 'required|string|min:6',
             'lead_specialization' => 'nullable|in:both,tenant,owner',
+            'daily_call_target' => 'nullable|integer|min:1|max:500',
         ]);
         $data['password'] = Hash::make($data['password']);
         if ($data['role'] === 'telecaller') {
             $data['lead_specialization'] = $data['lead_specialization'] ?? 'both';
+            $data['daily_call_target'] = $data['daily_call_target'] ?? null;
         } else {
-            unset($data['lead_specialization']);
+            unset($data['lead_specialization'], $data['daily_call_target']);
         }
         if ($data['role'] === 'owner') {
             // Admin-created owner — free access, no payment paywall.
