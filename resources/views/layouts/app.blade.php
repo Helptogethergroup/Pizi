@@ -238,8 +238,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                                 </a>
                                 <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-coral-50 transition">
                                     <span class="w-10 h-10 rounded-xl bg-ink-900 text-cream flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-building"></i></span>
-                                    <span class="leading-tight"><span class="block text-sm font-bold text-ink-950">Owner app</span><span class="block text-xs text-ink-900/55">Manage your PG and tenant leads</span></span>
+                                    <span class="leading-tight"><span class="block text-sm font-bold text-ink-950">Owner app · Android</span><span class="block text-xs text-ink-900/55">Manage your PG and tenant leads</span></span>
                                     <i class="fa-brands fa-google-play ml-auto text-ink-900/40"></i>
+                                </a>
+                                <a href="https://apps.apple.com/in/app/pizi-india/id6814565739" target="_blank" rel="noopener" class="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-coral-50 transition">
+                                    <span class="w-10 h-10 rounded-xl bg-ink-900 text-cream flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-building"></i></span>
+                                    <span class="leading-tight"><span class="block text-sm font-bold text-ink-950">Owner app · iPhone</span><span class="block text-xs text-ink-900/55">Manage your PG and tenant leads</span></span>
+                                    <i class="fa-brands fa-apple ml-auto text-ink-900/40"></i>
                                 </a>
                             </div>
                         </div>
@@ -347,7 +352,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 @endauth
                 <div class="px-4 pt-1 text-xs uppercase font-bold text-ink-900/40">Get the app</div>
                 <a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-coral-50 text-coral-600 font-bold"><i class="fa-brands fa-google-play fa-fw"></i> Tenant app</a>
-                <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-brands fa-google-play fa-fw"></i> Owner app</a>
+                <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-brands fa-google-play fa-fw"></i> Owner app · Android</a>
+                <a href="https://apps.apple.com/in/app/pizi-india/id6814565739" target="_blank" rel="noopener" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-900 text-cream font-bold"><i class="fa-brands fa-apple fa-fw"></i> Owner app · iPhone</a>
             </div>
 
             <div class="border-t border-ink-900/10 my-2 pt-3 space-y-2">
@@ -427,6 +433,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white hover:-translate-y-0.5 transition">
                             <i class="fa-brands fa-google-play text-2xl text-coral-400"></i>
                             <span class="leading-tight"><span class="block text-[10px] uppercase tracking-wider text-cream/60 group-hover:text-ink-900/60 transition">Get it on Google Play</span><span class="block text-sm font-bold text-cream group-hover:text-ink-950 transition">Owner app</span></span>
+                        </a>
+                        <a href="https://apps.apple.com/in/app/pizi-india/id6814565739" target="_blank" rel="noopener" class="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-white/10 border border-white/15 hover:bg-white hover:-translate-y-0.5 transition">
+                            <i class="fa-brands fa-apple text-2xl text-coral-400"></i>
+                            <span class="leading-tight"><span class="block text-[10px] uppercase tracking-wider text-cream/60 group-hover:text-ink-900/60 transition">Download on the App Store</span><span class="block text-sm font-bold text-cream group-hover:text-ink-950 transition">Owner app</span></span>
                         </a>
                     </div>
                 </div>
@@ -545,7 +555,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <li><a href="{{ route('blog.index') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">Blog</a></li>
                 <li><a href="{{ route('register') }}" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition">List your PG</a></li>
                 <li><a href="https://play.google.com/store/apps/details?id=com.pizi.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-brands fa-google-play fa-fw"></i> Tenant app</a></li>
-                <li><a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-brands fa-google-play fa-fw"></i> Owner app</a></li>
+                <li><a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-brands fa-google-play fa-fw"></i> Owner app · Android</a></li>
+                <li><a href="https://apps.apple.com/in/app/pizi-india/id6814565739" target="_blank" rel="noopener" class="text-cream/60 hover:text-coral-400 hover:translate-x-1 inline-block transition"><i class="fa-brands fa-apple fa-fw"></i> Owner app · iPhone</a></li>
                <li> <a href="{{ route('privacy-policy') }}" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
             </ul>
         </div>

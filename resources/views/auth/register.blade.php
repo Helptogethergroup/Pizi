@@ -366,6 +366,9 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                     <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#16233B] hover:bg-[#0f1a2e] text-white text-sm font-semibold transition">
                         <i class="fa-brands fa-google-play"></i> Get it on Google Play
                     </a>
+                    <a href="https://apps.apple.com/in/app/pizi-india/id6814565739" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#16233B] hover:bg-[#0f1a2e] text-white text-sm font-semibold transition">
+                        <i class="fa-brands fa-apple"></i> Download on the App Store
+                    </a>
                 </div>
             </div>
 
@@ -772,7 +775,10 @@ details.pz-faq[open] .pz-faq-icon { transform: rotate(45deg); }
                 Register your PG now
             </a>
             <a href="https://play.google.com/store/apps/details?id=com.pizi_owner.india" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 text-white font-semibold px-8 py-4 rounded-xl transition">
-                <i class="fa-brands fa-google-play"></i> Get the Owner app
+                <i class="fa-brands fa-google-play"></i> Owner app · Android
+            </a>
+            <a href="https://apps.apple.com/in/app/pizi-india/id6814565739" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/30 hover:bg-white/10 text-white font-semibold px-8 py-4 rounded-xl transition">
+                <i class="fa-brands fa-apple"></i> Owner app · iPhone
             </a>
         </div>
     </div>
