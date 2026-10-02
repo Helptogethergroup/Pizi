@@ -42,6 +42,11 @@ class User extends Authenticatable
         return $this->hasMany(Lead::class, 'assigned_telecaller_id');
     }
 
+    public function deviceTokens(): HasMany
+    {
+        return $this->hasMany(DeviceToken::class);
+    }
+
     public function fieldVisits()
      {
            return $this->hasMany(\App\Models\FieldVisit::class, 'field_executive_id');

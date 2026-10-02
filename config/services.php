@@ -25,4 +25,12 @@ return [
         'redirect'      => env('GOOGLE_REDIRECT_URI', 'https://pizi.in/auth/google/callback'),
     ],
 
+    // Firebase Cloud Messaging (push notifications for the mobile apps).
+    // Absolute path to the Firebase service-account JSON — kept OUTSIDE the
+    // repo (e.g. ~/env-store/firebase-service-account.json). Push silently
+    // no-ops until this is set and the file exists.
+    'fcm' => [
+        'credentials' => env('FCM_CREDENTIALS_PATH'),
+    ],
+
 ];

@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Lead;
+use App\Notifications\Channels\FcmChannel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -17,7 +18,24 @@ class NewLeadMatched extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        // Push sits before mail so an SMTP hiccup can't stop it (and the
+        // push channel itself never throws).
+        return ['database', FcmChannel::class, 'mail'];
+    }
+
+    public function toFcm(object $notifiable): array
+    {
+        $budget = $this->lead->budget_max ? ' · budget up to ₹' . number_format($this->lead->budget_max) : '';
+
+        return [
+            'title' => 'New lead matched to your property',
+            'body' => "{$this->lead->name} · " . ($this->lead->preferred_locality ?: 'location not specified') . $budget,
+            'data' => [
+                'type' => 'new_lead',
+                'lead_id' => $this->lead->id,
+                'match_score' => $this->matchScore,
+            ],
+        ];
     }
 
     public function toMail(object $notifiable): MailMessage

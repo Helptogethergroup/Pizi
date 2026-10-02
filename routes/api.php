@@ -73,6 +73,9 @@ Route::middleware('pizi.auth')->group(function () {
     // SHARED
     Route::get('/user/notifications', [SharedController::class, 'notifications']);
     Route::post('/user/notifications/{id}/read', [SharedController::class, 'markRead']);
+    Route::post('/user/device-token', [SharedController::class, 'registerDeviceToken']);
+    Route::delete('/user/device-token', [SharedController::class, 'removeDeviceToken']);
+    Route::post('/user/device-token/test', [SharedController::class, 'testPush']);
     Route::post('/leads/manual', [SharedController::class, 'leadManual']);
 
     // ============ ADMIN ============
