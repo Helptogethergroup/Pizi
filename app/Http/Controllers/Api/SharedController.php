@@ -62,11 +62,22 @@ class SharedController extends Controller
                 'user_id' => $request->user->id,
                 'token' => $data['token'],
                 'platform' => $data['platform'] ?? null,
+                'session_expires_at' => $this->sessionExpiry($request),
                 'last_used_at' => now(),
             ]
         );
 
         return $this->ok(['message' => 'Device registered', 'id' => $device->id]);
+    }
+
+    // Expiry of the bearer token this request was made with (already validated
+    // by PiziAuthenticate), so a device stops getting pushes once that session ends.
+    private function sessionExpiry(Request $request): ?\Illuminate\Support\Carbon
+    {
+        $decoded = base64_decode(substr((string) $request->header('Authorization'), 7), true);
+        $expiry = $decoded ? (explode('|', $decoded)[2] ?? null) : null;
+
+        return $expiry ? \Illuminate\Support\Carbon::createFromTimestamp((int) $expiry, config('app.timezone')) : null;
     }
 
     // Call on logout so a signed-out phone stops getting that user's pushes.

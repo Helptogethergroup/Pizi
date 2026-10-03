@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DeviceToken extends Model
 {
-    protected $fillable = ['user_id', 'token', 'token_hash', 'platform', 'last_used_at'];
+    protected $fillable = ['user_id', 'token', 'token_hash', 'platform', 'session_expires_at', 'last_used_at'];
 
     protected function casts(): array
     {
-        return ['last_used_at' => 'datetime'];
+        return ['last_used_at' => 'datetime', 'session_expires_at' => 'datetime'];
     }
 
     public static function hashFor(string $token): string

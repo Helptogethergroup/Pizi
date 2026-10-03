@@ -35,6 +35,9 @@ class FcmService
             return 0;
         }
 
+        // Sessions that expired mean the app auto-logged-out without telling us.
+        $user->deviceTokens()->where('session_expires_at', '<', now())->delete();
+
         $devices = $user->deviceTokens()->get();
         if ($devices->isEmpty()) {
             return 0;
