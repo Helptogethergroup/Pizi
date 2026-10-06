@@ -32,6 +32,8 @@ class NewLeadMatched extends Notification
             'body' => "{$this->lead->name} · " . ($this->lead->preferred_locality ?: 'location not specified') . $budget,
             'data' => [
                 'type' => 'new_lead',
+                // Where the app should open when the owner taps the push.
+                'screen' => 'lead_detail',
                 'lead_id' => $this->lead->id,
                 'match_score' => $this->matchScore,
             ],

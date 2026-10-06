@@ -103,7 +103,7 @@ class SharedController extends Controller
             return $this->ok(['sent' => 0, 'devices' => $devices, 'message' => 'Push is not configured on the server yet (Firebase credentials missing).']);
         }
 
-        $sent = $fcm->sendToUser($user, 'Pizi test notification', 'If you can read this, push notifications are working.', ['type' => 'test']);
+        $sent = $fcm->sendToUser($user, 'Pizi test notification', 'If you can read this, push notifications are working.', ['type' => 'test', 'screen' => 'home']);
 
         return $this->ok(['sent' => $sent, 'devices' => $devices]);
     }
