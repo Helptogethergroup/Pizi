@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\FcmChannel;
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -18,7 +20,7 @@ class CreditsAdded extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database', 'mail'];
+        return ['database', FcmChannel::class, 'mail'];
     }
 
     public function toMail(object $notifiable): MailMessage

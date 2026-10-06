@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\FcmChannel;
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
@@ -19,7 +21,7 @@ class ComplaintFiled extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', FcmChannel::class];
     }
 
     public function toArray(object $notifiable): array

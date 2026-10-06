@@ -2,6 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\FcmChannel;
+
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
@@ -14,7 +16,7 @@ class AgreementSigned extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', FcmChannel::class];
     }
 
     public function toArray(object $notifiable): array
