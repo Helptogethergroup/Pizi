@@ -39,7 +39,7 @@ class SubmitWhatsAppTemplates extends Command
             ],
             'property_verified_alert' => [
                 'category' => 'UTILITY',
-                'body' => "Hi {{1}}, your property \"{{2}}\" has been ✅ verified and is now live on the site.\n\nView it here: {{3}}",
+                'body' => "Hi {{1}}, your property \"{{2}}\" has been ✅ verified and is now live on the site.\n\nView it here: {{3}}\n\nThank you for listing with Pizi.",
                 'example' => ['Rajesh', 'Sunrise PG', 'https://pizi.in/pg/sunrise-pg'],
             ],
             'tenant_rent_overdue_owner_alert' => [
@@ -69,7 +69,7 @@ class SubmitWhatsAppTemplates extends Command
             ],
             'admin_daily_summary' => [
                 'category' => 'UTILITY',
-                'body' => "Pizi Daily Summary — {{1}}\n\nNew signups: {{2}}\nNew leads: {{3}}\nPayments received: ₹{{4}}",
+                'body' => "Pizi Daily Summary — {{1}}\n\nNew signups: {{2}}\nNew leads: {{3}}\nPayments received: ₹{{4}}\n\nHave a great evening.",
                 'example' => ['1 Sep 2026', '5', '23', '48000'],
             ],
             'payment_gateway_failure_alert' => [
