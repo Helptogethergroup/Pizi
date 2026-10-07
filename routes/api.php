@@ -159,7 +159,8 @@ Route::prefix('owner')->middleware('role:owner,admin')->group(function () {
     Route::get('/properties',                        [OwnerController::class, 'properties']);
     Route::get('/properties/{id}',                   [OwnerController::class, 'propertyShow']);
     Route::post('/properties',                       [OwnerController::class, 'propertyStore']);
-    Route::post('/properties/{id}',                  [OwnerController::class, 'propertyUpdate']);
+    // PUT/PATCH too: multipart forms from the app often spoof them via _method.
+    Route::match(['post', 'put', 'patch'], '/properties/{id}', [OwnerController::class, 'propertyUpdate']);
     Route::delete('/properties/{id}',                [OwnerController::class, 'propertyDelete']);
     Route::patch('/properties/{id}/pause',           [OwnerController::class, 'propertyPause']);
     Route::post('/properties/{id}/images',           [OwnerController::class, 'uploadPropertyImage']);
