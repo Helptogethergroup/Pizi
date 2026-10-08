@@ -112,8 +112,8 @@
         <div>
             <label class="block text-xs font-bold text-ink-900/50 uppercase mb-1">Sort by</label>
             <select name="sort" class="px-3 py-2 border border-ink-900/15 rounded-lg text-sm">
-                <option value="" @selected(!request('sort'))>Best Match</option>
-                <option value="newest" @selected(request('sort') === 'newest')>Newest first</option>
+                <option value="newest" @selected(!request('sort') || request('sort') === 'newest')>Newest first</option>
+                <option value="best_match" @selected(request('sort') === 'best_match')>Best Match</option>
                 <option value="budget_high" @selected(request('sort') === 'budget_high')>Budget: High to Low</option>
                 <option value="budget_low" @selected(request('sort') === 'budget_low')>Budget: Low to High</option>
             </select>

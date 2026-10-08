@@ -110,9 +110,9 @@ class LeadController extends Controller
                 || str_contains(strtolower($l->phone ?? ''), $term));
         }
 
-        // NEW: Sort — default stays the service's own area/score ranking;
-        // these give the owner an explicit way to reorder instead.
-        $filtered = match ($request->get('sort')) {
+        // Sort — newest first by default so a fresh lead is always on top;
+        // 'best_match' keeps the service's own area/score ranking.
+        $filtered = match ($request->get('sort') ?: 'newest') {
             'newest' => $filtered->sortByDesc('created_at'),
             'budget_high' => $filtered->sortByDesc(fn ($l) => $l->budget_max ?? $l->budget_min ?? 0),
             'budget_low' => $filtered->sortBy(fn ($l) => $l->budget_min ?? $l->budget_max ?? PHP_INT_MAX),
