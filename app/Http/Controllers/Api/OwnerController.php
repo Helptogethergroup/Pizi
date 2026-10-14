@@ -1292,7 +1292,7 @@ class OwnerController extends Controller
             ->leftJoin('tenants as t', 'rb.tenant_id', '=', 't.id')
             ->leftJoin('properties as p', 'rb.property_id', '=', 'p.id')
             ->where('rb.owner_id', $oid)
-            ->select('rb.*', 't.name as tenant_name', 'p.name as property_name')
+            ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 'p.name as property_name')
             ->orderBy('rb.created_at', 'desc');
 
         if ($request->status)    $query->where('rb.status', $request->status);
@@ -1607,8 +1607,10 @@ class OwnerController extends Controller
         $rooms = $query->get();
         $roomIds = $rooms->pluck('id');
         $beds = DB::table('beds')->whereIn('room_id', $roomIds)->whereNull('deleted_at')->get()->groupBy('room_id');
-        $rooms = $rooms->map(function ($r) use ($beds) {
+        $propertyNames = DB::table('properties')->whereIn('id', $rooms->pluck('property_id')->unique())->pluck('name', 'id');
+        $rooms = $rooms->map(function ($r) use ($beds, $propertyNames) {
             $r = (array) $r;
+            $r['property_name'] = $propertyNames[$r['property_id']] ?? null;
             $r['beds'] = $beds->get($r['id'], collect([]))->values();
             return (object) $r;
         });
