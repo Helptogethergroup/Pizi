@@ -2142,6 +2142,239 @@ class OwnerController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════════════
+    //  PER-TENANT LEDGERS: DEPOSIT, CHECKLIST, METER
+    // ═══════════════════════════════════════════════════════════════
+
+    /** The tenant, only if they belong to this owner. */
+    private function myTenant(Request $request, $id)
+    {
+        return DB::table('tenants')
+            ->where('id', $id)
+            ->where('owner_id', $this->ownerId($request))
+            ->first();
+    }
+
+    private function depositSummary(int $tenantId, int $ownerId): array
+    {
+        $entries = DB::table('deposit_entries')
+            ->where('tenant_id', $tenantId)
+            ->where('owner_id', $ownerId)
+            ->orderByDesc('entry_date')
+            ->orderByDesc('id')
+            ->get();
+
+        $received = (float) $entries->where('type', 'received')->sum('amount');
+        $deducted = (float) $entries->where('type', 'deduction')->sum('amount');
+        $refunded = (float) $entries->where('type', 'refund')->sum('amount');
+
+        return [
+            'received' => round($received, 2),
+            'deducted' => round($deducted, 2),
+            'refunded' => round($refunded, 2),
+            'held' => round($received - $deducted - $refunded, 2),
+            'entries' => $entries,
+        ];
+    }
+
+    public function depositShow(Request $request, $id)
+    {
+        $tenant = $this->myTenant($request, $id);
+        if (!$tenant) return $this->notFound();
+
+        return $this->ok($this->depositSummary((int) $id, $this->ownerId($request)));
+    }
+
+    public function depositStore(Request $request, $id)
+    {
+        $tenant = $this->myTenant($request, $id);
+        if (!$tenant) return $this->notFound();
+
+        $data = $request->validate([
+            'type' => 'required|in:received,deduction,refund',
+            'amount' => 'required|numeric|gt:0|max:10000000',
+            'entry_date' => 'required|date|before_or_equal:' . now()->addDay()->toDateString(),
+            'note' => 'nullable|string|max:255',
+        ]);
+
+        $oid = $this->ownerId($request);
+
+        // Money cannot go out more than is held.
+        if (in_array($data['type'], ['deduction', 'refund'], true)) {
+            $held = $this->depositSummary((int) $id, $oid)['held'];
+            if ((float) $data['amount'] > $held + 0.009) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'That is more than the deposit held (₹' . number_format($held, 0) . ').',
+                ], 422);
+            }
+        }
+
+        $entryId = DB::table('deposit_entries')->insertGetId([
+            'owner_id' => $oid,
+            'tenant_id' => (int) $id,
+            'type' => $data['type'],
+            'amount' => $data['amount'],
+            'entry_date' => $data['entry_date'],
+            'note' => $data['note'] ?? null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return $this->ok(['id' => $entryId] + $this->depositSummary((int) $id, $oid));
+    }
+
+    public function depositDelete(Request $request, $id)
+    {
+        $deleted = DB::table('deposit_entries')
+            ->where('id', $id)
+            ->where('owner_id', $this->ownerId($request))
+            ->delete();
+
+        return $deleted ? $this->ok(['message' => 'Deleted']) : $this->notFound();
+    }
+
+    private const CHECKLIST_DEFAULTS = [
+        'move_in' => [
+            'ID proof collected', 'Agreement signed', 'Security deposit received',
+            'Room and bed condition noted', 'Keys handed over', 'House rules explained',
+        ],
+        'move_out' => [
+            'Notice period completed', 'Room and bed inspected', 'Damages noted',
+            'Electricity meter read', 'Keys returned', 'Deposit settled',
+        ],
+    ];
+
+    public function checklistShow(Request $request, $id, $kind)
+    {
+        if (!isset(self::CHECKLIST_DEFAULTS[$kind])) return $this->notFound();
+        if (!$this->myTenant($request, $id)) return $this->notFound();
+
+        $row = DB::table('tenant_checklists')
+            ->where('tenant_id', $id)
+            ->where('owner_id', $this->ownerId($request))
+            ->where('kind', $kind)
+            ->first();
+
+        if ($row) {
+            return $this->ok([
+                'kind' => $kind,
+                'items' => json_decode($row->items, true) ?: [],
+                'notes' => $row->notes,
+                'completed_at' => $row->completed_at,
+            ]);
+        }
+
+        return $this->ok([
+            'kind' => $kind,
+            'items' => array_map(fn ($label) => ['label' => $label, 'done' => false, 'note' => null], self::CHECKLIST_DEFAULTS[$kind]),
+            'notes' => null,
+            'completed_at' => null,
+        ]);
+    }
+
+    public function checklistSave(Request $request, $id, $kind)
+    {
+        if (!isset(self::CHECKLIST_DEFAULTS[$kind])) return $this->notFound();
+        if (!$this->myTenant($request, $id)) return $this->notFound();
+
+        $data = $request->validate([
+            'items' => 'required|array|min:1|max:40',
+            'items.*.label' => 'required|string|max:120',
+            'items.*.done' => 'required|boolean',
+            'items.*.note' => 'nullable|string|max:255',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $items = array_map(fn ($i) => [
+            'label' => $i['label'],
+            'done' => (bool) $i['done'],
+            'note' => $i['note'] ?? null,
+        ], $data['items']);
+
+        $allDone = collect($items)->every(fn ($i) => $i['done']);
+        $oid = $this->ownerId($request);
+
+        $existing = DB::table('tenant_checklists')
+            ->where('tenant_id', $id)->where('owner_id', $oid)->where('kind', $kind)->first();
+
+        $payload = [
+            'items' => json_encode($items),
+            'notes' => $data['notes'] ?? null,
+            'completed_at' => $allDone ? ($existing->completed_at ?? now()) : null,
+            'updated_at' => now(),
+        ];
+
+        if ($existing) {
+            DB::table('tenant_checklists')->where('id', $existing->id)->update($payload);
+        } else {
+            DB::table('tenant_checklists')->insert($payload + [
+                'owner_id' => $oid,
+                'tenant_id' => (int) $id,
+                'kind' => $kind,
+                'created_at' => now(),
+            ]);
+        }
+
+        return $this->ok(['completed' => $allDone]);
+    }
+
+    public function meterShow(Request $request, $id)
+    {
+        if (!$this->myTenant($request, $id)) return $this->notFound();
+
+        $rows = DB::table('meter_readings')
+            ->where('tenant_id', $id)
+            ->where('owner_id', $this->ownerId($request))
+            ->orderByDesc('read_on')
+            ->orderByDesc('id')
+            ->limit(12)
+            ->get();
+
+        return $this->ok([
+            'latest' => $rows->first(),
+            'readings' => $rows,
+        ]);
+    }
+
+    public function meterStore(Request $request, $id)
+    {
+        if (!$this->myTenant($request, $id)) return $this->notFound();
+
+        $data = $request->validate([
+            'reading' => 'required|numeric|min:0|max:99999999',
+            'read_on' => 'required|date|before_or_equal:' . now()->addDay()->toDateString(),
+        ]);
+
+        $oid = $this->ownerId($request);
+        $previous = DB::table('meter_readings')
+            ->where('tenant_id', $id)->where('owner_id', $oid)
+            ->orderByDesc('read_on')->orderByDesc('id')->first();
+
+        // A meter only counts up.
+        if ($previous && (float) $data['reading'] < (float) $previous->reading) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The new reading is lower than the last one (' . rtrim(rtrim((string) $previous->reading, '0'), '.') . ').',
+            ], 422);
+        }
+
+        $readingId = DB::table('meter_readings')->insertGetId([
+            'owner_id' => $oid,
+            'tenant_id' => (int) $id,
+            'reading' => $data['reading'],
+            'read_on' => $data['read_on'],
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return $this->ok([
+            'id' => $readingId,
+            'previous' => $previous ? (float) $previous->reading : null,
+            'units' => $previous ? round((float) $data['reading'] - (float) $previous->reading, 2) : null,
+        ]);
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     //  EXPENSES
     // ═══════════════════════════════════════════════════════════════
     private const EXPENSE_CATEGORIES = [

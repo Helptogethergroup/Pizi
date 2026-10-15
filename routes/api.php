@@ -203,6 +203,15 @@ Route::prefix('owner')->middleware('role:owner,admin')->group(function () {
     Route::post('/credits/order',  [OwnerController::class, 'createOrder']);
     Route::post('/credits/verify', [OwnerController::class, 'verifyPayment']);
 
+    // Per-tenant ledgers: deposit, checklist, meter readings
+    Route::get('/tenants/{id}/deposit',        [OwnerController::class, 'depositShow']);
+    Route::post('/tenants/{id}/deposit',       [OwnerController::class, 'depositStore']);
+    Route::delete('/deposit-entries/{id}',     [OwnerController::class, 'depositDelete']);
+    Route::get('/tenants/{id}/checklist/{kind}',  [OwnerController::class, 'checklistShow']);
+    Route::post('/tenants/{id}/checklist/{kind}', [OwnerController::class, 'checklistSave']);
+    Route::get('/tenants/{id}/meter',          [OwnerController::class, 'meterShow']);
+    Route::post('/tenants/{id}/meter',         [OwnerController::class, 'meterStore']);
+
     // Expenses
     Route::get('/expenses',          [OwnerController::class, 'expenses']);
     Route::post('/expenses',         [OwnerController::class, 'expenseStore']);
