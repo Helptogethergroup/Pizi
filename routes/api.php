@@ -203,6 +203,11 @@ Route::prefix('owner')->middleware('role:owner,admin')->group(function () {
     Route::post('/credits/order',  [OwnerController::class, 'createOrder']);
     Route::post('/credits/verify', [OwnerController::class, 'verifyPayment']);
 
+    // Expenses
+    Route::get('/expenses',          [OwnerController::class, 'expenses']);
+    Route::post('/expenses',         [OwnerController::class, 'expenseStore']);
+    Route::delete('/expenses/{id}',  [OwnerController::class, 'expenseDelete']);
+
     // Rent / Bills
     Route::get('/rent',                    [OwnerController::class, 'rent']);
     Route::get('/rent/{id}',               [OwnerController::class, 'rentShow']);

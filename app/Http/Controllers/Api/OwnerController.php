@@ -2142,6 +2142,86 @@ class OwnerController extends Controller
     }
 
     // ═══════════════════════════════════════════════════════════════
+    //  EXPENSES
+    // ═══════════════════════════════════════════════════════════════
+    private const EXPENSE_CATEGORIES = [
+        'electricity', 'water', 'food', 'salary', 'maintenance',
+        'internet', 'rent', 'cleaning', 'other',
+    ];
+
+    /** GET /owner/expenses?month=YYYY-MM  (default: this month) */
+    public function expenses(Request $request)
+    {
+        $oid = $this->ownerId($request);
+        $month = (string) $request->get('month', now()->format('Y-m'));
+        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
+            return response()->json(['success' => false, 'message' => 'Month must look like 2026-10.'], 422);
+        }
+        $start = \Carbon\Carbon::createFromFormat('Y-m-d', $month . '-01')->startOfDay();
+        $end = (clone $start)->endOfMonth();
+
+        $rows = DB::table('owner_expenses as e')
+            ->leftJoin('properties as p', 'p.id', '=', 'e.property_id')
+            ->where('e.owner_id', $oid)
+            ->whereBetween('e.expense_date', [$start->toDateString(), $end->toDateString()])
+            ->orderByDesc('e.expense_date')
+            ->orderByDesc('e.id')
+            ->select('e.*', 'p.name as property_name')
+            ->get();
+
+        $byCategory = $rows->groupBy('category')->map(fn ($g) => round((float) $g->sum('amount'), 2));
+
+        return $this->ok([
+            'month' => $month,
+            'total' => round((float) $rows->sum('amount'), 2),
+            'by_category' => $byCategory,
+            'items' => $rows,
+        ]);
+    }
+
+    public function expenseStore(Request $request)
+    {
+        $data = $request->validate([
+            'category' => 'required|in:' . implode(',', self::EXPENSE_CATEGORIES),
+            'amount' => 'required|numeric|gt:0|max:10000000',
+            'expense_date' => 'required|date|before_or_equal:' . now()->addDay()->toDateString(),
+            'note' => 'nullable|string|max:255',
+            'property_id' => 'nullable|integer',
+        ]);
+
+        $oid = $this->ownerId($request);
+        if (!empty($data['property_id'])) {
+            $mine = DB::table('properties')->where('id', $data['property_id'])->where('owner_id', $oid)->exists();
+            if (!$mine) {
+                return response()->json(['success' => false, 'message' => 'That property is not yours.'], 422);
+            }
+        }
+
+        $id = DB::table('owner_expenses')->insertGetId([
+            'owner_id' => $oid,
+            'property_id' => $data['property_id'] ?? null,
+            'category' => $data['category'],
+            'amount' => $data['amount'],
+            'expense_date' => $data['expense_date'],
+            'note' => $data['note'] ?? null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return $this->ok(['id' => $id]);
+    }
+
+    public function expenseDelete(Request $request, $id)
+    {
+        $deleted = DB::table('owner_expenses')
+            ->where('id', $id)
+            ->where('owner_id', $this->ownerId($request))
+            ->delete();
+
+        return $deleted ? $this->ok(['message' => 'Deleted']) : $this->notFound();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
     //  PRIVATE HELPERS
     // ═══════════════════════════════════════════════════════════════
     private function ok($data)
