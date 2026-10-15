@@ -44,6 +44,28 @@ Route::prefix('auth')->group(function () {
     });
 });
 
+// ============ AUTH v2 (native owner app: sessions, rotating refresh tokens) ============
+Route::prefix('v2/auth')->group(function () {
+    $c = \App\Http\Controllers\Api\AuthV2Controller::class;
+
+    Route::post('/login/password', [$c, 'loginPassword']);
+    Route::post('/login/confirm', [$c, 'loginConfirm']);
+    Route::post('/otp/send', [$c, 'otpSend']);
+    Route::post('/otp/verify', [$c, 'otpVerify']);
+    Route::post('/refresh', [$c, 'refresh']);
+    Route::post('/register/start', [$c, 'registerStart']);
+    Route::post('/register/verify', [$c, 'registerVerify']);
+
+    Route::middleware('pizi.auth')->group(function () use ($c) {
+        Route::get('/me', [$c, 'me']);
+        Route::post('/logout', [$c, 'logout']);
+        Route::post('/logout-all', [$c, 'logoutAll']);
+        Route::get('/sessions', [$c, 'sessions']);
+        Route::delete('/sessions/{uuid}', [$c, 'revokeSession']);
+        Route::post('/password/change', [$c, 'changePassword']);
+    });
+});
+
 // ============ PUBLIC (no auth) ============
 Route::prefix('public')->group(function () {
     Route::get('/home', [PublicController::class, 'home']);

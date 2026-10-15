@@ -4,7 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use App\Models\ApiSession;
 use App\Models\User;
+use App\Services\ApiTokenService;
 
 class PiziAuthenticate
 {
@@ -16,6 +18,12 @@ class PiziAuthenticate
         }
 
         $token = substr($auth, 7);
+
+        // v2: session based tokens issued to the native owner app.
+        if (str_starts_with($token, 'v2.')) {
+            return $this->handleSessionToken($request, $next, $token);
+        }
+
         $decoded = base64_decode($token, true);
         if (!$decoded) {
             return response()->json(['success' => false, 'message' => 'Invalid token'], 401);
@@ -45,6 +53,45 @@ class PiziAuthenticate
 
         $request->user = $user;
         $request->setUserResolver(fn() => $user);
+
+        return $next($request);
+    }
+
+    private function handleSessionToken(Request $request, Closure $next, string $token)
+    {
+        $tokens = app(ApiTokenService::class);
+
+        $claims = $tokens->parseAccess($token);
+        if (!$claims) {
+            return response()->json(['success' => false, 'message' => 'Invalid token', 'code' => 'invalid_token'], 401);
+        }
+
+        // The app refreshes quietly when it sees this code.
+        if ($tokens->accessIsExpired($claims)) {
+            return response()->json(['success' => false, 'message' => 'Token expired', 'code' => 'token_expired'], 401);
+        }
+
+        $session = ApiSession::where('uuid', $claims['sid'])
+            ->where('user_id', $claims['uid'])
+            ->first();
+
+        if (!$session || !$session->isActive()) {
+            return response()->json(['success' => false, 'message' => 'Session ended', 'code' => 'session_ended'], 401);
+        }
+
+        $user = User::find($session->user_id);
+        if (!$user || !$user->is_active) {
+            return response()->json(['success' => false, 'message' => 'User not found or disabled', 'code' => 'session_ended'], 401);
+        }
+
+        // "last seen" without a write on every single request.
+        if (!$session->last_used_at || $session->last_used_at->lt(now()->subMinute())) {
+            $session->forceFill(['last_used_at' => now()])->saveQuietly();
+        }
+
+        $request->user = $user;
+        $request->setUserResolver(fn() => $user);
+        $request->attributes->set('api_session', $session);
 
         return $next($request);
     }
