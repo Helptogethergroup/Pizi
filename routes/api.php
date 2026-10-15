@@ -55,6 +55,7 @@ Route::prefix('v2/auth')->group(function () {
     Route::post('/refresh', [$c, 'refresh']);
     Route::post('/register/start', [$c, 'registerStart']);
     Route::post('/register/verify', [$c, 'registerVerify']);
+    Route::get('/packages', [$c, 'packages']);
 
     Route::middleware('pizi.auth')->group(function () use ($c) {
         Route::get('/me', [$c, 'me']);

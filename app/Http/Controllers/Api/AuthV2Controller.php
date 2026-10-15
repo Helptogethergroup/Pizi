@@ -240,6 +240,16 @@ class AuthV2Controller extends Controller
         ], 202);
     }
 
+    /**
+     * Credit packages shown on the sign-up screen, before there is an account
+     * (same list the website shows on /register-packages).
+     */
+    public function packages(): JsonResponse
+    {
+        $packages = \DB::table('credit_packages')->where('is_active', 1)->orderBy('credits')->get();
+        return response()->json(['success' => true, 'data' => $packages]);
+    }
+
     public function registerVerify(Request $request): JsonResponse
     {
         $data = $this->validated($request, [
