@@ -11,7 +11,7 @@ while (ob_get_level() > 0) {
 }
 ob_start();
 
-return Application::configure(basePath: dirname(__DIR__))
+$app = Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
@@ -53,3 +53,12 @@ return Application::configure(basePath: dirname(__DIR__))
             return null;
         });
     })->create();
+
+// Live and test each run with their own env file, picked from the folder the
+// app is running in (see bootstrap/pick-env.php) so a deploy can never swap them.
+if ($envFile = (require __DIR__.'/pick-env.php')($app->basePath())) {
+    $app->useEnvironmentPath(dirname($envFile));
+    $app->loadEnvironmentFrom(basename($envFile));
+}
+
+return $app;

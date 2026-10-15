@@ -1,4 +1,8 @@
 <?php
+// Runs on every Hostinger deploy (composer post-autoload-dump). It must only
+// replace .env when it is CERTAIN whether this is the test or the live deploy;
+// a wrong guess puts a site on the other site's database. When unsure it does
+// nothing, so the .env that is already in place keeps working.
 $home = getenv('HOME');
 if (!$home) {
     exit(0);
@@ -6,26 +10,39 @@ if (!$home) {
 
 $cwd = getcwd();
 
-// Hostinger runs composer in a temporary build folder, so the folder name alone
-// can't tell test from live. Also look at which repo this deploy was cloned
-// from: test deploys from the "pizi-beta" repo, live from "Pizi".
-$remote = '';
+// Every "url = ..." line of the clone's git config, credentials stripped.
+$urls = [];
 $gitConfig = $cwd . '/.git/config';
 if (is_readable($gitConfig)) {
-    $remote = (string) file_get_contents($gitConfig);
+    preg_match_all('/^\s*url\s*=\s*(\S+)/mi', (string) file_get_contents($gitConfig), $m);
+    foreach ($m[1] as $u) {
+        $urls[] = preg_replace('#//[^/@]*@#', '//', $u);
+    }
 }
 
-$isTest = strpos($cwd, DIRECTORY_SEPARATOR . 'public_html' . DIRECTORY_SEPARATOR . 'test') !== false
-    || stripos($remote, 'pizi-beta') !== false;
-$source = $home . '/env-store/' . ($isTest ? 'test.env' : 'live.env');
+// Repo name = last path segment of each remote url.
+$repos = array_map(fn ($u) => strtolower(preg_replace('#\.git$#i', '', basename($u))), $urls);
+$fromBeta = in_array('pizi-beta', $repos, true);
+$fromLive = in_array('pizi', $repos, true);
 
-// A line per deploy so a wrong pick can be diagnosed afterwards.
+$target = null;
+if (strpos($cwd, DIRECTORY_SEPARATOR . 'public_html' . DIRECTORY_SEPARATOR . 'test') !== false) {
+    $target = 'test';
+} elseif ($fromBeta && !$fromLive) {
+    $target = 'test';
+} elseif ($fromLive && !$fromBeta) {
+    $target = 'live';
+}
+
 @file_put_contents(
     $home . '/env-store/restore-env.log',
-    date('c') . " cwd=$cwd remote_has_beta=" . (stripos($remote, 'pizi-beta') !== false ? 'yes' : 'no') . " -> " . basename($source) . "\n",
+    date('c') . " cwd=$cwd remotes=[" . implode(', ', $urls) . "] -> " . ($target ? "$target.env" : 'UNSURE, .env left untouched') . "\n",
     FILE_APPEND
 );
 
-if (file_exists($source)) {
-    copy($source, $cwd . '/.env');
+if ($target) {
+    $source = $home . '/env-store/' . $target . '.env';
+    if (file_exists($source)) {
+        copy($source, $cwd . '/.env');
+    }
 }
