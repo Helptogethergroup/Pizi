@@ -167,15 +167,19 @@ class OwnerController extends Controller
     public function profileUpdate(Request $request)
     {
         $user = $request->user();
-        $data = $request->only(['name', 'email', 'phone']);
+        $request->validate([
+            'name' => 'sometimes|required|string|max:150',
+            'avatar' => 'sometimes|file|image|max:4096',
+        ]);
+
+        // Phone, e-mail and password are not changed here: they need OTP or the
+        // current password (v2/auth/password/change), so a stolen token cannot take
+        // the account over.
+        $data = $request->only(['name']);
 
         if ($request->hasFile('avatar')) {
             $path = $request->file('avatar')->store('avatars', 'public');
             $data['avatar'] = $path;
-        }
-
-        if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
         }
 
         $data['updated_at'] = now();
@@ -1321,7 +1325,8 @@ class OwnerController extends Controller
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
         $oid    = $this->ownerId($request);
-        $tenant = DB::table('tenants')->where('id', $request->tenant_id)->first();
+        $tenant = DB::table('tenants')->where('id', $request->tenant_id)->where('owner_id', $oid)->first();
+        if (!$tenant) return $this->notFound();
         $rent   = $request->rent_amount;
         $total  = $rent + ($request->electricity ?? 0) + ($request->water ?? 0) + ($request->maintenance ?? 0) + ($request->food_charges ?? 0) + ($request->other_charges ?? 0) + ($request->late_fee ?? 0) - ($request->discount ?? 0);
         $billNo = 'BILL-' . date('Ym') . '-' . str_pad($tenant->id, 4, '0', STR_PAD_LEFT) . '-' . substr(uniqid(), -4);
@@ -1344,6 +1349,14 @@ class OwnerController extends Controller
     {
         $bill = DB::table('rent_bills')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
         if (!$bill) return $this->notFound();
+
+        $request->validate(['amount' => 'required|numeric|gt:0']);
+        if ((float) $request->amount > (float) $bill->due_amount + 0.009) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The amount is more than what is due on this bill.',
+            ], 422);
+        }
 
         $amount   = (float) $request->amount;
         $receiptNo = 'RCPT-' . date('Ymd') . '-' . substr(uniqid(), -6);
@@ -1876,9 +1889,41 @@ class OwnerController extends Controller
 
     public function complaintUpdateStatus(Request $request, $id)
     {
-        DB::table('complaints')->where('id', $id)->where('owner_id', $this->ownerId($request))->update([
-            'status' => $request->status, 'resolution_note' => $request->resolution_note, 'updated_at' => now(),
+        $data = $request->validate([
+            'status' => 'required|in:open,assigned,in_progress,resolved,closed,cancelled',
+            'resolution_note' => 'nullable|string|max:2000',
+            'resolution_notes' => 'nullable|string|max:2000',
         ]);
+
+        $complaint = \App\Models\Complaint::where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+        if (!$complaint) return $this->notFound();
+
+        // Same rules as the website's owner panel (Owner\ComplaintController@changeStatus).
+        $update = ['status' => $data['status']];
+        $closing = in_array($data['status'], ['resolved', 'closed']);
+        if ($closing && !$complaint->resolved_at) {
+            $update['resolved_at'] = now();
+        }
+        $note = $data['resolution_notes'] ?? $data['resolution_note'] ?? null;
+        if (!empty($note)) {
+            $update['resolution_notes'] = $note;
+        }
+
+        $wasClosed = in_array($complaint->status, ['resolved', 'closed']);
+        $complaint->update($update);
+
+        if (!$wasClosed && $closing && $complaint->tenant && $complaint->tenant->phone) {
+            try {
+                app(\App\Services\WhatsAppService::class)->sendTemplate(
+                    $complaint->tenant->phone,
+                    'complaint_resolved',
+                    [$complaint->tenant->name, $complaint->title]
+                );
+            } catch (\Throwable $e) {
+                \Log::warning('Complaint resolved WhatsApp alert failed: ' . $e->getMessage());
+            }
+        }
+
         return $this->ok(['message' => 'Status updated']);
     }
 
@@ -1920,7 +1965,8 @@ class OwnerController extends Controller
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
         $oid    = $this->ownerId($request);
-        $tenant = DB::table('tenants')->where('id', $request->tenant_id)->first();
+        $tenant = DB::table('tenants')->where('id', $request->tenant_id)->where('owner_id', $oid)->first();
+        if (!$tenant) return $this->notFound();
         $agrNo  = 'AGR-' . date('Ymd') . '-' . str_pad($tenant->id, 4, '0', STR_PAD_LEFT);
 
         $id = DB::table('rent_agreements')->insertGetId([
