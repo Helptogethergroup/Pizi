@@ -281,6 +281,8 @@ class AuthV2Controller extends Controller
             'email' => $pending['email'] ?: $pending['phone'] . '@temp.pizi.in',
             'password' => $pending['password'],
             'role' => 'owner',
+            // free sign-up, like the website's /register-free; credits are bought later
+            'signup_type' => 'free',
             'is_active' => true,
         ]);
 
