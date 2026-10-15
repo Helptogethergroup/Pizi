@@ -23,6 +23,10 @@ class SendTenantOverdueOwnerAlerts extends Command
 
         $sent = 0;
 
+        // The owner app gets one summary per owner per day, whether or not
+        // WhatsApp is configured (it is a different, free channel).
+        $this->notifyOwnersInApp($bills);
+
         foreach ($bills as $bill) {
             if (!$bill->owner || !$bill->owner->phone || !$bill->tenant) {
                 continue;
@@ -55,5 +59,27 @@ class SendTenantOverdueOwnerAlerts extends Command
 
         $this->info("Checked {$bills->count()} overdue bills, sent {$sent} owner alerts.");
         return self::SUCCESS;
+    }
+
+    private function notifyOwnersInApp($bills): void
+    {
+        foreach ($bills->filter(fn ($b) => $b->owner)->groupBy('owner_id') as $ownerBills) {
+            $owner = $ownerBills->first()->owner;
+            $key = 'rent_overdue_app_digest_' . $owner->id . '_' . now()->toDateString();
+            if (\Illuminate\Support\Facades\Cache::has($key)) {
+                continue;
+            }
+
+            try {
+                $owner->notify(new \App\Notifications\RentOverdueDigest(
+                    $ownerBills->count(),
+                    (float) $ownerBills->sum('due_amount'),
+                    $ownerBills->map(fn ($b) => $b->tenant?->name)->filter()->unique()->values()->all()
+                ));
+                \Illuminate\Support\Facades\Cache::put($key, true, now()->addDay());
+            } catch (\Throwable $e) {
+                \Log::warning('Rent overdue app digest failed: ' . $e->getMessage());
+            }
+        }
     }
 }

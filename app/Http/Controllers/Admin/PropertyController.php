@@ -51,6 +51,15 @@ public function verify(Property $property)
     // badge control kare, property ko site se hide na kare
     $property->save();
 
+    // Owner app: inbox + push, independent of WhatsApp.
+    if ($property->is_verified && $property->owner) {
+        try {
+            $property->owner->notify(new \App\Notifications\PropertyVerified($property->name, $property->id));
+        } catch (\Throwable $e) {
+            \Log::warning('Property verified app notification failed: ' . $e->getMessage());
+        }
+    }
+
     // Sirf verify hone par bhejo — unverify par nahi
     if ($property->is_verified && $property->owner && $property->owner->phone) {
         try {

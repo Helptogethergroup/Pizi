@@ -21,3 +21,8 @@ Schedule::command('rent:send-overdue-owner-alerts --days=5')->dailyAt('10:30');
 Schedule::command('admin:send-daily-summary')->dailyAt('21:00');
 Schedule::command('owner:send-daily-lead-count')->dailyAt('11:30');
 Schedule::command('visits:send-reminders --minutes=30')->everyFifteenMinutes();
+
+// Owner app notifications (inbox + push)
+Schedule::command('owner:notify-moveouts --days=3')->dailyAt('09:30');
+Schedule::command('owner:notify-leads-waiting --days=3')->dailyAt('12:30');
+Schedule::command('owner:send-monthly-summary')->monthlyOn(1, '09:00');

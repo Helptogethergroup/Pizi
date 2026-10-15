@@ -49,6 +49,14 @@ class FcmChannel
         'review_posted' => 'reviews',
         'credits_added' => 'wallet',
         'low_balance' => 'recharge',
+        'rent_overdue' => 'rent_bill',
+        'agreement_expiring' => 'agreements',
+        'notice_ending' => 'tenant_detail',
+        'property_verified' => 'home',
+        'token_received' => 'token_payments',
+        'vacant_beds' => 'rooms',
+        'leads_waiting' => 'lead_detail',
+        'monthly_summary' => 'insights',
     ];
 
     /**

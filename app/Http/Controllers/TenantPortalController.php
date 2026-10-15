@@ -801,7 +801,33 @@ public function tokenPay()
                 'updated_at'          => now(),
             ]);
 
+        $this->notifyOwnerOfToken((int) $request->token_payment_id);
+
         return redirect()->route('tenant.onboarding')->with('success', '✅ Token paid successfully!');
+    }
+
+    /** Tells the property's owner (inbox + push) that a token amount came in. */
+    private function notifyOwnerOfToken(int $tokenPaymentId): void
+    {
+        try {
+            $payment = DB::table('token_payments')->where('id', $tokenPaymentId)->first();
+            if (!$payment || $payment->status !== 'paid' || !$payment->property_id) {
+                return;
+            }
+            $property = \App\Models\Property::with('owner')->find($payment->property_id);
+            if (!$property || !$property->owner) {
+                return;
+            }
+            $tenantName = DB::table('users')->where('id', $payment->user_id)->value('name') ?: 'A tenant';
+            $property->owner->notify(new \App\Notifications\TokenPaymentReceived(
+                (float) $payment->amount,
+                $tenantName,
+                $property->name,
+                (int) $payment->id
+            ));
+        } catch (\Throwable $e) {
+            \Log::warning('Token payment owner notification failed: ' . $e->getMessage());
+        }
     }
 
     /**

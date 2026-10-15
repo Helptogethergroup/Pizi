@@ -28,6 +28,24 @@ class SendVacantRoomAlerts extends Command
         $sent = 0;
 
         foreach ($properties as $property) {
+            // The owner app, once a week per property, with or without WhatsApp.
+            if ($property->owner) {
+                $appKey = "vacant_beds_app_alert_{$property->id}";
+                if (!\Illuminate\Support\Facades\Cache::has($appKey)) {
+                    try {
+                        $property->owner->notify(new \App\Notifications\VacantBedsAlert(
+                            $property->name,
+                            (int) $property->available_rooms,
+                            (int) $days,
+                            $property->id
+                        ));
+                        \Illuminate\Support\Facades\Cache::put($appKey, true, now()->addDays(7));
+                    } catch (\Throwable $e) {
+                        \Log::warning('Vacant beds app alert failed: ' . $e->getMessage());
+                    }
+                }
+            }
+
             if (!$property->owner || !$property->owner->phone) {
                 continue;
             }
