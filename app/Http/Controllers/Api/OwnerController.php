@@ -112,9 +112,9 @@ class OwnerController extends Controller
             ->limit(10)
             ->get();
 
-        // Judged per person: a lead another owner paid for is still locked for this one.
-        $mine = \App\Models\Lead::unlockedIdsFor($request->user());
-        $recentLeads = $recentLeads->map(fn ($lead) => $this->formatLeadForApp($lead, in_array((int) $lead->id, $mine, true)));
+        // The dashboard only says that a lead came in. Phone and e-mail are never
+        // sent here (they are paid for): the Leads list gives them once unlocked.
+        $recentLeads = $recentLeads->map(fn ($lead) => $this->formatLeadForApp($lead, false));
 
         return $this->ok([
             'stats'        => $stats,

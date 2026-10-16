@@ -24,15 +24,12 @@ class DashboardController extends Controller
             ->with('property')
             ->latest()->take(10)->get();
 
-        // A lead's phone and email are what owners pay credits for: show them
-        // here only for leads this owner (or their team) has unlocked.
-        $unlocked = Lead::unlockedIdsFor($user);
-        $recentLeads->each(function ($lead) use ($unlocked) {
-            $lead->contact_visible = in_array((int) $lead->id, $unlocked, true);
-            if (!$lead->contact_visible) {
-                $lead->phone = Lead::maskPhone($lead->phone);
-                $lead->email = null;
-            }
+        // The dashboard only says that a lead came in. A lead's phone and email are
+        // what owners pay credits for, so they are never put on this page: they are
+        // on the Leads page, after the owner unlocks the lead.
+        $recentLeads->each(function ($lead) {
+            $lead->phone = null;
+            $lead->email = null;
         });
 
         $properties = Property::whereIn('id', $propertyIds)

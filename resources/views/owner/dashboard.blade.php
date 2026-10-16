@@ -52,7 +52,7 @@
         @forelse($recentLeads as $lead)
             <div class="py-2 border-t border-ink-900/5 first:border-t-0">
                 <div class="font-semibold text-sm">{{ $lead->name }}</div>
-                <div class="text-xs text-ink-900/50"><i class="fa-solid {{ $lead->contact_visible ?? false ? 'fa-phone' : 'fa-lock' }} fa-fw"></i> {{ $lead->phone }} · {{ $lead->property?->name }}</div>
+                <div class="text-xs text-ink-900/50"><i class="fa-solid fa-building fa-fw"></i> {{ $lead->property?->name }}</div>
                 <div class="text-xs text-ink-900/40 mt-1">{{ $lead->created_at->diffForHumans() }}</div>
             </div>
         @empty
