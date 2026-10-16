@@ -277,4 +277,33 @@ protected $fillable = [
 {
     return $this->belongsTo(User::class);
 }
+
+    /**
+     * Ids of the leads this person may see the contact details of: the ones they
+     * unlocked, or that anyone on their team unlocked (an owner and the PG
+     * Managers that owner created). This is the ONE place that decides it, so a
+     * lead someone else paid for never shows its phone or email to this owner.
+     */
+    public static function unlockedIdsFor(\App\Models\User $user): array
+    {
+        $teamOwnerId = $user->role === 'pg_manager' ? $user->owner_id : $user->id;
+
+        return \DB::table('lead_unlocks')
+            ->where(function ($q) use ($user, $teamOwnerId) {
+                $q->where('user_id', $user->id)->orWhere('owner_id', $teamOwnerId);
+            })
+            ->pluck('lead_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+    }
+
+    /** 98XXXXXX21 style: enough to recognise the lead, not enough to call it. */
+    public static function maskPhone(?string $phone): string
+    {
+        $digits = preg_replace('/\D/', '', (string) $phone);
+        if (strlen($digits) < 4) {
+            return 'XXXXXXXXXX';
+        }
+        return substr($digits, 0, 2) . str_repeat('X', max(strlen($digits) - 4, 4)) . substr($digits, -2);
+    }
 }

@@ -110,8 +110,11 @@ class OwnerController extends Controller
             ->select('leads.*', 'properties.name as property_name')
             ->orderBy('leads.created_at', 'desc')
             ->limit(10)
-            ->get()
-            ->map(fn ($lead) => $this->formatLeadForApp($lead));
+            ->get();
+
+        // Judged per person: a lead another owner paid for is still locked for this one.
+        $mine = \App\Models\Lead::unlockedIdsFor($request->user());
+        $recentLeads = $recentLeads->map(fn ($lead) => $this->formatLeadForApp($lead, in_array((int) $lead->id, $mine, true)));
 
         return $this->ok([
             'stats'        => $stats,
@@ -1158,7 +1161,7 @@ class OwnerController extends Controller
             'message' => $result['message'],
             'credits_spent' => $result['credits_spent'],
             'balance_remaining' => $result['balance_remaining'],
-            'lead' => $this->formatLeadForApp(DB::table('leads')->where('id', $id)->first()),
+            'lead' => $this->formatLeadForApp(DB::table('leads')->where('id', $id)->first(), true),
         ]);
     }
 
@@ -1168,10 +1171,10 @@ class OwnerController extends Controller
      * a correctly-named `is_unlocked` field, and masks phone/email until
      * unlocked. Used anywhere a single raw lead row needs to go to the app.
      */
-    private function formatLeadForApp($lead)
+    private function formatLeadForApp($lead, bool $unlockedForViewer)
     {
         $lead = (array) $lead;
-        $unlocked = (bool) ($lead['is_locked'] ?? false);
+        $unlocked = $unlockedForViewer;
         // Keep BOTH field names in the response — is_unlocked is the
         // correctly-named one going forward, but is_locked is kept too
         // (same true=unlocked value as the raw DB column) since existing
