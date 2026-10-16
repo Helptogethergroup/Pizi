@@ -1218,7 +1218,7 @@ class OwnerController extends Controller
                 'receipt'  => 'credits_' . $this->ownerId($request) . '_' . time(),
                 'notes'    => ['package_id' => $package->id, 'credits' => $package->credits],
             ]);
-            return $this->ok(['order_id' => $order->id, 'amount' => $package->price_inr * 100, 'package' => $package]);
+            return $this->ok(['order_id' => $order->id, 'amount' => $package->price_inr * 100, 'key_id' => config('services.razorpay.key'), 'package' => $package]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
