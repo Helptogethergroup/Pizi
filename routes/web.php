@@ -576,6 +576,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/pg-managers', [\App\Http\Controllers\Owner\PgManagerController::class, 'store'])->name('pg-managers.store');
     Route::patch('/pg-managers/{manager}', [\App\Http\Controllers\Owner\PgManagerController::class, 'updateProperties'])->name('pg-managers.update');
     Route::patch('/pg-managers/{manager}/toggle', [\App\Http\Controllers\Owner\PgManagerController::class, 'toggle'])->name('pg-managers.toggle');
+    Route::post('/pg-managers/{manager}/credits', [\App\Http\Controllers\Owner\PgManagerController::class, 'credits'])->name('pg-managers.credits');
     Route::delete('/pg-managers/{manager}', [\App\Http\Controllers\Owner\PgManagerController::class, 'destroy'])->name('pg-managers.destroy');
 });
 

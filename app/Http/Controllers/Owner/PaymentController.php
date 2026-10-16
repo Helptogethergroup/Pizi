@@ -16,6 +16,10 @@ class PaymentController extends Controller
 {
     public function packages()
     {
+        if (auth()->user()->role === 'pg_manager') {
+            return redirect()->route('owner.wallet')->with('error', 'Only the owner buys credits. Ask your owner to add credits to your account.');
+        }
+
         $packages = CreditPackage::where('is_active', true)
             ->orderBy('display_order')
             ->orderBy('price_inr')
@@ -28,6 +32,10 @@ class PaymentController extends Controller
 
     public function checkout(CreditPackage $package, PaymentService $paymentService)
     {
+        if (auth()->user()->role === 'pg_manager') {
+            return redirect()->route('owner.wallet')->with('error', 'Only the owner buys credits.');
+        }
+
         try {
             $payment = $paymentService->createOrder(auth()->user(), $package);
         } catch (RuntimeException $e) {

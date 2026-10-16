@@ -147,6 +147,9 @@
                 @if(auth()->user()->hasFeature('blogs'))
              <a href="{{ route('owner.blogs.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.blogs.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-pen-to-square fa-fw"></i> My Blogs</a>
                 @endif
+                @if(auth()->user()->role === 'pg_manager' && auth()->user()->hasFeature('leads'))
+                <a href="{{ route('owner.wallet') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.wallet') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> My Credits</a>
+                @endif
                              @if(auth()->user()->role === 'owner')
                 <a href="{{ route('owner.wallet') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.wallet') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> Wallet</a>
                 <a href="{{ route('owner.packages') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.packages') || request()->routeIs('owner.checkout') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-credit-card fa-fw"></i> Buy Credits</a>

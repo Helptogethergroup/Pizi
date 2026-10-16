@@ -100,7 +100,12 @@ public function leadsForOwner($owner, int $limit = 60)
     if ($properties->isEmpty()) return collect();
 
     // Leads unlocked by THIS owner
-    $unlockedByMe = \App\Models\LeadUnlock::where('user_id', $owner->id)
+    // Unlocked by this person, or (for an owner and their managers) by anyone on
+    // the same team, since the lead belongs to the owner.
+    $teamOwnerId = $owner->role === 'pg_manager' ? $owner->owner_id : $owner->id;
+    $unlockedByMe = \App\Models\LeadUnlock::where(function ($q) use ($owner, $teamOwnerId) {
+            $q->where('user_id', $owner->id)->orWhere('owner_id', $teamOwnerId);
+        })
         ->pluck('lead_id')->toArray();
 
     // Leads locked by ANYONE (including self) — EXCLUDING internal

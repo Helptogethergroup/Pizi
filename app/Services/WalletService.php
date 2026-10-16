@@ -71,6 +71,70 @@ class WalletService
         return $tx;
     }
     /**
+     * Move credits between an owner and one of that owner's PG Managers, in one
+     * step: both wallets are locked, the total never changes, and each side gets
+     * its own history line. $from pays, $to receives.
+     */
+    public function transferCredits(User $from, User $to, int $amount, ?User $actionedBy = null): array
+    {
+        if ($amount <= 0) {
+            throw new RuntimeException('Enter a number of credits greater than zero.');
+        }
+
+        $isOwnersManager = ($to->role === 'pg_manager' && (int) $to->owner_id === (int) $from->id)
+            || ($from->role === 'pg_manager' && (int) $from->owner_id === (int) $to->id);
+        if (!$isOwnersManager) {
+            throw new RuntimeException('Credits can only move between an owner and their own manager.');
+        }
+
+        return DB::transaction(function () use ($from, $to, $amount, $actionedBy) {
+            // Lock in a fixed order so two transfers never wait on each other.
+            $ids = [$from->id, $to->id];
+            sort($ids);
+            $wallets = [];
+            foreach ($ids as $id) {
+                $wallets[$id] = Wallet::lockForUpdate()->firstOrCreate(['user_id' => $id], ['balance' => 0]);
+            }
+            $src = $wallets[$from->id];
+            $dst = $wallets[$to->id];
+
+            if ($src->balance < $amount) {
+                throw new RuntimeException("Not enough credits. Available: {$src->balance}.");
+            }
+
+            $src->balance -= $amount;
+            $src->save();
+            $dst->balance += $amount;
+            $dst->lifetime_added += $amount;
+            $dst->save();
+
+            $toManager = $to->role === 'pg_manager';
+            WalletTransaction::create([
+                'wallet_id' => $src->id,
+                'user_id' => $from->id,
+                'type' => 'debit',
+                'amount' => $amount,
+                'balance_after' => $src->balance,
+                'source' => $toManager ? 'manager_transfer_out' : 'manager_transfer_in',
+                'notes' => $toManager ? "Given to {$to->name}" : "Returned to {$to->name}",
+                'actioned_by' => $actionedBy?->id,
+            ]);
+            WalletTransaction::create([
+                'wallet_id' => $dst->id,
+                'user_id' => $to->id,
+                'type' => 'credit',
+                'amount' => $amount,
+                'balance_after' => $dst->balance,
+                'source' => $toManager ? 'manager_transfer_in' : 'manager_transfer_out',
+                'notes' => $toManager ? "From {$from->name}" : "Taken back by {$to->name}",
+                'actioned_by' => $actionedBy?->id,
+            ]);
+
+            return ['from_balance' => $src->balance, 'to_balance' => $dst->balance];
+        });
+    }
+
+    /**
      * Debit credits from a user's wallet (admin action / expiry).
      */
     public function debit(
@@ -139,10 +203,15 @@ class WalletService
      */
     public function unlockLead(User $owner, Lead $lead): array
     {
-        // Already unlocked by this owner? Return success.
+        // A PG Manager pays from their own wallet, but the lead belongs to their owner.
+        $realOwnerId = $owner->role === 'pg_manager' ? (int) $owner->owner_id : (int) $owner->id;
+
+        // Already unlocked by this owner (or one of their managers)? Return success.
         $alreadyUnlocked = \DB::table('lead_unlocks')
             ->where('lead_id', $lead->id)
-            ->where('user_id', $owner->id)
+            ->where(function ($q) use ($owner, $realOwnerId) {
+                $q->where('user_id', $owner->id)->orWhere('owner_id', $realOwnerId);
+            })
             ->exists();
 
         if ($alreadyUnlocked) {
@@ -161,7 +230,7 @@ class WalletService
             throw new RuntimeException('Pricing not configured for this lead type. Please contact admin.');
         }
 
-        $result = DB::transaction(function () use ($owner, $lead, $cost) {
+        $result = DB::transaction(function () use ($owner, $lead, $cost, $realOwnerId) {
             $freshLead = Lead::lockForUpdate()->find($lead->id);
             if (!$freshLead) {
                 throw new RuntimeException('Lead no longer exists.');
@@ -171,6 +240,9 @@ class WalletService
             $lockedByOther = \DB::table('lead_unlocks')
                 ->where('lead_id', $freshLead->id)
                 ->where('user_id', '!=', $owner->id)
+                ->where(function ($q) use ($realOwnerId) {
+                    $q->whereNull('owner_id')->orWhere('owner_id', '!=', $realOwnerId);
+                })
                 ->exists();
 
             if ($lockedByOther) {
@@ -199,7 +271,7 @@ class WalletService
             \DB::table('lead_unlocks')->insert([
                 'lead_id' => $freshLead->id,
                 'user_id' => $owner->id,
-                'owner_id' => $owner->id,
+                'owner_id' => $realOwnerId,
                 'credits_spent' => $cost,
                 'lead_type_at_unlock' => $freshLead->lead_type ?? 'direct',
                 'created_at' => now(),

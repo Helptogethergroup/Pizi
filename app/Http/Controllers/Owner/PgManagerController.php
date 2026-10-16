@@ -35,13 +35,15 @@ class PgManagerController extends Controller
                 $manager->property_ids = $ids;
                 $manager->property_names = Property::whereIn('id', $ids)->pluck('name');
                 $manager->feature_list = json_decode($manager->permissions ?? '[]', true) ?: [];
+                $manager->credit_balance = (int) (DB::table('wallets')->where('user_id', $manager->id)->value('balance') ?? 0);
                 return $manager;
             });
 
         $myProperties = Property::where('owner_id', auth()->id())->orderBy('name')->get();
         $availableFeatures = self::AVAILABLE_FEATURES;
+        $ownerBalance = (int) (DB::table('wallets')->where('user_id', auth()->id())->value('balance') ?? 0);
 
-        return view('owner.pg-managers.index', compact('managers', 'myProperties', 'availableFeatures'));
+        return view('owner.pg-managers.index', compact('managers', 'myProperties', 'availableFeatures', 'ownerBalance'));
     }
 
     public function store(Request $request)
@@ -120,6 +122,36 @@ class PgManagerController extends Controller
         $manager->update(['permissions' => json_encode($data['features'] ?? [])]);
 
         return back()->with('success', 'Manager access updated.');
+    }
+
+    /**
+     * Give credits to a manager out of the owner's own wallet, or take unused
+     * ones back. Credits only move; none are created or lost.
+     */
+    public function credits(Request $request, User $manager, \App\Services\WalletService $wallets)
+    {
+        if ($manager->owner_id !== auth()->id() || $manager->role !== 'pg_manager') {
+            abort(403);
+        }
+
+        $data = $request->validate([
+            'amount' => 'required|integer|min:1|max:100000',
+            'direction' => 'required|in:give,take_back',
+        ]);
+
+        try {
+            if ($data['direction'] === 'give') {
+                $wallets->transferCredits(auth()->user(), $manager, (int) $data['amount'], auth()->user());
+                $msg = "✓ {$data['amount']} credits given to {$manager->name}.";
+            } else {
+                $wallets->transferCredits($manager, auth()->user(), (int) $data['amount'], auth()->user());
+                $msg = "✓ {$data['amount']} credits taken back from {$manager->name}.";
+            }
+        } catch (\RuntimeException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
+        return back()->with('success', $msg);
     }
 
     public function toggle(User $manager)

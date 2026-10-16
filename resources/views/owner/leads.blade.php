@@ -11,7 +11,11 @@
         <div class="px-4 py-2 bg-ink-950 text-cream rounded-xl font-bold">
             <i class="fa-solid fa-coins fa-fw"></i> {{ number_format($wallet->balance) }} credits
         </div>
+        @if(auth()->user()->role === 'pg_manager')
+            <span class="text-xs text-ink-900/60 max-w-[11rem]">Credits come from your owner. Ask them to add more.</span>
+        @else
         <a href="{{ route('owner.packages') }}" class="px-4 py-2 bg-coral-500 text-white rounded-xl font-bold">+ Buy Credits</a>
+        @endif
     </div>
 </div>
 

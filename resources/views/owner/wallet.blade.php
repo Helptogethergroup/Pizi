@@ -27,6 +27,13 @@
         </div>
     </div>
     
+    @if(auth()->user()->role === 'pg_manager')
+    <div class="p-8 rounded-2xl bg-coral-50 border border-coral-100">
+        <div class="text-xs uppercase tracking-wider text-coral-700">Need more credits?</div>
+        <h3 class="font-display font-bold text-2xl mt-2">Ask your owner</h3>
+        <p class="text-sm text-ink-900/60 mt-2">Your owner adds credits to your account. Only they can buy credits.</p>
+    </div>
+    @else
     <div class="p-8 rounded-2xl bg-coral-50 border border-coral-100">
         <div class="text-xs uppercase tracking-wider text-coral-700">Need more credits?</div>
         <h3 class="font-display font-bold text-2xl mt-2">Buy credits</h3>
@@ -36,6 +43,7 @@
         </a>
        
     </div>
+    @endif
 </div>
 
 {{-- Transactions --}}

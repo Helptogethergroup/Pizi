@@ -47,6 +47,8 @@ class WalletTransaction extends Model
             'refund'       => 'Refund',
             'bonus'        => 'Bonus credits',
             'expiry'       => 'Credits expired',
+            'manager_transfer_in'  => 'Credits from your owner',
+            'manager_transfer_out' => 'Credits moved to a manager',
             default        => ucfirst($this->source),
         };
     }

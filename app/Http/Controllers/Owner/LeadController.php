@@ -189,11 +189,6 @@ public function unlock(Lead $lead, WalletService $service)
     {
         $owner = auth()->user();
 
-        // Credits belong to the owner, so only the owner spends them on a lead.
-        if ($owner->role === 'pg_manager') {
-            return back()->withErrors(['unlock' => 'Only the owner can unlock leads. Ask your owner to unlock it.']);
-        }
-
         try {
             $result = $service->unlockLead($owner, $lead);
             $balance = $result['balance_remaining'] ?? $owner->wallet?->fresh()?->balance ?? 0;
@@ -350,9 +345,10 @@ public function unlock(Lead $lead, WalletService $service)
     private function authorizeOwnerLead(Lead $lead): void
     {
         $owner = auth()->user();
+        $teamOwnerId = $owner->role === 'pg_manager' ? $owner->owner_id : $owner->id;
         $isUnlocked = \DB::table('lead_unlocks')
             ->where('lead_id', $lead->id)
-            ->where('owner_id', $owner->id)
+            ->where('owner_id', $teamOwnerId)
             ->exists();
 
         if (!$isUnlocked) {

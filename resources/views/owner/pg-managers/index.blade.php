@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-6">
         <div>
             <h1 class="font-display font-black text-3xl">PG Managers</h1>
-            <p class="text-ink-900/60 mt-1">Create manager accounts and assign them to specific PGs.</p>
+            <p class="text-ink-900/60 mt-1">Create manager accounts, assign them to specific PGs and give them credits to unlock leads. Your balance: <b>{{ number_format($ownerBalance) }}</b> credits.</p>
         </div>
         <button onclick="document.getElementById('newManagerModal').classList.remove('hidden')"
             class="px-4 py-2 bg-coral-500 text-white rounded-lg font-semibold">+ Create Manager</button>
@@ -25,6 +25,7 @@
                     <th>Email / Phone</th>
                     <th>Assigned PGs</th>
                     <th>Access</th>
+                    <th>Credits</th>
                     <th>Status</th>
                     <th></th>
                 </tr>
@@ -49,6 +50,15 @@
                             @endforelse
                         </td>
                         <td>
+                            <div class="font-bold">{{ number_format($m->credit_balance) }}</div>
+                            <form method="POST" action="{{ route('owner.pg-managers.credits', $m) }}" class="mt-1 flex items-center gap-1">
+                                @csrf
+                                <input type="number" name="amount" min="1" required placeholder="Credits" class="w-20 text-xs border border-ink-900/15 rounded px-2 py-1">
+                                <button name="direction" value="give" class="text-xs px-2 py-1 rounded bg-emerald-600 text-white font-semibold">Give</button>
+                                <button name="direction" value="take_back" class="text-xs px-2 py-1 rounded border border-ink-900/15">Take back</button>
+                            </form>
+                        </td>
+                        <td>
                             <span class="text-xs px-2 py-1 rounded-full {{ $m->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700' }}">
                                 {{ $m->is_active ? 'Active' : 'Disabled' }}
                             </span>
@@ -67,7 +77,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="px-4 py-8 text-center text-ink-900/50">No PG Managers yet. Create one to delegate day-to-day PG handling.</td></tr>
+                    <tr><td colspan="7" class="px-4 py-8 text-center text-ink-900/50">No PG Managers yet. Create one to delegate day-to-day PG handling.</td></tr>
                 @endforelse
             </tbody>
         </table>
