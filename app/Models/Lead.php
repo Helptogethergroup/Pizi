@@ -306,4 +306,26 @@ protected $fillable = [
         }
         return substr($digits, 0, 2) . str_repeat('X', max(strlen($digits) - 4, 4)) . substr($digits, -2);
     }
+
+    /**
+     * Ids of the leads this person's team unlocked most recently, newest unlock
+     * first. These are the only leads the dashboard lists, so every number on it
+     * is one the owner already paid for.
+     */
+    public static function recentUnlockedIdsFor(\App\Models\User $user, int $limit = 10): array
+    {
+        $teamOwnerId = $user->role === 'pg_manager' ? $user->owner_id : $user->id;
+
+        return \DB::table('lead_unlocks')
+            ->where(function ($q) use ($user, $teamOwnerId) {
+                $q->where('user_id', $user->id)->orWhere('owner_id', $teamOwnerId);
+            })
+            ->orderByDesc('created_at')
+            ->pluck('lead_id')
+            ->unique()
+            ->take($limit)
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+    }
 }

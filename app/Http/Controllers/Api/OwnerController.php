@@ -103,18 +103,21 @@ class OwnerController extends Controller
         // Fix: add full URL for cover_image
         $properties = $this->mapPropertyImages($properties);
 
-        $recentLeads = $this->scopeProps(DB::table('leads')
-            ->leftJoin('properties', 'leads.property_id', '=', 'properties.id')
-            ->where('properties.owner_id', $oid)
-            ->whereNull('leads.deleted_at'), $request, 'leads.property_id')
-            ->select('leads.*', 'properties.name as property_name')
-            ->orderBy('leads.created_at', 'desc')
-            ->limit(10)
-            ->get();
-
-        // The dashboard only says that a lead came in. Phone and e-mail are never
-        // sent here (they are paid for): the Leads list gives them once unlocked.
-        $recentLeads = $recentLeads->map(fn ($lead) => $this->formatLeadForApp($lead, false));
+        // Only leads this owner's team already unlocked (newest unlock first). Their
+        // phone and e-mail are still not sent here: the Leads list has them.
+        $recentLeads = collect();
+        if ($request->user()->role !== 'pg_manager' || $request->user()->hasFeature('leads')) {
+            $ids = \App\Models\Lead::recentUnlockedIdsFor($request->user(), 10);
+            $rows = DB::table('leads')
+                ->leftJoin('properties', 'leads.property_id', '=', 'properties.id')
+                ->whereIn('leads.id', $ids)
+                ->whereNull('leads.deleted_at')
+                ->select('leads.*', 'properties.name as property_name')
+                ->get()
+                ->sortBy(fn ($lead) => array_search((int) $lead->id, $ids, true))
+                ->values();
+            $recentLeads = $rows->map(fn ($lead) => $this->formatLeadForApp($lead, false));
+        }
 
         return $this->ok([
             'stats'        => $stats,

@@ -20,17 +20,20 @@ class DashboardController extends Controller
             'total_leads' => Lead::whereIn('property_id', $propertyIds)->count(),
         ];
 
-        $recentLeads = Lead::whereIn('property_id', $propertyIds)
-            ->with('property')
-            ->latest()->take(10)->get();
-
-        // The dashboard only says that a lead came in. A lead's phone and email are
-        // what owners pay credits for, so they are never put on this page: they are
-        // on the Leads page, after the owner unlocks the lead.
-        $recentLeads->each(function ($lead) {
-            $lead->phone = null;
-            $lead->email = null;
-        });
+        // Only leads this owner (or their team) already unlocked, newest unlock first.
+        // Even for these the phone and email are not printed on the dashboard: they
+        // are on the Leads page, so the number lives in exactly one place.
+        $recentLeads = collect();
+        if ($user->hasFeature('leads')) {
+            $ids = Lead::recentUnlockedIdsFor($user, 10);
+            $recentLeads = Lead::whereIn('id', $ids)->with('property')->get()
+                ->sortBy(fn ($lead) => array_search((int) $lead->id, $ids, true))
+                ->values();
+            $recentLeads->each(function ($lead) {
+                $lead->phone = null;
+                $lead->email = null;
+            });
+        }
 
         $properties = Property::whereIn('id', $propertyIds)
             ->with(['city', 'locality'])

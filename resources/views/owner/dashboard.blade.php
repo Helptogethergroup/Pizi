@@ -48,15 +48,15 @@
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">Recent leads</h2>
+        <h2 class="font-display font-bold text-xl mb-4">Recent unlocked leads</h2>
         @forelse($recentLeads as $lead)
             <div class="py-2 border-t border-ink-900/5 first:border-t-0">
                 <div class="font-semibold text-sm">{{ $lead->name }}</div>
-                <div class="text-xs text-ink-900/50"><i class="fa-solid fa-building fa-fw"></i> {{ $lead->property?->name }}</div>
+                <div class="text-xs text-ink-900/50"><i class="fa-solid fa-building fa-fw"></i> {{ $lead->property?->name ?? 'General enquiry' }}</div>
                 <div class="text-xs text-ink-900/40 mt-1">{{ $lead->created_at->diffForHumans() }}</div>
             </div>
         @empty
-            <p class="text-ink-900/50 text-sm">No leads yet.</p>
+            <p class="text-ink-900/50 text-sm">No unlocked leads yet. Unlock a lead from the <a href="{{ route('owner.leads.index') }}" class="text-coral-500 font-semibold">Leads</a> page and it will show here.</p>
         @endforelse
     </div>
 </div>
