@@ -94,7 +94,7 @@ class LeadMatchingService
      */
 public function leadsForOwner($owner, int $limit = 60)
 {
-    $properties = $owner->properties()->where('is_active', true)
+    $properties = $owner->leadProperties()->where('is_active', true)
         ->with(['city', 'locality'])->get();
 
     if ($properties->isEmpty()) return collect();

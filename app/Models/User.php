@@ -119,6 +119,15 @@ class User extends Authenticatable
         return $this->hasMany(Property::class, 'owner_id');
     }
 
+    /**
+     * The properties whose leads this user may see: an owner's own, or for a
+     * PG Manager only the ones the owner assigned (a manager owns none).
+     */
+    public function leadProperties()
+    {
+        return Property::whereIn('id', $this->getManagedPropertyIds());
+    }
+
     public function tenants()
     {
         return $this->hasMany(Tenant::class, 'owner_id');

@@ -171,7 +171,7 @@ class LeadController extends Controller
 
         // Localities the owner actually has a property in — filter options
         // for "which locality is this lead for".
-        $localities = $owner->properties()->where('is_active', true)
+        $localities = $owner->leadProperties()->where('is_active', true)
             ->with('locality')->get()
             ->pluck('locality.name')->filter()->unique()->values();
 
@@ -188,6 +188,11 @@ class LeadController extends Controller
 public function unlock(Lead $lead, WalletService $service)
     {
         $owner = auth()->user();
+
+        // Credits belong to the owner, so only the owner spends them on a lead.
+        if ($owner->role === 'pg_manager') {
+            return back()->withErrors(['unlock' => 'Only the owner can unlock leads. Ask your owner to unlock it.']);
+        }
 
         try {
             $result = $service->unlockLead($owner, $lead);
