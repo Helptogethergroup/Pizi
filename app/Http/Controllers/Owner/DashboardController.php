@@ -35,10 +35,26 @@ class DashboardController extends Controller
             });
         }
 
+        // The newest matched leads this owner has NOT unlocked yet. Name and area only;
+        // the number stays hidden until the owner unlocks the lead.
+        $lockedLeads = collect();
+        if ($user->hasFeature('leads')) {
+            $lockedLeads = app(\App\Services\LeadMatchingService::class)
+                ->leadsForOwner($user, 60)
+                ->where('is_unlocked', false)
+                ->sortByDesc('created_at')
+                ->take(10)
+                ->values();
+            $lockedLeads->each(function ($lead) {
+                $lead->phone = null;
+                $lead->email = null;
+            });
+        }
+
         $properties = Property::whereIn('id', $propertyIds)
             ->with(['city', 'locality'])
             ->latest()->take(5)->get();
 
-        return view('owner.dashboard', compact('stats', 'recentLeads', 'properties'));
+        return view('owner.dashboard', compact('stats', 'recentLeads', 'lockedLeads', 'properties'));
     }
 }

@@ -119,10 +119,29 @@ class OwnerController extends Controller
             $recentLeads = $rows->map(fn ($lead) => $this->formatLeadForApp($lead, false));
         }
 
+        // Matched leads this person has not unlocked yet: name and area only.
+        $recentLocked = collect();
+        if ($request->user()->role !== 'pg_manager' || $request->user()->hasFeature('leads')) {
+            $recentLocked = app(\App\Services\LeadMatchingService::class)
+                ->leadsForOwner($request->user(), 60)
+                ->where('is_unlocked', false)
+                ->sortByDesc('created_at')
+                ->take(10)
+                ->map(fn ($l) => [
+                    'id' => $l->id,
+                    'name' => $l->name,
+                    'location' => $l->preferred_locality ?: ($l->preferred_city ?: ($l->property?->name)),
+                    'unlock_cost' => $l->unlock_cost ?? null,
+                    'created_at' => $l->created_at,
+                ])
+                ->values();
+        }
+
         return $this->ok([
-            'stats'        => $stats,
-            'properties'   => $properties,
-            'recent_leads' => $recentLeads,
+            'stats'               => $stats,
+            'properties'          => $properties,
+            'recent_leads'        => $recentLeads,
+            'recent_locked_leads' => $recentLocked,
         ]);
     }
 

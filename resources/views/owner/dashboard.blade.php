@@ -29,7 +29,7 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
-    <div class="lg:col-span-2 bg-white p-6 rounded-2xl border border-ink-900/10">
+    <div class="lg:col-span-3 bg-white p-6 rounded-2xl border border-ink-900/10">
         <div class="flex justify-between items-center mb-4">
             <h2 class="font-display font-bold text-xl">Your properties</h2>
             <a href="{{ route('owner.properties.create') }}" class="px-4 py-2 bg-coral-500 text-white rounded-lg font-semibold text-sm">+ Add new</a>
@@ -47,16 +47,39 @@
         @endforelse
     </div>
 
+</div>
+
+{{-- Two lists side by side. No phone number or email is ever printed here: numbers are on the Leads page, after a lead is unlocked. --}}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">Recent unlocked leads</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-display font-bold text-xl"><i class="fa-solid fa-lock-open fa-fw text-emerald-600"></i> Recent unlocked leads</h2>
+            <a href="{{ route('owner.leads.index', ['tab' => 'unlocked']) }}" class="text-coral-600 text-sm font-semibold">All →</a>
+        </div>
         @forelse($recentLeads as $lead)
-            <div class="py-2 border-t border-ink-900/5 first:border-t-0">
+            <a href="{{ route('owner.leads.show', $lead) }}" class="block py-2 border-t border-ink-900/5 first:border-t-0 hover:bg-ink-900/[0.02] rounded">
                 <div class="font-semibold text-sm">{{ $lead->name }}</div>
-                <div class="text-xs text-ink-900/50"><i class="fa-solid fa-building fa-fw"></i> {{ $lead->property?->name ?? 'General enquiry' }}</div>
+                <div class="text-xs text-ink-900/50"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $lead->preferred_locality ?: ($lead->preferred_city ?: ($lead->property?->name ?? 'Location not given')) }}</div>
                 <div class="text-xs text-ink-900/40 mt-1">{{ $lead->created_at->diffForHumans() }}</div>
-            </div>
+            </a>
         @empty
-            <p class="text-ink-900/50 text-sm">No unlocked leads yet. Unlock a lead from the <a href="{{ route('owner.leads.index') }}" class="text-coral-500 font-semibold">Leads</a> page and it will show here.</p>
+            <p class="text-ink-900/50 text-sm">No unlocked leads yet. Unlock one from the Leads page and it will show here.</p>
+        @endforelse
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-display font-bold text-xl"><i class="fa-solid fa-lock fa-fw text-amber-600"></i> Recent locked leads</h2>
+            <a href="{{ route('owner.leads.index') }}" class="text-coral-600 text-sm font-semibold">Unlock →</a>
+        </div>
+        @forelse($lockedLeads as $lead)
+            <a href="{{ route('owner.leads.index') }}" class="block py-2 border-t border-ink-900/5 first:border-t-0 hover:bg-ink-900/[0.02] rounded">
+                <div class="font-semibold text-sm">{{ $lead->name }}</div>
+                <div class="text-xs text-ink-900/50"><i class="fa-solid fa-location-dot fa-fw"></i> {{ $lead->preferred_locality ?: ($lead->preferred_city ?: ($lead->property?->name ?? 'Location not given')) }}</div>
+                <div class="text-xs text-ink-900/40 mt-1">{{ $lead->created_at->diffForHumans() }} · phone hidden until you unlock</div>
+            </a>
+        @empty
+            <p class="text-ink-900/50 text-sm">No new leads waiting for you right now.</p>
         @endforelse
     </div>
 </div>
