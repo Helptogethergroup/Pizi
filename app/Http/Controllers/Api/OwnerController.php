@@ -1202,6 +1202,12 @@ class OwnerController extends Controller
         // (same true=unlocked value as the raw DB column) since existing
         // app code reads that field name and a lead can look "still
         // locked" in the app despite the unlock/credit-deduct succeeding.
+        // DECIMAL columns come out of the database as text ("10000.00"); the apps want numbers.
+        foreach (['budget_min', 'budget_max'] as $money) {
+            if (isset($lead[$money]) && is_numeric($lead[$money])) {
+                $lead[$money] = $lead[$money] + 0;
+            }
+        }
         $lead['is_locked'] = $unlocked;
         $lead['is_unlocked'] = $unlocked;
         // WalletService::unlockLead() doesn't set locked_at, only
