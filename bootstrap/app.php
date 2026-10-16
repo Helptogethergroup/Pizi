@@ -22,6 +22,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
       $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'pizi.auth' => \App\Http\Middleware\PiziAuthenticate::class,
+            'manager.api' => \App\Http\Middleware\ManagerApiAccess::class,
             'tenant.journey' => \App\Http\Middleware\EnsureTenantJourneyComplete::class,
             'owner.paid' => \App\Http\Middleware\EnsureOwnerHasPaid::class,
             'feature' => \App\Http\Middleware\CheckFeature::class,

@@ -17,5 +17,6 @@ return [
     'require_otp_on_new_device' => (bool) env('API_OTP_ON_NEW_DEVICE', true),
 
     // Only these roles may sign in through the owner app.
-    'allowed_roles' => ['owner'],
+    // A PG Manager signs in with the login their owner created for them.
+    'allowed_roles' => ['owner', 'pg_manager'],
 ];

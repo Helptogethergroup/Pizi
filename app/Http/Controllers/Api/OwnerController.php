@@ -13,9 +13,28 @@ use Illuminate\Support\Str;
 
 class OwnerController extends Controller
 {
+    /** The owner whose data this request works on (a PG Manager works on their owner's). */
     private function ownerId(Request $request): int
     {
-        return $request->user()->id;
+        $u = $request->user();
+        return $u->role === 'pg_manager' ? (int) $u->owner_id : (int) $u->id;
+    }
+
+    /** null for an owner (no limit); the assigned property ids for a PG Manager. */
+    private function managedIds(Request $request): ?array
+    {
+        $u = $request->user();
+        return $u->role === 'pg_manager' ? $u->getManagedPropertyIds()->map(fn ($i) => (int) $i)->all() : null;
+    }
+
+    /** Limits a query to the manager's properties; does nothing for an owner. */
+    private function scopeProps($query, Request $request, string $column)
+    {
+        $ids = $this->managedIds($request);
+        if ($ids !== null) {
+            $query->whereIn($column, $ids ?: [0]);
+        }
+        return $query;
     }
 
     // ─── Image URL helper ────────────────────────────────────────────────────
@@ -54,27 +73,29 @@ class OwnerController extends Controller
     public function dashboard(Request $request)
     {
         $oid = $this->ownerId($request);
+        $ids = $this->managedIds($request);
+        // A table that carries property_id: this owner's rows, narrowed to the manager's properties.
+        $t = fn (string $table) => $this->scopeProps(DB::table($table)->where('owner_id', $oid), $request, 'property_id');
+        $props = fn () => $this->scopeProps(DB::table('properties')->where('owner_id', $oid)->whereNull('deleted_at'), $request, 'id');
+        $propIds = fn () => $this->scopeProps(DB::table('properties')->where('owner_id', $oid)->select('id'), $request, 'id');
 
         $stats = [
-            'total_properties'  => DB::table('properties')->where('owner_id', $oid)->whereNull('deleted_at')->count(),
-            'active_properties' => DB::table('properties')->where('owner_id', $oid)->where('is_active', 1)->whereNull('deleted_at')->count(),
-            'total_views'       => DB::table('properties')->where('owner_id', $oid)->whereNull('deleted_at')->sum('view_count') ?? 0,
-            'total_leads'       => DB::table('leads')->whereNull('leads.deleted_at')->whereIn('property_id', function ($q) use ($oid) {
-                $q->select('id')->from('properties')->where('owner_id', $oid);
-            })->count(),
-            'active_tenants'    => DB::table('tenants')->where('owner_id', $oid)->where('status', 'active')->count(),
-            'pending_dues'      => (float) DB::table('rent_bills')->where('owner_id', $oid)->whereIn('status', ['pending', 'partial', 'overdue'])->sum('due_amount'),
-            'open_complaints'   => DB::table('complaints')->where('owner_id', $oid)->whereIn('status', ['open', 'assigned', 'in_progress'])->count(),
-            'total_rooms'       => DB::table('rooms')->where('owner_id', $oid)->whereNull('deleted_at')->count(),
-            'vacant_beds'       => DB::table('beds')->where('owner_id', $oid)->whereNull('deleted_at')->where('status', 'vacant')->count(),
-            'occupied_beds'     => DB::table('beds')->where('owner_id', $oid)->whereNull('deleted_at')->where('status', 'occupied')->count(),
+            'total_properties'  => $props()->count(),
+            'active_properties' => $props()->where('is_active', 1)->count(),
+            'total_views'       => $props()->sum('view_count') ?? 0,
+            'total_leads'       => DB::table('leads')->whereNull('leads.deleted_at')->whereIn('property_id', $propIds())->count(),
+            'active_tenants'    => $t('tenants')->where('status', 'active')->count(),
+            'pending_dues'      => (float) $t('rent_bills')->whereIn('status', ['pending', 'partial', 'overdue'])->sum('due_amount'),
+            'open_complaints'   => $t('complaints')->whereIn('status', ['open', 'assigned', 'in_progress'])->count(),
+            'total_rooms'       => $t('rooms')->whereNull('deleted_at')->count(),
+            'vacant_beds'       => $t('beds')->whereNull('deleted_at')->where('status', 'vacant')->count(),
+            'occupied_beds'     => $t('beds')->whereNull('deleted_at')->where('status', 'occupied')->count(),
             'month_collection'  => (float) DB::table('rent_payments')->where('owner_id', $oid)
+                ->when($ids !== null, fn ($q) => $q->whereIn('rent_bill_id', DB::table('rent_bills')->where('owner_id', $oid)->whereIn('property_id', $ids ?: [0])->select('id')))
                 ->whereRaw("DATE_FORMAT(paid_at, '%Y-%m') = ?", [date('Y-m')])->sum('amount'),
         ];
 
-        $properties = DB::table('properties')
-            ->where('owner_id', $oid)
-            ->whereNull('deleted_at')
+        $properties = $props()
             ->select('id', 'name', 'slug', 'cover_image', 'is_active', 'is_verified', 'view_count')
             ->limit(10)
             ->get();
@@ -82,10 +103,10 @@ class OwnerController extends Controller
         // Fix: add full URL for cover_image
         $properties = $this->mapPropertyImages($properties);
 
-        $recentLeads = DB::table('leads')
+        $recentLeads = $this->scopeProps(DB::table('leads')
             ->leftJoin('properties', 'leads.property_id', '=', 'properties.id')
             ->where('properties.owner_id', $oid)
-            ->whereNull('leads.deleted_at')
+            ->whereNull('leads.deleted_at'), $request, 'leads.property_id')
             ->select('leads.*', 'properties.name as property_name')
             ->orderBy('leads.created_at', 'desc')
             ->limit(10)
@@ -198,6 +219,7 @@ class OwnerController extends Controller
             ->leftJoin('localities', 'properties.locality_id', '=', 'localities.id')
             ->where('properties.owner_id', $this->ownerId($request))
             ->whereNull('properties.deleted_at')
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 'properties.id'))
             ->select('properties.*', 'cities.name as city_name', 'localities.name as locality_name')
             ->orderBy('properties.created_at', 'desc')
             ->get();
@@ -216,6 +238,7 @@ class OwnerController extends Controller
             ->leftJoin('universities', 'properties.nearby_university_id', '=', 'universities.id')
             ->where('properties.id', $id)
             ->where('properties.owner_id', $this->ownerId($request))
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 'properties.id'))
             ->select('properties.*', 'cities.name as city_name', 'localities.name as locality_name', 'universities.name as nearby_university_name')
             ->first();
 
@@ -978,9 +1001,9 @@ class OwnerController extends Controller
         $owner = $request->user();
         $allMatched = $matcher->leadsForOwner($owner, 300);
 
-        $properties = \App\Models\Property::where('owner_id', $owner->id)->get(['id', 'name']);
+        $properties = $owner->leadProperties()->get(['id', 'name']);
         $sources = $allMatched->pluck('source')->filter()->unique()->values();
-        $localities = $owner->properties()->where('is_active', true)
+        $localities = $owner->leadProperties()->where('is_active', true)
             ->with('locality')->get()
             ->pluck('locality.name')->filter()->unique()->values();
         $pricing = DB::table('lead_pricing')->where('is_active', true)->get(['lead_type', 'credit_cost']);
@@ -1009,7 +1032,10 @@ class OwnerController extends Controller
         $lead = \App\Models\Lead::find($id);
         if (!$lead) return $this->notFound();
 
-        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where('user_id', $owner->id)->exists();
+        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where(function ($q) use ($owner) {
+            $q->where('user_id', $owner->id)
+              ->orWhere('owner_id', $owner->role === 'pg_manager' ? $owner->owner_id : $owner->id);
+        })->exists();
         if (!$isUnlocked) {
             return response()->json(['success' => false, 'message' => 'You must unlock this lead before updating its status.'], 403);
         }
@@ -1043,7 +1069,10 @@ class OwnerController extends Controller
     public function leadAddRemark(Request $request, $id)
     {
         $owner = $request->user();
-        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where('user_id', $owner->id)->exists();
+        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where(function ($q) use ($owner) {
+            $q->where('user_id', $owner->id)
+              ->orWhere('owner_id', $owner->role === 'pg_manager' ? $owner->owner_id : $owner->id);
+        })->exists();
         if (!$isUnlocked) {
             return response()->json(['success' => false, 'message' => 'You must unlock this lead before adding a remark.'], 403);
         }
@@ -1067,7 +1096,10 @@ class OwnerController extends Controller
     public function leadTimeline(Request $request, $id)
     {
         $owner = $request->user();
-        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where('user_id', $owner->id)->exists();
+        $isUnlocked = DB::table('lead_unlocks')->where('lead_id', $id)->where(function ($q) use ($owner) {
+            $q->where('user_id', $owner->id)
+              ->orWhere('owner_id', $owner->role === 'pg_manager' ? $owner->owner_id : $owner->id);
+        })->exists();
         if (!$isUnlocked) {
             return response()->json(['success' => false, 'message' => 'You must unlock this lead to view its timeline.'], 403);
         }
@@ -1192,7 +1224,8 @@ class OwnerController extends Controller
     // ═══════════════════════════════════════════════════════════════
     public function wallet(Request $request)
     {
-        $oid = $this->ownerId($request);
+        // a PG Manager sees their own credits, not the owner's
+        $oid = (int) $request->user()->id;
         $wallet = DB::table('wallets')->where('user_id', $oid)->first();
         $transactions = DB::table('wallet_transactions')->where('user_id', $oid)->orderBy('created_at', 'desc')->limit(20)->get();
         return $this->ok(['wallet' => $wallet, 'transactions' => $transactions]);
@@ -1296,6 +1329,7 @@ class OwnerController extends Controller
             ->leftJoin('tenants as t', 'rb.tenant_id', '=', 't.id')
             ->leftJoin('properties as p', 'rb.property_id', '=', 'p.id')
             ->where('rb.owner_id', $oid)
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 'rb.property_id'))
             ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 'p.name as property_name')
             ->orderBy('rb.created_at', 'desc');
 
@@ -1308,7 +1342,7 @@ class OwnerController extends Controller
 
     public function rentShow(Request $request, $id)
     {
-        $bill = DB::table('rent_bills')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+        $bill = $this->scopeProps(DB::table('rent_bills')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
         if (!$bill) return $this->notFound();
         $bill->payments = DB::table('rent_payments')->where('rent_bill_id', $id)->orderBy('paid_at', 'desc')->get();
         return $this->ok($bill);
@@ -1347,7 +1381,7 @@ class OwnerController extends Controller
 
     public function rentPayment(Request $request, $id)
     {
-        $bill = DB::table('rent_bills')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+        $bill = $this->scopeProps(DB::table('rent_bills')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
         if (!$bill) return $this->notFound();
 
         $request->validate(['amount' => 'required|numeric|gt:0']);
@@ -1411,6 +1445,7 @@ class OwnerController extends Controller
         $query = DB::table('tenants as t')
             ->leftJoin('properties as p', 't.property_id', '=', 'p.id')
             ->where('t.owner_id', $oid)
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 't.property_id'))
             ->select('t.*', 'p.name as property_name')
             ->orderBy('t.created_at', 'desc');
 
@@ -1426,7 +1461,7 @@ class OwnerController extends Controller
 
     public function tenantShow(Request $request, $id)
     {
-        $tenant = DB::table('tenants')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+        $tenant = $this->scopeProps(DB::table('tenants')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
         if (!$tenant) return $this->notFound();
 
         $tenant = (array) $tenant;
@@ -1616,6 +1651,7 @@ class OwnerController extends Controller
     {
         $oid = $this->ownerId($request);
         $query = DB::table('rooms')->where('owner_id', $oid)->whereNull('deleted_at')->orderBy('created_at', 'desc');
+        $this->scopeProps($query, $request, 'property_id');
         if ($request->property_id) $query->where('property_id', $request->property_id);
         $rooms = $query->get();
         $roomIds = $rooms->pluck('id');
@@ -1632,7 +1668,7 @@ class OwnerController extends Controller
 
     public function roomShow(Request $request, $id)
     {
-        $room = DB::table('rooms')->where('id', $id)->where('owner_id', $this->ownerId($request))->whereNull('deleted_at')->first();
+        $room = $this->scopeProps(DB::table('rooms')->where('id', $id)->where('owner_id', $this->ownerId($request))->whereNull('deleted_at'), $request, 'property_id')->first();
         if (!$room) return $this->notFound();
         $room = (array) $room;
         $room['beds'] = DB::table('beds')->where('room_id', $id)->whereNull('deleted_at')->get();
@@ -1874,6 +1910,7 @@ class OwnerController extends Controller
             ->leftJoin('tenants as t', 'c.tenant_id', '=', 't.id')
             ->leftJoin('properties as p', 'c.property_id', '=', 'p.id')
             ->where('c.owner_id', $oid)
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 'c.property_id'))
             ->select('c.*', 't.name as tenant_name', 'p.name as property_name')
             ->orderBy('c.created_at', 'desc');
         if ($request->status) $query->where('c.status', $request->status);
@@ -1882,7 +1919,7 @@ class OwnerController extends Controller
 
     public function complaintShow(Request $request, $id)
     {
-        $c = DB::table('complaints')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+        $c = $this->scopeProps(DB::table('complaints')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
         if (!$c) return $this->notFound();
         return $this->ok($c);
     }
@@ -1895,7 +1932,7 @@ class OwnerController extends Controller
             'resolution_notes' => 'nullable|string|max:2000',
         ]);
 
-        $complaint = \App\Models\Complaint::where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+        $complaint = $this->scopeProps(\App\Models\Complaint::where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
         if (!$complaint) return $this->notFound();
 
         // Same rules as the website's owner panel (Owner\ComplaintController@changeStatus).

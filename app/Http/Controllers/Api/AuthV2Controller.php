@@ -575,6 +575,11 @@ class AuthV2Controller extends Controller
             'phone' => $user->phone,
             'role' => $user->role,
             'avatar' => $user->avatar ?? null,
+            // what a PG Manager may open; owners get everything
+            'permissions' => $user->role === 'pg_manager'
+                ? (json_decode($user->permissions ?? '[]', true) ?: [])
+                : null,
+            'owner_id' => $user->role === 'pg_manager' ? $user->owner_id : null,
         ];
     }
 

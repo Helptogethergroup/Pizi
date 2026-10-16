@@ -172,7 +172,7 @@ Route::middleware('pizi.auth')->group(function () {
 // Dhundho: Route::prefix('owner')->middleware('role:owner,admin')->group(function () {
 // Aur poora block (closing }); tak) replace karo
 
-Route::prefix('owner')->middleware('role:owner,admin')->group(function () {
+Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'])->group(function () {
     Route::get('/dashboard',  [OwnerController::class, 'dashboard']);
     Route::get('/analytics',  [OwnerController::class, 'analytics']);
     Route::get('/profile',    [OwnerController::class, 'profile']);
@@ -212,6 +212,14 @@ Route::prefix('owner')->middleware('role:owner,admin')->group(function () {
     Route::post('/tenants/{id}/checklist/{kind}', [OwnerController::class, 'checklistSave']);
     Route::get('/tenants/{id}/meter',          [OwnerController::class, 'meterShow']);
     Route::post('/tenants/{id}/meter',         [OwnerController::class, 'meterStore']);
+
+    // PG Managers: only the owner (manager.api refuses a manager on these)
+    Route::get('/managers',                   [\App\Http\Controllers\Api\ManagerAdminController::class, 'index']);
+    Route::post('/managers',                  [\App\Http\Controllers\Api\ManagerAdminController::class, 'store']);
+    Route::post('/managers/{id}',             [\App\Http\Controllers\Api\ManagerAdminController::class, 'update']);
+    Route::post('/managers/{id}/toggle',      [\App\Http\Controllers\Api\ManagerAdminController::class, 'toggle']);
+    Route::post('/managers/{id}/credits',     [\App\Http\Controllers\Api\ManagerAdminController::class, 'credits']);
+    Route::delete('/managers/{id}',           [\App\Http\Controllers\Api\ManagerAdminController::class, 'destroy']);
 
     // Expenses
     Route::get('/expenses',          [OwnerController::class, 'expenses']);
