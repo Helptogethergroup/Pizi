@@ -22,7 +22,8 @@ class ManagerApiAccess
         'GET owner/dashboard' => '',
         'GET owner/profile' => '',
 
-        'GET owner/properties' => 'properties',
+        // the list only names the manager's own properties; tenants, rooms and rent need it
+        'GET owner/properties' => '',
         'GET owner/properties/{id}' => 'properties',
 
         'GET owner/leads' => 'leads',
