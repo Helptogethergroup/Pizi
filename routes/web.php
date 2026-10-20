@@ -275,8 +275,7 @@ Route::middleware(['auth', 'role:owner,admin,pg_manager', 'owner.paid'])->prefix
     Route::get('/', [\App\Http\Controllers\Owner\DashboardController::class, 'index'])->name('dashboard');
     Route::resource('properties', \App\Http\Controllers\Owner\PropertyController::class)
         ->except(['show']);
-    Route::patch('properties/{property}/toggle', [\App\Http\Controllers\Owner\PropertyController::class, 'toggle'])
-        ->name('properties.toggle');
+    // Switching a listing on or off is the admin's call, not the owner's.
         
 //         Route::get('/pg-managers', [\App\Http\Controllers\Owner\PgManagerController::class, 'index'])->name('pg-managers.index');
 // Route::post('/pg-managers', [\App\Http\Controllers\Owner\PgManagerController::class, 'store'])->name('pg-managers.store');

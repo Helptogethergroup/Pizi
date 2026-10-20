@@ -687,7 +687,6 @@ class OwnerController extends Controller
             'meta_description'      => 'nullable|string',
             'cover_image'           => 'nullable|string',
             'cover_image_file'      => 'nullable|image|max:5120',
-            'is_active'             => 'nullable|boolean',
             'amenities'             => 'nullable|array',
             'amenities.*'           => 'integer|exists:amenities,id',
             'images'                => 'nullable|array',
@@ -703,7 +702,7 @@ class OwnerController extends Controller
             'food_type', 'construction_year', 'pet_allowed', 'guest_entry_allowed',
             'address_line', 'landmark', 'nearby_police_station', 'pincode', 'latitude', 'longitude',
             'google_map_link', 'total_rooms', 'available_rooms', 'meta_title', 'meta_description',
-            'cover_image', 'is_active',
+            'cover_image',
         ]);
         $effectiveCityId = $request->filled('city_id') ? (int) $request->city_id : $property->city_id;
         if ($request->filled('locality_id') || $request->filled('locality_name')) {
@@ -737,12 +736,6 @@ class OwnerController extends Controller
         if (!$property) return $this->notFound();
         DB::table('properties')->where('id', $id)->update(['deleted_at' => now()]);
         return $this->ok(['message' => 'Deleted']);
-    }
-
-    public function propertyPause(Request $request, $id)
-    {
-        DB::table('properties')->where('id', $id)->where('owner_id', $this->ownerId($request))->update(['is_active' => DB::raw('1 - is_active')]);
-        return $this->ok(['message' => 'Toggled']);
     }
 
     // Accepts either a single file under "image" (original behaviour) OR

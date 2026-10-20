@@ -356,14 +356,6 @@ public function update(Request $request, Property $property)
     }
 }
 
-    public function toggle(Property $property)
-    {
-        $this->authorizeOwner($property);
-        $property->is_active = !$property->is_active;
-        $property->save();
-        return back()->with('success', 'Listing status updated.');
-    }
-
     public function destroy(Property $property)
     {
         $this->authorizeOwner($property);

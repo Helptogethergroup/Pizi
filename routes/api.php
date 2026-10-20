@@ -185,7 +185,6 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     // PUT/PATCH too: multipart forms from the app often spoof them via _method.
     Route::match(['post', 'put', 'patch'], '/properties/{id}', [OwnerController::class, 'propertyUpdate']);
     Route::delete('/properties/{id}',                [OwnerController::class, 'propertyDelete']);
-    Route::patch('/properties/{id}/pause',           [OwnerController::class, 'propertyPause']);
     Route::post('/properties/{id}/images',           [OwnerController::class, 'uploadPropertyImage']);
     Route::delete('/properties/images/{imageId}',    [OwnerController::class, 'deletePropertyImage']);
 
