@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Pizi — Find Verified PGs in Delhi NCR & Noida')
-@section('meta_description', 'Browse verified PGs, hostels & coliving across Delhi, Noida, Gurgaon, Ghaziabad. Real photos, owner-direct, no brokerage.')
+@section('title', 'Verified PGs in Delhi NCR | Affordable PG Accommodation')
+@section('meta_description', 'Find verified PGs in Delhi NCR with affordable rents, real photos and zero brokerage. Explore PGs in Delhi, Noida, Gurgaon and Ghaziabad with free site visits on Pizi.')
 
 @push('head')
 <style>

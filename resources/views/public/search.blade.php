@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Search PGs — Find Verified Paying Guest Accommodation')
-@section('meta_description', 'Browse 2,500+ verified PGs in Delhi NCR. Filter by city, locality, budget, gender, and amenities.')
+@section('title', 'Search Verified PGs in Delhi NCR | Pizi')
+@section('meta_description', 'Search verified PGs in Delhi NCR by city, budget, room type and amenities. Find boys, girls and unisex PGs in Delhi, Noida, Gurgaon and more with zero brokerage and free site visits on Pizi.')
 @section('content')
 
 {{-- ===== SEARCH HEADER ===== --}}

@@ -1,4 +1,6 @@
 @extends('layouts.app')
+@section('title', 'Universities in Delhi NCR & Nearby PGs | Pizi')
+@section('meta_description', 'Explore universities in Delhi NCR and find nearby PG accommodation for students. Compare locations, rents and amenities to choose a convenient place to stay with Pizi.')
 
 @section('content')
 <div class="min-h-screen bg-gradient-to-b from-cream via-white to-cream">

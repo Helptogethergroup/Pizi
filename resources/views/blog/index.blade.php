@@ -1,6 +1,6 @@
 @extends('layouts.app')
-@section('title', 'Blog — PG Living Tips & Guides | Pizi')
-@section('meta_description', 'Tips, guides, and stories about PG living, finding the right room, and city moving guides.')
+@section('title', 'PG Accommodation Tips & Student Housing Guides | Pizi')
+@section('meta_description', 'Explore Pizi blogs for PG accommodation tips, student housing guides, rental advice and practical checklists to help you choose the right place to live.')
 @section('content')
 <section class="max-w-7xl mx-auto px-4 lg:px-8 py-16">
     <span class="text-xs font-semibold text-coral-600 uppercase tracking-wider">Pizi Journal</span>

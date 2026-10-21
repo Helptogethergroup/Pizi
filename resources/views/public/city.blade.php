@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', ($city->meta_title ?: 'PG in ' . $city->name . ' | Verified Hostels & Coliving — PGFind'))
-@section('meta_description', $city->meta_description ?: 'Browse ' . $properties->total() . '+ PGs in ' . $city->name . '. Filter by budget, locality, gender. Free site visits, zero brokerage.')
+@section('title', ($city->meta_title ?: 'PG in ' . $city->name . ' – Verified Boys & Girls PGs | Pizi'))
+@section('meta_description', $city->meta_description ?: 'Find verified PGs in ' . $city->name . ' for boys, girls and working professionals. Compare rents, amenities and locations with zero brokerage and free site visits on Pizi.')
 
 @section('content')
 <section class="bg-cream grain border-b border-ink-900/10">

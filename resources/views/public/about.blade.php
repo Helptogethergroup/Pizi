@@ -1,13 +1,13 @@
 @extends('layouts.app')
-@section('title', 'About Pizi — Verified PGs & Hostels in Delhi NCR | Zero Brokerage')
-@section('meta_description', 'Pizi is Delhi NCR\'s trusted PG aggregator. Field-verified properties, real photos, owner-direct contact, zero brokerage. Discover how we\'re changing how India finds PGs.')
+@section('title', 'About Pizi – Find Verified PG Accommodation in India')
+@section('meta_description', 'Learn about Pizi and our mission to simplify PG accommodation searches. Discover a convenient way to explore PG options, compare amenities and find a place to stay.')
 
 @push('head')
 <meta name="keywords" content="about pizi, verified pg delhi ncr, zero brokerage pg, owner direct pg, pg aggregator india, trusted pg platform noida">
 <link rel="canonical" href="https://pizi.in/about">
 
-<meta property="og:title" content="About Pizi — Verified PGs in Delhi NCR">
-<meta property="og:description" content="Field-verified PGs, real photos, owner-direct, zero brokerage. Discover the Pizi story.">
+<meta property="og:title" content="About Pizi – Find Verified PG Accommodation in India">
+<meta property="og:description" content="Learn about Pizi and our mission to simplify PG accommodation searches. Discover a convenient way to explore PG options, compare amenities and find a place to stay.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://pizi.in/about">
 
