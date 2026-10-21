@@ -20,6 +20,23 @@ class OwnerController extends Controller
         return $u->role === 'pg_manager' ? (int) $u->owner_id : (int) $u->id;
     }
 
+    /**
+     * The app names bunk beds bunk_lower / bunk_upper; the database column is
+     * bunk_bottom / bunk_top. Unmapped, a bunk bed was a 500 error.
+     */
+    private function dbBedType(?string $type): ?string
+    {
+        return ['bunk_lower' => 'bunk_bottom', 'bunk_upper' => 'bunk_top'][$type] ?? $type;
+    }
+
+    /** Payment methods the rent_payments column accepts; anything else (the app's "card") is stored as other. */
+    private function dbPaymentMethod(?string $method): string
+    {
+        $allowed = ['cash', 'upi', 'bank_transfer', 'razorpay', 'phonepe', 'paytm', 'cheque', 'other'];
+        $method = $method ?: 'cash';
+        return in_array($method, $allowed, true) ? $method : 'other';
+    }
+
     /** null for an owner (no limit); the assigned property ids for a PG Manager. */
     private function managedIds(Request $request): ?array
     {
@@ -1425,7 +1442,7 @@ class OwnerController extends Controller
         DB::table('rent_payments')->insertGetId([
             'rent_bill_id' => $id, 'tenant_id' => $bill->tenant_id, 'owner_id' => $this->ownerId($request),
             'receipt_number' => $receiptNo, 'amount' => $amount,
-            'payment_method' => $request->payment_method ?? 'cash',
+            'payment_method' => $this->dbPaymentMethod($request->payment_method),
             'transaction_ref' => $request->transaction_ref, 'paid_at' => $request->paid_at ?? now(),
             'received_by_id' => $this->ownerId($request), 'notes' => $request->notes,
             'created_at' => now(), 'updated_at' => now(),
@@ -1654,6 +1671,13 @@ class OwnerController extends Controller
             'move_in_date', 'move_out_date', 'notice_date', 'notice_reason', 'notes', 'status',
             'emergency_name', 'emergency_phone', 'emergency_relation',
         ]);
+        if (isset($data['status'])) {
+            // the app used to send 'inactive' and 'notice'; read them as what they meant
+            $data['status'] = ['inactive' => 'left', 'notice' => 'notice_period'][$data['status']] ?? $data['status'];
+            if (!in_array($data['status'], ['active', 'notice_period', 'left', 'blacklisted'], true)) {
+                return response()->json(['success' => false, 'message' => 'Choose Active, On notice or Moved out.'], 422);
+            }
+        }
         $data['updated_at'] = now();
         DB::table('tenants')->where('id', $id)->update($data);
 
@@ -1862,7 +1886,7 @@ class OwnerController extends Controller
             'property_id'  => $room->property_id,
             'owner_id'     => $this->ownerId($request),
             'bed_number'   => $request->bed_number,
-            'bed_type'     => $request->bed_type,
+            'bed_type'     => $this->dbBedType($request->bed_type),
             'monthly_rent' => $request->monthly_rent ?? 0,
             'status'       => 'vacant',
             'created_at'   => now(),
@@ -1887,6 +1911,9 @@ class OwnerController extends Controller
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
         $data = $request->only(['bed_number', 'bed_type', 'monthly_rent']);
+        if (isset($data['bed_type'])) {
+            $data['bed_type'] = $this->dbBedType($data['bed_type']);
+        }
 
         // status change ke saath tenant assign/unassign bhi handle karo (web jaisa).
         if ($request->filled('status')) {
