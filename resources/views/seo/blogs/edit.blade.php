@@ -31,6 +31,9 @@
             <div class="mt-2">
                 <img src="{{ str_starts_with($blog->cover_image, 'http') ? $blog->cover_image : asset('storage/' . $blog->cover_image) }}" class="w-48 rounded-lg border">
                 <p class="text-xs text-ink-500 mt-1">Current image. Upload new to replace.</p>
+                <label class="inline-flex items-center gap-2 text-sm text-rose-700 font-semibold mt-2 cursor-pointer">
+                    <input type="checkbox" name="remove_cover" value="1" class="w-4 h-4"> Delete this image when I save
+                </label>
             </div>
         @endif
         <input type="file" name="cover_image" accept="image/*" class="w-full mt-2 text-sm">

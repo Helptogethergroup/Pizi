@@ -346,15 +346,110 @@
         </div>
     </div>
 
+    {{-- Pictures: when editing, each can be deleted here. --}}
     <div>
         <label class="text-xs font-semibold text-ink-900/60 uppercase">Cover image</label>
-        <input type="file" name="cover_image" accept="image/*" class="w-full mt-1">
-        @if(isset($property) && $property->cover_image)<img src="{{ $property->cover_url }}" class="w-32 h-24 mt-2 rounded-lg object-cover">@endif
+        @if(isset($property) && $property->exists && $property->cover_image)
+            <div id="coverCurrent" class="mt-2 flex items-start gap-3">
+                <img src="{{ $property->cover_url }}" class="w-32 h-24 rounded-lg object-cover" alt="">
+                <button type="button" id="deleteCoverBtn"
+                    class="px-3 py-1.5 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white">
+                    <i class="fa-solid fa-trash fa-fw"></i> Delete this image
+                </button>
+            </div>
+        @endif
+        <p id="coverMsg" class="hidden text-xs mt-2 text-emerald-700"></p>
+        <input type="file" name="cover_image" accept="image/*" class="w-full mt-2">
     </div>
+
     <div>
         <label class="text-xs font-semibold text-ink-900/60 uppercase">Gallery images (multiple)</label>
-        <input type="file" name="images[]" accept="image/*" multiple class="w-full mt-1">
+        @if(isset($property) && $property->exists)
+            @php($galleryImages = $property->images()->orderBy('display_order')->get())
+            @if($galleryImages->count())
+                <div id="galleryTools" class="mt-2 flex flex-wrap items-center gap-3 text-xs">
+                    <label class="inline-flex items-center gap-1.5 font-semibold cursor-pointer">
+                        <input type="checkbox" id="galleryAll" class="w-4 h-4"> Select all
+                    </label>
+                    <button type="button" id="deleteGalleryBtn" disabled
+                        class="px-3 py-1.5 font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-40 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-trash fa-fw"></i> Delete selected (<span id="galleryCount">0</span>)
+                    </button>
+                </div>
+                <div id="galleryGrid" class="mt-2 grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-6 gap-2">
+                    @foreach($galleryImages as $img)
+                        <label class="relative block cursor-pointer" data-img="{{ $img->id }}">
+                            <img src="{{ $img->url }}" class="w-full h-20 object-cover rounded-lg border border-ink-900/10" alt="">
+                            <input type="checkbox" value="{{ $img->id }}" class="gallery-pick absolute top-1.5 left-1.5 w-4 h-4">
+                        </label>
+                    @endforeach
+                </div>
+            @endif
+            <p id="galleryMsg" class="hidden text-xs mt-2 text-emerald-700"></p>
+        @endif
+        <input type="file" name="images[]" accept="image/*" multiple class="w-full mt-2">
     </div>
+
+    @if(isset($property) && $property->exists)
+    <script>
+    (function () {
+        const csrf = '{{ csrf_token() }}';
+        const send = (url, method, body) => fetch(url, {
+            method,
+            headers: {'X-CSRF-TOKEN': csrf, 'Accept': 'application/json', 'Content-Type': 'application/json'},
+            body: body ? JSON.stringify(body) : null,
+        }).then(r => { if (!r.ok) throw new Error('failed'); return r.json(); });
+        const note = (id, text) => { const el = document.getElementById(id); if (el) { el.textContent = text; el.classList.remove('hidden'); } };
+
+        // one cover picture
+        const coverBtn = document.getElementById('deleteCoverBtn');
+        if (coverBtn) coverBtn.addEventListener('click', function () {
+            if (!confirm('Delete the cover image? This cannot be undone.')) return;
+            coverBtn.disabled = true;
+            send(@json(route('owner.properties.cover.delete', $property)), 'DELETE')
+                .then(() => {
+                    document.getElementById('coverCurrent').remove();
+                    note('coverMsg', 'Cover image deleted. Choose a new file below if you want one.');
+                })
+                .catch(() => { coverBtn.disabled = false; alert('Could not delete the image. Please try again.'); });
+        });
+
+        // many gallery pictures
+        const grid = document.getElementById('galleryGrid');
+        if (grid) {
+            const delBtn = document.getElementById('deleteGalleryBtn');
+            const all = document.getElementById('galleryAll');
+            const count = document.getElementById('galleryCount');
+            const picks = () => Array.from(grid.querySelectorAll('.gallery-pick'));
+            const refresh = () => {
+                const n = picks().filter(c => c.checked).length;
+                count.textContent = n;
+                delBtn.disabled = n === 0;
+                all.checked = n > 0 && n === picks().length;
+            };
+            grid.addEventListener('change', refresh);
+            all.addEventListener('change', () => { picks().forEach(c => c.checked = all.checked); refresh(); });
+            delBtn.addEventListener('click', function () {
+                const ids = picks().filter(c => c.checked).map(c => c.value);
+                if (!ids.length) return;
+                if (!confirm('Delete ' + ids.length + ' selected image' + (ids.length > 1 ? 's' : '') + '? This cannot be undone.')) return;
+                delBtn.disabled = true;
+                send(@json(route('owner.properties.gallery.delete', $property)), 'POST', {ids})
+                    .then(res => {
+                        (res.deleted || []).forEach(id => {
+                            const el = grid.querySelector('[data-img="' + id + '"]');
+                            if (el) el.remove();
+                        });
+                        refresh();
+                        note('galleryMsg', (res.deleted || []).length + ' image(s) deleted.');
+                        if (!picks().length) document.getElementById('galleryTools').remove();
+                    })
+                    .catch(() => { refresh(); alert('Could not delete the images. Please try again.'); });
+            });
+        }
+    })();
+    </script>
+    @endif
 
     <div>
         <label class="text-xs font-semibold text-ink-900/60 uppercase">House rules</label>

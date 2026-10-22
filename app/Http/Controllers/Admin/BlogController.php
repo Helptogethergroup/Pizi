@@ -86,6 +86,13 @@ class BlogController extends Controller
             $data['cover_image'] = $request->file('cover_image')->store('blogs/covers', 'public');
         }
 
+        if ($request->boolean('remove_cover') && !$request->hasFile('cover_image')) {
+            if ($blog->cover_image && !str_starts_with($blog->cover_image, 'http')) {
+                Storage::disk('public')->delete($blog->cover_image);
+            }
+            $data['cover_image'] = null;
+        }
+
         // Slug change only if title changes
         if ($data['title'] !== $blog->title) {
             $newSlug = Str::slug($data['title']);

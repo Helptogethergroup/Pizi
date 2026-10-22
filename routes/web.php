@@ -276,6 +276,12 @@ Route::middleware(['auth', 'role:owner,admin,pg_manager', 'owner.paid'])->prefix
     Route::resource('properties', \App\Http\Controllers\Owner\PropertyController::class)
         ->except(['show']);
     // Switching a listing on or off is the admin's call, not the owner's.
+
+    // Delete pictures of a listing: its cover, or any the owner ticks in the gallery.
+    Route::delete('properties/{property}/cover', [\App\Http\Controllers\Owner\PropertyController::class, 'deleteCover'])
+        ->name('properties.cover.delete');
+    Route::post('properties/{property}/gallery/delete', [\App\Http\Controllers\Owner\PropertyController::class, 'deleteGallery'])
+        ->name('properties.gallery.delete');
         
 //         Route::get('/pg-managers', [\App\Http\Controllers\Owner\PgManagerController::class, 'index'])->name('pg-managers.index');
 // Route::post('/pg-managers', [\App\Http\Controllers\Owner\PgManagerController::class, 'store'])->name('pg-managers.store');

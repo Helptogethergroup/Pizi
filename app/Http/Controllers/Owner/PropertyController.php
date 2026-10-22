@@ -356,6 +356,42 @@ public function update(Request $request, Property $property)
     }
 }
 
+    /** Removes the cover picture (and its file). The listing stays; a new cover can be uploaded any time. */
+    public function deleteCover(Property $property)
+    {
+        $this->authorizeOwner($property);
+
+        if ($property->cover_image && !str_starts_with($property->cover_image, 'http')) {
+            Storage::disk('public')->delete($property->cover_image);
+        }
+        $property->cover_image = null;
+        $property->save();
+
+        return response()->json(['ok' => true]);
+    }
+
+    /** Removes the gallery pictures the owner ticked. Only pictures of this listing can be removed. */
+    public function deleteGallery(Request $request, Property $property)
+    {
+        $this->authorizeOwner($property);
+
+        $ids = collect((array) $request->input('ids', []))
+            ->filter(fn ($id) => is_numeric($id))
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $deleted = [];
+        foreach ($property->images()->whereIn('id', $ids)->get() as $image) {
+            if ($image->image_path && !str_starts_with($image->image_path, 'http')) {
+                Storage::disk('public')->delete($image->image_path);
+            }
+            $deleted[] = $image->id;
+            $image->delete();
+        }
+
+        return response()->json(['ok' => true, 'deleted' => $deleted]);
+    }
+
     public function destroy(Property $property)
     {
         $this->authorizeOwner($property);

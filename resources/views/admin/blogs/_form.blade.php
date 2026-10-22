@@ -69,6 +69,9 @@
                 <h3 class="font-bold text-lg mb-4">Cover Image</h3>
                 @if($isEdit && $blog->cover_image)
                     <img src="{{ asset('storage/' . $blog->cover_image) }}" class="w-full h-32 object-cover rounded-lg mb-3" alt="">
+                    <label class="inline-flex items-center gap-2 text-sm text-rose-700 font-semibold mb-3 cursor-pointer">
+                        <input type="checkbox" name="remove_cover" value="1" class="w-4 h-4"> Delete this image when I save
+                    </label>
                 @endif
                 <input type="file" name="cover_image" accept="image/*" class="w-full text-sm">
                 <p class="text-xs text-ink-900/50 mt-2">Recommended: 1200×630px</p>

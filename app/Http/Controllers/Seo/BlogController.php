@@ -73,8 +73,13 @@ class BlogController extends Controller
             'is_published' => 'nullable|boolean',
         ]);
 
-        if ($request->hasFile('cover_image')) {
-            $data['cover_image'] = $request->file('cover_image')->store('blogs', 'public');
+        if ($request->hasFile('cover_image') || $request->boolean('remove_cover')) {
+            if ($blog->cover_image && !str_starts_with($blog->cover_image, 'http')) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($blog->cover_image);
+            }
+            $data['cover_image'] = $request->hasFile('cover_image')
+                ? $request->file('cover_image')->store('blogs', 'public')
+                : null;
         }
 
         $wasPublished = $blog->is_published;
