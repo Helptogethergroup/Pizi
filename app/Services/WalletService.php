@@ -243,6 +243,8 @@ class WalletService
                 ->where(function ($q) use ($realOwnerId) {
                     $q->whereNull('owner_id')->orWhere('owner_id', '!=', $realOwnerId);
                 })
+                // an internal QA/test account unlocking a lead never takes it from real owners
+                ->whereNotIn('user_id', DB::table('users')->where('is_test_account', true)->select('id'))
                 ->exists();
 
             if ($lockedByOther) {
@@ -262,10 +264,15 @@ class WalletService
             $wallet->lifetime_spent += $cost;
             $wallet->save();
 
-            // Lock the lead
-            $freshLead->is_locked = true;
-            $freshLead->locked_by_user_id = $owner->id;
-            $freshLead->save();
+            // Lock the lead (not for internal QA/test accounts: their unlock is only a live test,
+            // the lead must stay available to real owners and workable by the team)
+            $isTestAccount = (bool) $owner->is_test_account
+                || ($realOwnerId !== (int) $owner->id && (bool) DB::table('users')->where('id', $realOwnerId)->value('is_test_account'));
+            if (!$isTestAccount) {
+                $freshLead->is_locked = true;
+                $freshLead->locked_by_user_id = $owner->id;
+                $freshLead->save();
+            }
 
             // Record the unlock — use BOTH user_id AND owner_id (both exist in your live DB)
             \DB::table('lead_unlocks')->insert([
