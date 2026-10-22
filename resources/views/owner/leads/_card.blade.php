@@ -86,7 +86,7 @@
                     @elseif($reportState === 'approved') <i class="fa-solid fa-circle-check fa-fw"></i> Reported. Your credits were returned.
                     @else <i class="fa-solid fa-circle-info fa-fw"></i> Reported. We could not confirm the problem. @endif
                 </div>
-            @elseif(!$lead->converted_tenant_id)
+            @elseif(!$lead->converted_tenant_id && in_array($lead->id, $reportableIds ?? [], true))
                 <details class="mt-2 text-xs">
                     <summary class="cursor-pointer text-center py-2 rounded-lg border border-rose-200 text-rose-700 font-semibold hover:bg-rose-50">
                         <i class="fa-solid fa-flag fa-fw"></i> This lead is not genuine? Report it

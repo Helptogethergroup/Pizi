@@ -930,8 +930,9 @@ class OwnerController extends Controller
         $pricing = DB::table('lead_pricing')->where('is_active', true)->pluck('credit_cost', 'lead_type');
 
         $reportStatuses = \App\Models\LeadReport::statusesFor($owner);
+        $reportableIds = \App\Models\LeadReport::reportableIdsFor($owner);
 
-        $items = $pageItems->map(function ($lead) use ($pricing, $reportStatuses) {
+        $items = $pageItems->map(function ($lead) use ($pricing, $reportStatuses, $reportableIds) {
             // The property this lead was actually submitted for, if any —
             // otherwise the best-matching one among the owner's own
             // properties, so the app still has something useful to show
@@ -954,6 +955,7 @@ class OwnerController extends Controller
                 'is_lead_verified' => $lead->lead_type === 'verified',
                 // pending | approved | rejected, or null when the owner never reported this lead
                 'report_status' => $reportStatuses[$lead->id] ?? null,
+                'can_report' => empty($lead->converted_tenant_id) && !isset($reportStatuses[$lead->id]) && in_array($lead->id, $reportableIds, true),
                 'credit_value' => (int) ($pricing[$lead->lead_type ?? 'direct'] ?? $pricing['direct'] ?? 20),
                 'match_score' => $lead->match_score,
                 'area_match' => (bool) $lead->area_match,

@@ -48,6 +48,18 @@ class LeadReport extends Model
         return self::REASONS[$this->reason] ?? $this->reason;
     }
 
+    /** ids of the leads this owner (team) unlocked recently enough to still report. */
+    public static function reportableIdsFor(User $user): array
+    {
+        $teamOwnerId = $user->role === 'pg_manager' ? $user->owner_id : $user->id;
+        $hours = (int) config('leads.report_hours', 72);
+
+        return \Illuminate\Support\Facades\DB::table('lead_unlocks')
+            ->where('owner_id', $teamOwnerId)
+            ->where('created_at', '>=', now()->subHours($hours))
+            ->pluck('lead_id')->all();
+    }
+
     /** lead id => status, for the leads one owner (team) has reported. */
     public static function statusesFor(User $user): array
     {

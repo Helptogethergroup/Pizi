@@ -179,11 +179,12 @@ class LeadController extends Controller
         $pricing = \App\Models\LeadPricing::where('is_active', true)->get()->keyBy('lead_type');
 
         $reportStatuses = \App\Models\LeadReport::statusesFor($owner);
+        $reportableIds = \App\Models\LeadReport::reportableIdsFor($owner);
 
         return view('owner.leads', compact(
             'paginated', 'wallet', 'tab', 'counts', 'pricing',
             'statusCounts', 'properties', 'telecallers', 'sources', 'localities',
-            'propertyLeadCounts', 'reportStatuses'
+            'propertyLeadCounts', 'reportStatuses', 'reportableIds'
         ));
     }
 
