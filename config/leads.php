@@ -21,6 +21,11 @@ return [
      */
     'area_mode' => env('LEADS_AREA_MODE', 'balanced'),
 
+    // A lead older than this many days is no longer offered to owners (people find a PG within
+    // weeks; selling a three-month-old enquiry is selling someone who has long since moved in
+    // elsewhere). 0 turns the limit off. A lead an owner already unlocked always stays visible.
+    'max_age_days' => (int) env('LEADS_MAX_AGE_DAYS', 60),
+
     // An owner can report an unlocked lead as not genuine within this many hours of unlocking it.
     'report_hours' => (int) env('LEADS_REPORT_HOURS', 72),
 ];

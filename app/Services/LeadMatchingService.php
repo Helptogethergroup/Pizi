@@ -183,6 +183,24 @@ public function leadsForOwner($owner, int $limit = 60)
         // leads are other people wanting to LIST their own PG — those are
         // for telecaller outreach, not something an existing owner should see.
         ->where('inquiry_type', '!=', 'owner')
+        // Leads this owner (or team) already paid for always stay. Every OTHER lead must still be
+        // worth selling: not one the telecaller found "not interested" (already found a PG, too
+        // expensive, wrong location...), not one already closed, not a number that never answered
+        // after three tries, and not a stale enquiry.
+        ->where(function ($q) use ($unlockedByMe) {
+            $q->whereIn('id', $unlockedByMe)->orWhere(function ($free) {
+                $free->whereNotIn('status', ['closed_won', 'not_interested'])
+                    ->where(fn ($c) => $c->whereNull('call_status')->orWhere('call_status', '!=', 'not_interested'))
+                    // three calls that nobody answered, and never a successful one
+                    ->where(fn ($c) => $c->where('call_attempts', '<', 3)
+                        ->orWhereNull('call_attempts')
+                        ->orWhereIn('call_status', ['contacted', 'interested', 'converted']));
+                $days = (int) config('leads.max_age_days', 60);
+                if ($days > 0) {
+                    $free->where('created_at', '>=', now()->subDays($days));
+                }
+            });
+        })
         // Meta (Facebook/Instagram) ad leads are unconfirmed until a
         // telecaller actually talks to the person and marks them Verified
         // — a lot of these are fake numbers, wrong numbers, or people just
