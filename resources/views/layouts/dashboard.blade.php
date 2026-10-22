@@ -86,6 +86,10 @@
               <a href="/admin/chat-analytics" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->path() === 'admin/chat-analytics' ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-comment-dots fa-fw"></i> Chat Analytics</a>
                 <a href="{{ route('admin.properties.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.properties.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-house fa-fw"></i> Properties</a>
                 <a href="{{ route('admin.properties.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5">+ Add Property</a>
+                @php
+                    $pendingReports = \App\Models\LeadReport::where('status', 'pending')->count();
+                @endphp
+                <a href="{{ route('admin.lead-reports.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.lead-reports.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-flag fa-fw"></i> Lead reports @if($pendingReports > 0)<span class="ml-auto text-xs bg-rose-500 text-white rounded-full px-2 py-0.5">{{ $pendingReports }}</span>@endif</a>
                 <a href="{{ route('admin.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bullseye fa-fw"></i> All Leads</a>
                 <a href="{{ route('admin.telecallers.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.telecallers.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-phone fa-fw"></i> Telecallers</a>
                 <a href="{{ route('admin.ad-lead-forms.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('admin.ad-lead-forms.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-clipboard-list fa-fw"></i> Ad Form Mapping</a>

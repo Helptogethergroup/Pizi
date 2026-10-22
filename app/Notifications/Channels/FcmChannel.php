@@ -48,6 +48,7 @@ class FcmChannel
         'agreement_signed' => 'tenant_detail',
         'review_posted' => 'reviews',
         'credits_added' => 'wallet',
+        'lead_report_reviewed' => 'wallet',
         'low_balance' => 'recharge',
         'rent_overdue' => 'rent_bill',
         'agreement_expiring' => 'agreements',

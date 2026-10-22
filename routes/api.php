@@ -192,6 +192,7 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     Route::get('/leads',              [OwnerController::class, 'leads']);
     Route::get('/leads/filters',      [OwnerController::class, 'leadFilters']);
     Route::post('/leads/{id}/unlock', [OwnerController::class, 'leadUnlock']);
+    Route::post('/leads/{id}/report', [OwnerController::class, 'leadReport']);
     Route::patch('/leads/{id}/status', [OwnerController::class, 'leadUpdateStatus']);
     Route::post('/leads/{id}/remark', [OwnerController::class, 'leadAddRemark']);
     Route::get('/leads/{id}/timeline', [OwnerController::class, 'leadTimeline']);

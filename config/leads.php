@@ -20,4 +20,7 @@ return [
      *      the old behaviour: any lead of the owner's city, and every lead of unknown area.
      */
     'area_mode' => env('LEADS_AREA_MODE', 'balanced'),
+
+    // An owner can report an unlocked lead as not genuine within this many hours of unlocking it.
+    'report_hours' => (int) env('LEADS_REPORT_HOURS', 72),
 ];

@@ -178,11 +178,33 @@ class LeadController extends Controller
         // Pricing for top strip
         $pricing = \App\Models\LeadPricing::where('is_active', true)->get()->keyBy('lead_type');
 
+        $reportStatuses = \App\Models\LeadReport::statusesFor($owner);
+
         return view('owner.leads', compact(
             'paginated', 'wallet', 'tab', 'counts', 'pricing',
             'statusCounts', 'properties', 'telecallers', 'sources', 'localities',
-            'propertyLeadCounts'
+            'propertyLeadCounts', 'reportStatuses'
         ));
+    }
+
+/**
+     * "This lead was not real": the owner tells us, the Pizi team checks, and the credits
+     * go back if the owner is right.
+     */
+    public function report(Request $request, Lead $lead, \App\Services\LeadReportService $reports)
+    {
+        $data = $request->validate([
+            'reason' => 'required|string',
+            'note' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            $reports->submit(auth()->user(), $lead, $data['reason'], $data['note'] ?? null);
+        } catch (RuntimeException $e) {
+            return back()->withErrors(['report' => $e->getMessage()]);
+        }
+
+        return back()->with('success', '✓ Thanks. We will check this lead and tell you what we find. If you are right, your credits come back.');
     }
 
 public function unlock(Lead $lead, WalletService $service)

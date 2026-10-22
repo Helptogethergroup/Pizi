@@ -929,7 +929,9 @@ class OwnerController extends Controller
         // will cost, without it having to know the pricing table itself.
         $pricing = DB::table('lead_pricing')->where('is_active', true)->pluck('credit_cost', 'lead_type');
 
-        $items = $pageItems->map(function ($lead) use ($pricing) {
+        $reportStatuses = \App\Models\LeadReport::statusesFor($owner);
+
+        $items = $pageItems->map(function ($lead) use ($pricing, $reportStatuses) {
             // The property this lead was actually submitted for, if any —
             // otherwise the best-matching one among the owner's own
             // properties, so the app still has something useful to show
@@ -950,6 +952,8 @@ class OwnerController extends Controller
                 'is_unlocked' => (bool) $lead->is_unlocked,
                 'unlocked_at' => $lead->locked_at,
                 'is_lead_verified' => $lead->lead_type === 'verified',
+                // pending | approved | rejected, or null when the owner never reported this lead
+                'report_status' => $reportStatuses[$lead->id] ?? null,
                 'credit_value' => (int) ($pricing[$lead->lead_type ?? 'direct'] ?? $pricing['direct'] ?? 20),
                 'match_score' => $lead->match_score,
                 'area_match' => (bool) $lead->area_match,
@@ -1166,6 +1170,28 @@ class OwnerController extends Controller
         DB::table('leads')->where('id', $id)->update(['status' => 'junk', 'updated_at' => now()]);
 
         return $this->ok(['message' => 'Reported as junk']);
+    }
+
+    /** An owner (or manager) tells us an unlocked lead was not real; the team checks it and may refund the credits. */
+    public function leadReport(Request $request, $id, \App\Services\LeadReportService $reports)
+    {
+        $data = $request->validate([
+            'reason' => 'required|string',
+            'note' => 'nullable|string|max:500',
+        ]);
+        $lead = \App\Models\Lead::find($id);
+        if (!$lead) return $this->notFound();
+
+        try {
+            $report = $reports->submit($request->user(), $lead, $data['reason'], $data['note'] ?? null);
+        } catch (\RuntimeException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return $this->ok([
+            'message' => 'Thanks. We will check this lead and tell you what we find.',
+            'report_status' => $report->status,
+        ]);
     }
 
     /**

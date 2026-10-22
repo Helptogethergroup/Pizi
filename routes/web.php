@@ -397,6 +397,7 @@ Route::post('/guide/dismiss', [\App\Http\Controllers\Owner\GuideController::clas
         Route::get('/leads', [\App\Http\Controllers\Owner\LeadController::class, 'index'])->name('leads.index');
         Route::get('/leads/{lead}', [\App\Http\Controllers\Owner\LeadController::class, 'show'])->name('leads.show');
         Route::post('/leads/{lead}/unlock', [\App\Http\Controllers\Owner\LeadController::class, 'unlock'])->name('leads.unlock');
+        Route::post('/leads/{lead}/report', [\App\Http\Controllers\Owner\LeadController::class, 'report'])->name('leads.report');
         Route::post('/leads/{lead}/report-junk', [\App\Http\Controllers\Owner\LeadController::class, 'reportJunk'])->name('leads.reportJunk');
         Route::patch('/leads/{lead}/status', [\App\Http\Controllers\Owner\LeadController::class, 'updateStatus'])->name('leads.updateStatus');
         Route::patch('/leads/{lead}/inquiry-type', [\App\Http\Controllers\Owner\LeadController::class, 'updateInquiryType'])->name('leads.updateInquiryType');
@@ -473,6 +474,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/invoices/{invoice}/download', [\App\Http\Controllers\InvoiceDownloadController::class, 'download'])->name('invoices.download');
 
     Route::get('/leads', [\App\Http\Controllers\Admin\LeadController::class, 'index'])->name('leads.index');
+    // Leads owners say were not real: approve (credits go back) or reject
+    Route::get('/lead-reports', [\App\Http\Controllers\Admin\LeadReportController::class, 'index'])->name('lead-reports.index');
+    Route::post('/lead-reports/{report}/approve', [\App\Http\Controllers\Admin\LeadReportController::class, 'approve'])->name('lead-reports.approve');
+    Route::post('/lead-reports/{report}/reject', [\App\Http\Controllers\Admin\LeadReportController::class, 'reject'])->name('lead-reports.reject');
     Route::get('/leads/export', [\App\Http\Controllers\Admin\LeadController::class, 'export'])->name('leads.export');
     Route::patch('/leads/{lead}/assign', [\App\Http\Controllers\Admin\LeadController::class, 'assign'])->name('leads.assign');
     Route::patch('/leads/{lead}/verify', [\App\Http\Controllers\Admin\LeadController::class, 'markVerified'])->name('leads.verify');

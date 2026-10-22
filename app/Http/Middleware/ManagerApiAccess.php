@@ -29,6 +29,7 @@ class ManagerApiAccess
         'GET owner/leads' => 'leads',
         'GET owner/leads/filters' => 'leads',
         'POST owner/leads/{id}/unlock' => 'leads',
+        'POST owner/leads/{id}/report' => 'leads',
         'PATCH owner/leads/{id}/status' => 'leads',
         'POST owner/leads/{id}/remark' => 'leads',
         'GET owner/leads/{id}/timeline' => 'leads',
