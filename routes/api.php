@@ -269,13 +269,6 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     Route::get('/reviews',               [OwnerController::class, 'reviews']);
     Route::post('/reviews/{id}/reply',   [OwnerController::class, 'reviewReply']);
 
-    // Blogs
-    Route::get('/blogs',              [OwnerController::class, 'blogs']);
-    Route::get('/blogs/{id}',         [OwnerController::class, 'blogShow']);
-    Route::post('/blogs',             [OwnerController::class, 'blogStore']);
-    Route::post('/blogs/{id}',        [OwnerController::class, 'blogUpdate']);
-    Route::delete('/blogs/{id}',      [OwnerController::class, 'blogDelete']);
-    Route::patch('/blogs/{id}/toggle',[OwnerController::class, 'blogToggle']);
 });
 
     // ============ TELECALLER ============

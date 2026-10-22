@@ -386,13 +386,7 @@ Route::post('/guide/dismiss', [\App\Http\Controllers\Owner\GuideController::clas
     Route::delete('/complaints/media/{media}', [\App\Http\Controllers\Owner\ComplaintController::class, 'deleteMedia'])->name('complaints.media.delete');
     Route::delete('/complaints/{complaint}', [\App\Http\Controllers\Owner\ComplaintController::class, 'destroy'])->name('complaints.destroy');
 
-        // Blogs
-    Route::get('/blogs', [\App\Http\Controllers\Owner\BlogController::class, 'index'])->name('blogs.index');
-    Route::get('/blogs/create', [\App\Http\Controllers\Owner\BlogController::class, 'create'])->name('blogs.create');
-    Route::post('/blogs', [\App\Http\Controllers\Owner\BlogController::class, 'store'])->name('blogs.store');
-    Route::get('/blogs/{blog}/edit', [\App\Http\Controllers\Owner\BlogController::class, 'edit'])->name('blogs.edit');
-    Route::patch('/blogs/{blog}', [\App\Http\Controllers\Owner\BlogController::class, 'update'])->name('blogs.update');
-    Route::delete('/blogs/{blog}', [\App\Http\Controllers\Owner\BlogController::class, 'destroy'])->name('blogs.destroy');
+        // (Owners no longer write blogs; blogs are written by the Pizi team.)
 
 
         // Wallet
