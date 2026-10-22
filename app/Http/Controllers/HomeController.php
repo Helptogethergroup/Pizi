@@ -145,10 +145,18 @@ public function index()
             'preferred_city' => 'required_if:inquiry_type,tenant|nullable|string|max:120',
         ]);
 
-        // Save as a generic lead
+        $quality = app(\App\Services\LeadQualityService::class);
+        $phone = $quality->normalizePhone($data['phone']);
+        if ($phone === null || $quality->looksFakePhone($phone)) {
+            return back()->withErrors(['phone' => 'Please enter a valid 10-digit mobile number.'])->withInput();
+        }
+        $junkReason = $quality->contentProblem($data['name'], $data['message'] ?? null);
+
+        // Save as a generic lead (a test or bot entry is kept as junk and nobody is told)
         \App\Models\Lead::create([
             'name' => $data['name'],
-            'phone' => $data['phone'],
+            'phone' => $phone,
+            'notes' => $junkReason ? 'Auto-rejected: ' . $quality->describe($junkReason) : null,
             'email' => $data['email'] ?? null,
             'message' => $data['message'],
             'preferred_city' => $data['preferred_city'] ?? null,
@@ -157,7 +165,7 @@ public function index()
             // reaches any owner's dashboard, and the vast majority of
             // contact-form submissions are someone looking for a PG.
             'inquiry_type' => $data['inquiry_type'] ?? 'tenant',
-            'status' => 'new',
+            'status' => $junkReason ? 'junk' : 'new',
         ]);
 
         return back()->with('success', 'Thanks! Our team will reach out within 30 minutes.');

@@ -333,15 +333,26 @@ class PublicController extends Controller
             'preferred_city' => 'required_if:inquiry_type,tenant|nullable|string|max:120',
         ]);
 
+        $quality = app(\App\Services\LeadQualityService::class);
+        $phone = '';
+        if ($request->filled('phone')) {
+            $phone = $quality->normalizePhone($request->phone);
+            if ($phone === null || $quality->looksFakePhone($phone)) {
+                return response()->json(['success' => false, 'message' => 'Please enter a valid 10-digit mobile number.'], 422);
+            }
+        }
+        $junkReason = $quality->contentProblem($request->name, $request->message);
+
         DB::table('leads')->insert([
             'name' => $request->name,
             'email' => $request->email,
-            'phone' => $request->phone ?? '',
+            'phone' => $phone,
+            'notes' => $junkReason ? 'Auto-rejected: ' . $quality->describe($junkReason) : null,
             'message' => $request->message,
             'preferred_city' => $request->preferred_city,
             'source' => 'contact_form',
             'inquiry_type' => in_array($request->inquiry_type, ['tenant', 'owner']) ? $request->inquiry_type : 'unknown',
-            'status' => 'new',
+            'status' => $junkReason ? 'junk' : 'new',
             'created_at' => now(),
             'updated_at' => now(),
         ]);
@@ -356,14 +367,27 @@ class PublicController extends Controller
             'phone' => 'required|string',
         ]);
 
+        $quality = app(\App\Services\LeadQualityService::class);
+        $phone = $quality->normalizePhone($request->phone);
+        if ($phone === null || $quality->looksFakePhone($phone)) {
+            return response()->json(['success' => false, 'message' => 'Please enter a valid 10-digit mobile number.'], 422);
+        }
+        // the same person asking about the same PG within 30 days is one lead
+        $earlier = $quality->recentDuplicate($phone, $request->property_id, 30);
+        if ($earlier) {
+            return $this->ok(['lead_id' => $earlier->id, 'message' => 'Got it! We will call you soon.']);
+        }
+        $junkReason = $quality->contentProblem($request->name, $request->message);
+
         $leadId = DB::table('leads')->insertGetId([
             'name' => $request->name,
-            'phone' => $request->phone,
+            'phone' => $phone,
             'email' => $request->email,
             'message' => $request->message,
             'property_id' => $request->property_id,
             'source' => $request->source ?? 'website',
-            'status' => 'new',
+            'notes' => $junkReason ? 'Auto-rejected: ' . $quality->describe($junkReason) : null,
+            'status' => $junkReason ? 'junk' : 'new',
             'credit_cost' => 3,
             'created_at' => now(),
             'updated_at' => now(),

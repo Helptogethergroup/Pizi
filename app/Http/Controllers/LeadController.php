@@ -7,6 +7,8 @@ use App\Models\Property;
 use App\Models\User;
 use App\Notifications\NewLeadMatched;
 use App\Services\LeadMatchingService;
+use App\Services\LeadQualityService;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -30,6 +32,17 @@ class LeadController extends Controller
             'user_id' => 'nullable|exists:users,id',
         ]);
 
+        // A phone number that cannot be real is sent back to the visitor, who may
+        // just have made a typo. A real number is stored as 10 plain digits.
+        $quality = app(LeadQualityService::class);
+        $normalizedPhone = $quality->normalizePhone($data['phone']);
+        if ($normalizedPhone === null || $quality->looksFakePhone($normalizedPhone)) {
+            throw ValidationException::withMessages([
+                'phone' => 'Please enter a valid 10-digit mobile number.',
+            ]);
+        }
+        $data['phone'] = $normalizedPhone;
+
         // Auto-attach user_id if user is logged in (overrides client input)
        // Agar login nahi hai par phone kisi tenant user se match karta hai, to link kar do
         if (!Auth::check() && !empty($data['phone'])) {
@@ -42,11 +55,9 @@ class LeadController extends Controller
             }
         }
 
-        // De-dupe: Same phone + same property within last 24 hours = one lead
-        $duplicate = Lead::where('phone', $data['phone'])
-            ->where('property_id', $data['property_id'] ?? null)
-            ->where('created_at', '>=', now()->subDay())
-            ->first();
+        // De-dupe: the same person asking about the same PG within 30 days is one lead,
+        // so one enquiry is never sold to two owners.
+        $duplicate = $quality->recentDuplicate($data['phone'], $data['property_id'] ?? null, 30);
 
         if ($duplicate) {
             // Even if duplicate, link user_id if missing
@@ -100,6 +111,17 @@ class LeadController extends Controller
             $data['assigned_telecaller_id'] = $telecaller->id;
         }
 
+        $junkReason = $quality->contentProblem($data['name'], $data['message'] ?? null);
+        if ($junkReason) {
+            Lead::create($data + [
+                'status' => 'junk',
+                'notes' => 'Auto-rejected: ' . $quality->describe($junkReason),
+            ]);
+            // the visitor sees the usual thank-you, so a bot learns nothing
+            return $this->respondSuccess($request, 'Thanks! Our team will reach out within 30 minutes.');
+        }
+
+        // no telecaller is picked for a lead nobody will see
         $lead = Lead::create($data);
 
         if ($lead->property_id) {

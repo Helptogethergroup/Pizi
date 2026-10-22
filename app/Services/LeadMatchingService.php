@@ -92,6 +92,57 @@ class LeadMatchingService
      * Get all matched leads for a specific owner across all their properties.
      * Returns sorted collection with score + badge + affordability attached.
      */
+/**
+ * Is this lead about the area of this owner's properties?
+ *
+ * Without this, a lead whose area nobody knew went to every owner, and a lead that
+ * gave only a city went to every owner in that city, so owners paid credits for
+ * enquiries that had nothing to do with their PG.
+ */
+public function isRelevantToOwner(Lead $lead, Collection $activeProperties, array $ownerPropertyIds, array $unlockedByMe = []): bool
+{
+    $mode = config('leads.area_mode', 'balanced');
+    if ($mode === 'off') {
+        return true;
+    }
+    // a lead this owner (or their team) already paid for always stays visible
+    if (in_array($lead->id, $unlockedByMe, true)) {
+        return true;
+    }
+
+    $localities = $activeProperties->map(fn ($p) => mb_strtolower(trim((string) ($p->locality->name ?? ''))))
+        ->filter()->unique()->values()->all();
+
+    // asked about one particular PG
+    if ($lead->property_id) {
+        if (in_array((int) $lead->property_id, $ownerPropertyIds, true)) {
+            return true; // their own PG
+        }
+        // somebody else's PG: still relevant when it is in a locality this owner also covers
+        $theirLocality = mb_strtolower(trim((string) ($lead->property->locality->name ?? '')));
+        return $theirLocality !== '' && in_array($theirLocality, $localities, true);
+    }
+
+    // asked for a locality
+    $wanted = mb_strtolower(trim((string) $lead->preferred_locality));
+    if ($wanted !== '') {
+        foreach ($localities as $loc) {
+            if (str_contains($loc, $wanted) || str_contains($wanted, $loc)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // only a city is known (or nothing)
+    if (trim((string) $lead->preferred_city) === '') {
+        return false; // nobody knows where this person wants to stay: not for any owner yet
+    }
+    // a city is enough in balanced mode (the SQL above already limited it to the owner's cities);
+    // in strict mode the team must have spoken to the person first
+    return $mode === 'strict' ? in_array($lead->lead_type, ['verified', 'converted'], true) : true;
+}
+
 public function leadsForOwner($owner, int $limit = 60)
 {
     $properties = $owner->leadProperties()->where('is_active', true)
@@ -164,8 +215,12 @@ public function leadsForOwner($owner, int $limit = 60)
               });
         })
         ->latest()
-        ->take($limit * 3)
+        ->take($limit * 6)
         ->get();
+
+    // Keep only leads that are really about this owner's area (mode in config/leads.php).
+    $ownerPropertyIds = $owner->leadProperties()->pluck('id')->map(fn ($i) => (int) $i)->all();
+    $leads = $leads->filter(fn ($lead) => $this->isRelevantToOwner($lead, $properties, $ownerPropertyIds, $unlockedByMe))->values();
 
     $wallet = $owner->wallet;
 

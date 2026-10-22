@@ -60,7 +60,10 @@ class GoogleAdsLeadWebhookController extends Controller
 
     private function createLead(string $name, string $phone, ?string $email, string $source, string $externalId, string $inquiryType = 'tenant'): void
     {
-        $phone = preg_replace('/[^0-9]/', '', $phone);
+        // a real number is stored as 10 plain digits; a fake one makes the lead junk
+        $quality = app(\App\Services\LeadQualityService::class);
+        $junkReason = $quality->phoneProblem($phone) ?? $quality->contentProblem($name);
+        $phone = $quality->normalizePhone($phone) ?? preg_replace('/[^0-9]/', '', $phone);
 
         $duplicate = Lead::where('phone', $phone)
             ->where('source', $source)
@@ -82,12 +85,14 @@ class GoogleAdsLeadWebhookController extends Controller
             'email' => $email,
             'source' => $source,
             'inquiry_type' => $inquiryType,
-            'status' => 'new',
+            'status' => $junkReason ? 'junk' : 'new',
+            'notes' => $junkReason ? 'Auto-rejected: ' . $quality->describe($junkReason) : null,
             'message' => "Auto-imported from {$source} (ref: {$externalId})",
-            'assigned_telecaller_id' => $telecaller?->id,
+            'assigned_telecaller_id' => $junkReason ? null : $telecaller?->id,
         ]);
 
-        if ($telecaller) {
+        // telecallers only get leads worth calling
+        if ($telecaller && !$junkReason) {
             try {
                 $telecaller->notify(new \App\Notifications\NewLeadAssigned($lead));
             } catch (\Exception $e) {
