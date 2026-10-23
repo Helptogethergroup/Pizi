@@ -42,7 +42,10 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-10">
     <div class="bg-white p-6 rounded-2xl border border-ink-900/10">
-        <h2 class="font-display font-bold text-xl mb-4">Leads by status</h2>
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-display font-bold text-xl">Leads by status</h2>
+            <a href="{{ route('admin.lead-insights.index', ['range' => 'today']) }}" class="text-sm font-bold text-coral-500 hover:underline">Full report <i class="fa-solid fa-arrow-right fa-fw"></i></a>
+        </div>
         <div class="space-y-2">
             @foreach($leadsByStatus as $status => $count)
                 <div class="flex justify-between items-center text-sm">

@@ -478,6 +478,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/lead-reports', [\App\Http\Controllers\Admin\LeadReportController::class, 'index'])->name('lead-reports.index');
     Route::post('/lead-reports/{report}/approve', [\App\Http\Controllers\Admin\LeadReportController::class, 'approve'])->name('lead-reports.approve');
     Route::post('/lead-reports/{report}/reject', [\App\Http\Controllers\Admin\LeadReportController::class, 'reject'])->name('lead-reports.reject');
+    // Date-wise lead pipeline with Excel / PDF download
+    Route::get('/lead-insights', [\App\Http\Controllers\Admin\LeadInsightsController::class, 'index'])->name('lead-insights.index');
+    Route::get('/lead-insights/excel', [\App\Http\Controllers\Admin\LeadInsightsController::class, 'xlsx'])->name('lead-insights.xlsx');
+    Route::get('/lead-insights/pdf', [\App\Http\Controllers\Admin\LeadInsightsController::class, 'pdf'])->name('lead-insights.pdf');
     Route::get('/leads/export', [\App\Http\Controllers\Admin\LeadController::class, 'export'])->name('leads.export');
     Route::patch('/leads/{lead}/assign', [\App\Http\Controllers\Admin\LeadController::class, 'assign'])->name('leads.assign');
     Route::patch('/leads/{lead}/verify', [\App\Http\Controllers\Admin\LeadController::class, 'markVerified'])->name('leads.verify');
