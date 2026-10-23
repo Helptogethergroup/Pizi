@@ -959,8 +959,11 @@ class OwnerController extends Controller
                 'credit_value' => (int) ($pricing[$lead->lead_type ?? 'direct'] ?? $pricing['direct'] ?? 20),
                 'match_score' => $lead->match_score,
                 'area_match' => (bool) $lead->area_match,
-                'preferred_locality' => $lead->preferred_locality,
-                'preferred_city' => $lead->preferred_city,
+                // Where the person wants a PG. Falls back to the locality/city of the PG they
+                // enquired about, so the app never shows a blank "Looking in".
+                'preferred_locality' => $lead->wanted_locality,
+                'preferred_city' => $lead->wanted_city,
+                'wanted_location' => collect([$lead->wanted_locality, $lead->wanted_city])->filter()->implode(', ') ?: null,
                 'preferred_gender' => $lead->preferred_gender,
                 'budget_min' => $lead->budget_min,
                 'budget_max' => $lead->budget_max,

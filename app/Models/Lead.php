@@ -228,6 +228,32 @@ protected $fillable = [
      * ad platform a lead came from. Admin/telecaller views can keep using
      * $lead->message directly; this is only for owner-facing screens.
      */
+    /**
+     * Where this person wants a PG, as an owner should read it: the locality they asked for, or
+     * (when they enquired about one particular PG without typing a locality) that PG's locality.
+     */
+    public function getWantedLocalityAttribute(): ?string
+    {
+        $typed = trim((string) $this->preferred_locality);
+        if ($typed !== '') {
+            return $typed;
+        }
+        $fromPg = trim((string) ($this->property?->locality?->name ?? ''));
+
+        return $fromPg !== '' ? $fromPg : null;
+    }
+
+    public function getWantedCityAttribute(): ?string
+    {
+        $typed = trim((string) $this->preferred_city);
+        if ($typed !== '') {
+            return $typed;
+        }
+        $fromPg = trim((string) ($this->property?->city?->name ?? ''));
+
+        return $fromPg !== '' ? $fromPg : null;
+    }
+
     public function getOwnerSafeMessageAttribute(): ?string
     {
         if (empty($this->message)) {

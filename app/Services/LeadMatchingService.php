@@ -101,9 +101,14 @@ class LeadMatchingService
  */
 public function isRelevantToOwner(Lead $lead, Collection $activeProperties, array $ownerPropertyIds, array $unlockedByMe = []): bool
 {
-    $mode = config('leads.area_mode', 'balanced');
+    $mode = config('leads.area_mode', 'city');
     if ($mode === 'off') {
         return true;
+    }
+    // city mode: every lead of the owner's city (the query already limited the city). The card
+    // tells the owner which locality the person wants. Only a lead with no known city is held back.
+    if ($mode === 'city') {
+        return $lead->property_id || trim((string) $lead->preferred_city) !== '';
     }
     // a lead this owner (or their team) already paid for always stays visible
     if (in_array($lead->id, $unlockedByMe, true)) {
@@ -257,8 +262,8 @@ public function leadsForOwner($owner, int $limit = 60)
         // AREA MATCH BONUS — preferred_locality/city is free-typed text,
         // so compare loosely (case-insensitive substring) not exact match.
         $areaMatch = false;
-        if ($lead->preferred_locality && collect($ownerLocalities)->contains(
-            fn ($loc) => stripos($lead->preferred_locality, $loc) !== false || stripos($loc, $lead->preferred_locality) !== false
+        if ($lead->wanted_locality && collect($ownerLocalities)->contains(
+            fn ($loc) => stripos($lead->wanted_locality, $loc) !== false || stripos($loc, $lead->wanted_locality) !== false
         )) {
             $bestScore = min(100, $bestScore + 15);
             $areaMatch = true;

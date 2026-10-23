@@ -35,9 +35,17 @@
     {{-- Lead requirements --}}
     <div class="grid grid-cols-2 gap-3 text-sm mb-3">
         <div>
-            <div class="text-xs text-ink-900/50 uppercase"><i class="fa-solid fa-location-dot fa-fw"></i> Looking in</div>
-            <div class="font-semibold">{{ $lead->preferred_locality ?? '—' }}</div>
-            <div class="text-xs text-ink-900/60">{{ $lead->preferred_city ?? '' }}</div>
+            <div class="text-xs text-ink-900/50 uppercase"><i class="fa-solid fa-location-dot fa-fw"></i> Wants a PG in</div>
+            @if($lead->wanted_locality)
+                <div class="font-bold text-ink-950">{{ $lead->wanted_locality }}</div>
+                <div class="text-xs text-ink-900/60">{{ $lead->wanted_city }}</div>
+            @else
+                <div class="font-semibold text-amber-700">Area not given</div>
+                <div class="text-xs text-ink-900/60">Only the city is known: {{ $lead->wanted_city }}</div>
+            @endif
+            @if(!($lead->area_match ?? false))
+                <div class="mt-1 inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-600">Not your locality</div>
+            @endif
         </div>
         <div>
             <div class="text-xs text-ink-900/50 uppercase"><i class="fa-solid fa-sack-dollar fa-fw"></i> Budget</div>
