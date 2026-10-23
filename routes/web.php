@@ -713,7 +713,7 @@ Route::middleware('guest')->group(function () {
 
 
 // ===== REVIEWS =====
-Route::post('/property/{property}/review', [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+Route::post('/property/{property}/review', [\App\Http\Controllers\ReviewController::class, 'store'])->name('property.reviews.store');
 
 // Owner reviews
 Route::middleware(['auth', 'role:owner,admin'])->prefix('owner')->name('owner.')->group(function () {
@@ -833,12 +833,12 @@ Route::middleware(['auth', 'role:tenant'])->prefix('tenant')->name('tenant.')->g
     Route::post('/kyc/submit',   [\App\Http\Controllers\TenantPortalController::class, 'kycSubmit'])->name('kyc.submit');
     
     // Token payment (always accessible)
-    Route::get('/token/pay/{property?}', [\App\Http\Controllers\TenantPortalController::class, 'tokenPay'])->name('token.pay');
+    Route::get('/token/pay/{property?}', [\App\Http\Controllers\TenantPortalController::class, 'tokenPay'])->name('token.pay.property');
     Route::post('/token/verify', [\App\Http\Controllers\TenantPortalController::class, 'tokenVerify'])->name('token.verify');
     
     // PROTECTED (only after journey complete)
     Route::middleware(['tenant.journey'])->group(function () {
-        Route::get('/', [\App\Http\Controllers\TenantPortalController::class, 'dashboard'])->name('dashboard');
+        Route::get('/', [\App\Http\Controllers\TenantPortalController::class, 'dashboard']);
         Route::get('/dashboard', [\App\Http\Controllers\TenantPortalController::class, 'dashboard'])->name('dashboard');
         Route::get('/room', [\App\Http\Controllers\TenantPortalController::class, 'myRoom'])->name('room');
         Route::get('/rent', [\App\Http\Controllers\TenantPortalController::class, 'rentHistory'])->name('rent.history');
