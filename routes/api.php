@@ -228,10 +228,17 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
 
     // Rent / Bills
     Route::get('/rent',                    [OwnerController::class, 'rent']);
-    Route::get('/rent/{id}',               [OwnerController::class, 'rentShow']);
-    Route::post('/rent',                   [OwnerController::class, 'rentStore']);
-    Route::post('/rent/{id}/payment',      [OwnerController::class, 'rentPayment']);
+    Route::get('/rent/summary',            [OwnerController::class, 'rentSummary']);
+    Route::get('/rent-archive',            [OwnerController::class, 'rentArchive']);
+    Route::get('/rent/receipt/{paymentId}', [OwnerController::class, 'rentReceipt']);
+    Route::delete('/rent/payments/{paymentId}', [OwnerController::class, 'rentPaymentDelete']);
     Route::post('/rent/generate-all',      [OwnerController::class, 'rentGenerateAll']);
+    Route::post('/rent',                   [OwnerController::class, 'rentStore']);
+    Route::get('/rent/{id}',               [OwnerController::class, 'rentShow']);
+    Route::delete('/rent/{id}',            [OwnerController::class, 'rentDelete']);
+    Route::post('/rent/{id}/payment',      [OwnerController::class, 'rentPayment']);
+    Route::post('/rent/{id}/reminder',     [OwnerController::class, 'rentReminder']);
+    Route::post('/rent/{id}/restore',      [OwnerController::class, 'rentRestore']);
 
     // Tenants
     Route::get('/tenants',          [OwnerController::class, 'tenants']);

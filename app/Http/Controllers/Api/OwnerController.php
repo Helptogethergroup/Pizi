@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use App\Models\RentBill;
+use App\Models\RentPayment;
+use App\Models\Tenant;
+use App\Services\RentBillingService;
 
 class OwnerController extends Controller
 {
@@ -1394,118 +1398,262 @@ class OwnerController extends Controller
     // ═══════════════════════════════════════════════════════════════
     //  RENT BILLS
     // ═══════════════════════════════════════════════════════════════
+    // ─── Rent collection: the same things the website's Rent Collection does ──────────────
+
+    /** Rent bills of this owner (or the PG a manager is on), never the deleted ones. */
+    private function rentBillsQuery(Request $request)
+    {
+        $query = RentBill::query()->where('owner_id', $this->ownerId($request));
+        $this->scopeProps($query, $request, 'property_id');
+
+        return $query;
+    }
+
+    private function rentBillOrFail(Request $request, $id): ?RentBill
+    {
+        return $this->rentBillsQuery($request)->where('id', $id)->first();
+    }
+
+    private function onlyOwner(Request $request): bool
+    {
+        return $request->user()->role !== 'pg_manager';
+    }
+
     public function rent(Request $request)
     {
-        $oid = $this->ownerId($request);
         $query = DB::table('rent_bills as rb')
             ->leftJoin('tenants as t', 'rb.tenant_id', '=', 't.id')
             ->leftJoin('properties as p', 'rb.property_id', '=', 'p.id')
-            ->where('rb.owner_id', $oid)
+            ->whereNull('rb.deleted_at')
+            ->where('rb.owner_id', $this->ownerId($request))
             ->tap(fn ($q) => $this->scopeProps($q, $request, 'rb.property_id'))
             ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 'p.name as property_name')
+            ->orderBy('rb.month', 'desc')
             ->orderBy('rb.created_at', 'desc');
 
-        if ($request->status)    $query->where('rb.status', $request->status);
-        if ($request->month)     $query->where('rb.month', $request->month);
-        if ($request->tenant_id) $query->where('rb.tenant_id', $request->tenant_id);
+        if ($request->status)      $query->where('rb.status', $request->status);
+        if ($request->month)       $query->where('rb.month', $request->month);
+        if ($request->tenant_id)   $query->where('rb.tenant_id', $request->tenant_id);
+        if ($request->property_id) $query->where('rb.property_id', $request->property_id);
+        if ($request->payment_method) {
+            $method = $request->payment_method;
+            $query->whereExists(fn ($q) => $q->select(DB::raw(1))->from('rent_payments as rp')
+                ->whereColumn('rp.rent_bill_id', 'rb.id')->where('rp.payment_method', $method));
+        }
+        if ($request->q) {
+            $term = '%' . $request->q . '%';
+            $query->where(fn ($q) => $q->where('t.name', 'like', $term)->orWhere('t.phone', 'like', $term));
+        }
 
         return $this->ok($query->get());
     }
 
-    public function rentShow(Request $request, $id)
+    /** The four numbers and the tab counts at the top of the website's Rent Collection page. */
+    public function rentSummary(Request $request)
     {
-        $bill = $this->scopeProps(DB::table('rent_bills')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
-        if (!$bill) return $this->notFound();
-        $bill->payments = DB::table('rent_payments')->where('rent_bill_id', $id)->orderBy('paid_at', 'desc')->get();
-        return $this->ok($bill);
+        $bills = fn () => $this->rentBillsQuery($request);
+        $ids = $bills()->pluck('id');
+
+        return $this->ok([
+            'collected_this_month' => (float) RentPayment::whereIn('rent_bill_id', $ids)
+                ->whereMonth('paid_at', now()->month)->whereYear('paid_at', now()->year)->sum('amount'),
+            'pending_amount' => (float) $bills()->where('status', '!=', 'paid')->sum('due_amount'),
+            'overdue_count' => $bills()->where('status', 'overdue')->count(),
+            'paid_count_this_month' => $bills()->where('month', now()->format('Y-m'))->where('status', 'paid')->count(),
+            'counts' => [
+                'all' => $bills()->count(),
+                'pending' => $bills()->where('status', 'pending')->count(),
+                'partial' => $bills()->where('status', 'partial')->count(),
+                'overdue' => $bills()->where('status', 'overdue')->count(),
+                'paid' => $bills()->where('status', 'paid')->count(),
+            ],
+        ]);
     }
 
-    public function rentStore(Request $request)
+    public function rentShow(Request $request, $id)
+    {
+        $bill = $this->rentBillOrFail($request, $id);
+        if (!$bill) return $this->notFound();
+
+        $row = (array) DB::table('rent_bills')->where('id', $id)->first();
+        $tenant = DB::table('tenants')->where('id', $bill->tenant_id)->first(['name', 'phone', 'room_number', 'bed_number']);
+        $row['tenant_name'] = $tenant->name ?? null;
+        $row['tenant_phone'] = $tenant->phone ?? null;
+        $row['room_number'] = $tenant->room_number ?? null;
+        $row['property_name'] = DB::table('properties')->where('id', $bill->property_id)->value('name');
+        $row['pay_url'] = $bill->pay_url;
+        $row['payments'] = DB::table('rent_payments')->where('rent_bill_id', $id)->orderBy('paid_at', 'desc')->get();
+
+        return $this->ok((object) $row);
+    }
+
+    public function rentStore(Request $request, RentBillingService $rent)
     {
         $validator = Validator::make($request->all(), [
             'tenant_id'   => 'required|integer|exists:tenants,id',
-            'month'       => 'required|string',
+            'month'       => 'required|date_format:Y-m',
             'rent_amount' => 'required|numeric|min:0',
+            'electricity' => 'nullable|numeric|min:0',
+            'water'       => 'nullable|numeric|min:0',
+            'maintenance' => 'nullable|numeric|min:0',
+            'food_charges' => 'nullable|numeric|min:0',
+            'other_charges' => 'nullable|numeric|min:0',
+            'other_charges_label' => 'nullable|string|max:100',
+            'late_fee'    => 'nullable|numeric|min:0',
+            'discount'    => 'nullable|numeric|min:0',
             'due_date'    => 'required|date',
+            'notes'       => 'nullable|string',
         ]);
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
-        $oid    = $this->ownerId($request);
-        $tenant = DB::table('tenants')->where('id', $request->tenant_id)->where('owner_id', $oid)->first();
+        $oid = $this->ownerId($request);
+        $tenantQuery = Tenant::where('id', $request->tenant_id)->where('owner_id', $oid);
+        $this->scopeProps($tenantQuery, $request, 'property_id');
+        $tenant = $tenantQuery->first();
         if (!$tenant) return $this->notFound();
-        $rent   = $request->rent_amount;
-        $total  = $rent + ($request->electricity ?? 0) + ($request->water ?? 0) + ($request->maintenance ?? 0) + ($request->food_charges ?? 0) + ($request->other_charges ?? 0) + ($request->late_fee ?? 0) - ($request->discount ?? 0);
-        $billNo = 'BILL-' . date('Ym') . '-' . str_pad($tenant->id, 4, '0', STR_PAD_LEFT) . '-' . substr(uniqid(), -4);
 
-        $id = DB::table('rent_bills')->insertGetId([
-            'tenant_id' => $tenant->id, 'property_id' => $tenant->property_id, 'owner_id' => $oid,
-            'bill_number' => $billNo, 'month' => $request->month, 'rent_amount' => $rent,
-            'electricity' => $request->electricity ?? 0, 'water' => $request->water ?? 0,
-            'maintenance' => $request->maintenance ?? 0, 'food_charges' => $request->food_charges ?? 0,
-            'other_charges' => $request->other_charges ?? 0, 'other_charges_label' => $request->other_charges_label,
-            'late_fee' => $request->late_fee ?? 0,
-            'discount' => $request->discount ?? 0, 'total_amount' => $total, 'paid_amount' => 0,
-            'due_amount' => $total, 'due_date' => $request->due_date, 'status' => 'pending',
-            'notes' => $request->notes, 'created_at' => now(), 'updated_at' => now(),
-        ]);
-        return $this->ok(['id' => $id, 'bill_number' => $billNo]);
+        try {
+            $bill = $rent->createBill($tenant, $validator->validated(), $oid);
+        } catch (\RuntimeException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return $this->ok(['id' => $bill->id, 'bill_number' => $bill->bill_number]);
     }
 
-    public function rentPayment(Request $request, $id)
+    public function rentPayment(Request $request, $id, RentBillingService $rent)
     {
-        $bill = $this->scopeProps(DB::table('rent_bills')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
+        $bill = $this->rentBillOrFail($request, $id);
         if (!$bill) return $this->notFound();
 
-        $request->validate(['amount' => 'required|numeric|gt:0']);
-        if ((float) $request->amount > (float) $bill->due_amount + 0.009) {
-            return response()->json([
-                'success' => false,
-                'message' => 'The amount is more than what is due on this bill.',
-            ], 422);
+        $data = $request->validate([
+            'amount' => 'required|numeric|gt:0',
+            'payment_method' => 'nullable|string|max:30',
+            'transaction_ref' => 'nullable|string|max:100',
+            'paid_at' => 'nullable|date',
+            'notes' => 'nullable|string',
+        ]);
+
+        try {
+            $payment = $rent->recordPayment($bill, $data, (int) $request->user()->id);
+        } catch (\RuntimeException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
         }
 
-        $amount   = (float) $request->amount;
-        $receiptNo = 'RCPT-' . date('Ymd') . '-' . substr(uniqid(), -6);
-        $newPaid   = $bill->paid_amount + $amount;
-        $newDue    = $bill->total_amount - $newPaid;
-        $status    = $newDue <= 0 ? 'paid' : ($newPaid > 0 ? 'partial' : 'pending');
-
-        DB::table('rent_payments')->insertGetId([
-            'rent_bill_id' => $id, 'tenant_id' => $bill->tenant_id, 'owner_id' => $this->ownerId($request),
-            'receipt_number' => $receiptNo, 'amount' => $amount,
-            'payment_method' => $this->dbPaymentMethod($request->payment_method),
-            'transaction_ref' => $request->transaction_ref, 'paid_at' => $request->paid_at ?? now(),
-            'received_by_id' => $this->ownerId($request), 'notes' => $request->notes,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
-
-        DB::table('rent_bills')->where('id', $id)->update([
-            'paid_amount' => $newPaid, 'due_amount' => max(0, $newDue), 'status' => $status, 'updated_at' => now(),
-        ]);
-        return $this->ok(['receipt_number' => $receiptNo]);
+        return $this->ok(['receipt_number' => $payment->receipt_number, 'payment_id' => $payment->id]);
     }
 
-    public function rentGenerateAll(Request $request)
+    public function rentGenerateAll(Request $request, RentBillingService $rent)
     {
-        $oid     = $this->ownerId($request);
-        $month   = $request->month ?? now()->format('Y-m');
-        $dueDate = $request->due_date ?? now()->format('Y-m-05');
+        $data = $request->validate([
+            'month' => 'nullable|date_format:Y-m',
+            'due_date' => 'nullable|date',
+        ]);
+        $month = $data['month'] ?? now()->format('Y-m');
+        $dueDate = $data['due_date'] ?? now()->format('Y-m-05');
 
-        $tenants = DB::table('tenants')->where('owner_id', $oid)->where('status', 'active')->whereNotNull('monthly_rent')->where('monthly_rent', '>', 0)->get();
+        $oid = $this->ownerId($request);
+        $tenants = Tenant::where('owner_id', $oid)->where('status', 'active')->where('monthly_rent', '>', 0)
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 'property_id'))->get();
 
-        $generated = 0; $skipped = 0;
-        foreach ($tenants as $t) {
-            if (DB::table('rent_bills')->where('tenant_id', $t->id)->where('month', $month)->exists()) { $skipped++; continue; }
-            $billNo = 'BILL-' . str_replace('-', '', $month) . '-' . str_pad($t->id, 4, '0', STR_PAD_LEFT);
-            DB::table('rent_bills')->insert([
-                'tenant_id' => $t->id, 'property_id' => $t->property_id, 'owner_id' => $oid,
-                'bill_number' => $billNo, 'month' => $month, 'rent_amount' => $t->monthly_rent,
-                'total_amount' => $t->monthly_rent, 'paid_amount' => 0, 'due_amount' => $t->monthly_rent,
-                'due_date' => $dueDate, 'status' => 'pending', 'created_at' => now(), 'updated_at' => now(),
-            ]);
-            $generated++;
+        $r = $rent->generateAll($tenants, $month, $dueDate, $oid);
+
+        return $this->ok(['generated' => $r['created'], 'skipped' => $r['skipped']]);
+    }
+
+    /** Deletes a bill into the Bill Archive (it can be restored). Owner only, like the website. */
+    public function rentDelete(Request $request, $id)
+    {
+        if (!$this->onlyOwner($request)) {
+            return response()->json(['success' => false, 'message' => 'Only the owner can delete rent bills.'], 403);
         }
-        return $this->ok(['generated' => $generated, 'skipped' => $skipped]);
+        $bill = $this->rentBillOrFail($request, $id);
+        if (!$bill) return $this->notFound();
+        $bill->delete();
+
+        return $this->ok(['message' => 'Bill deleted. You can find it in the Bill Archive.']);
+    }
+
+    /** Bill Archive: bills older than 30 days, and deleted ones. Owner only. */
+    public function rentArchive(Request $request)
+    {
+        if (!$this->onlyOwner($request)) {
+            return response()->json(['success' => false, 'message' => 'Only the owner can open the Bill Archive.'], 403);
+        }
+        $oid = $this->ownerId($request);
+        $shape = function ($query) {
+            return $query->join('tenants as t', 't.id', '=', 'rb.tenant_id')
+                ->leftJoin('properties as p', 'p.id', '=', 'rb.property_id')
+                ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 'p.name as property_name');
+        };
+
+        $old = $shape(DB::table('rent_bills as rb')->whereNull('rb.deleted_at')->where('rb.owner_id', $oid)
+            ->where('rb.created_at', '<=', now()->subDays(30)))->orderByDesc('rb.created_at')->limit(300)->get();
+        $deleted = $shape(DB::table('rent_bills as rb')->whereNotNull('rb.deleted_at')->where('rb.owner_id', $oid))
+            ->orderByDesc('rb.deleted_at')->limit(300)->get();
+
+        return $this->ok(['old' => $old, 'deleted' => $deleted]);
+    }
+
+    public function rentRestore(Request $request, $id)
+    {
+        if (!$this->onlyOwner($request)) {
+            return response()->json(['success' => false, 'message' => 'Only the owner can restore rent bills.'], 403);
+        }
+        $bill = RentBill::onlyTrashed()->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+        if (!$bill) return $this->notFound();
+        $bill->restore();
+
+        return $this->ok(['message' => 'Bill restored.']);
+    }
+
+    public function rentPaymentDelete(Request $request, $paymentId, RentBillingService $rent)
+    {
+        if (!$this->onlyOwner($request)) {
+            return response()->json(['success' => false, 'message' => 'Only the owner can remove payments.'], 403);
+        }
+        $payment = RentPayment::where('id', $paymentId)->where('owner_id', $this->ownerId($request))->first();
+        if (!$payment) return $this->notFound();
+        $rent->deletePayment($payment);
+
+        return $this->ok(['message' => 'Payment removed.']);
+    }
+
+    public function rentReminder(Request $request, $id, RentBillingService $rent)
+    {
+        $bill = $this->rentBillOrFail($request, $id);
+        if (!$bill) return $this->notFound();
+        $result = $rent->remind($bill->load('tenant'));
+
+        return response()->json(['success' => true, 'data' => $result]);
+    }
+
+    /** What the receipt of one payment says (the app shows and shares it). */
+    public function rentReceipt(Request $request, $paymentId)
+    {
+        $payment = RentPayment::where('id', $paymentId)->where('owner_id', $this->ownerId($request))->first();
+        if (!$payment) return $this->notFound();
+        $bill = $this->rentBillOrFail($request, $payment->rent_bill_id);
+        if (!$bill) return $this->notFound();
+        $tenant = DB::table('tenants')->where('id', $bill->tenant_id)->first(['name', 'phone', 'room_number', 'bed_number']);
+
+        return $this->ok([
+            'receipt_number' => $payment->receipt_number,
+            'amount' => (float) $payment->amount,
+            'payment_method' => $payment->payment_method,
+            'transaction_ref' => $payment->transaction_ref,
+            'paid_at' => $payment->paid_at,
+            'notes' => $payment->notes,
+            'bill_number' => $bill->bill_number,
+            'month' => $bill->month,
+            'total_amount' => (float) $bill->total_amount,
+            'paid_amount' => (float) $bill->paid_amount,
+            'due_amount' => (float) $bill->due_amount,
+            'tenant_name' => $tenant->name ?? null,
+            'tenant_phone' => $tenant->phone ?? null,
+            'room_number' => $tenant->room_number ?? null,
+            'property_name' => DB::table('properties')->where('id', $bill->property_id)->value('name'),
+        ]);
     }
 
     // ═══════════════════════════════════════════════════════════════

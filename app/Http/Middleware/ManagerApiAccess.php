@@ -39,6 +39,13 @@ class ManagerApiAccess
         'GET owner/rent' => 'rent',
         'GET owner/rent/{id}' => 'rent',
         'POST owner/rent/{id}/payment' => 'rent',
+        // the website lets a manager with the Rent Collection feature do these too;
+        // deleting bills or payments, the Bill Archive and restoring stay with the owner
+        'GET owner/rent/summary' => 'rent',
+        'GET owner/rent/receipt/{paymentId}' => 'rent',
+        'POST owner/rent' => 'rent',
+        'POST owner/rent/generate-all' => 'rent',
+        'POST owner/rent/{id}/reminder' => 'rent',
 
         'GET owner/tenants' => 'tenants',
         'GET owner/tenants/{id}' => 'tenants',
