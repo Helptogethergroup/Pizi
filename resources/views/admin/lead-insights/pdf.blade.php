@@ -38,6 +38,18 @@
     <td class="kpi"><div class="l">Junk</div><div class="n">{{ $d['groups']['junk']['count'] }}</div></td>
 </tr></table>
 
+@if($d['filter_connection'] || $d['filter_telecaller'])
+    <div class="sub">Filter: @if($d['filter_connection']) {{ $S::CONNECTION[$d['filter_connection']] }} leads @endif @if($d['filter_telecaller']) &middot; {{ optional(\App\Models\User::find($d['filter_telecaller']))->name }} @endif</div>
+@endif
+
+<h2>Connected / not connected (all new leads, junk left out)</h2>
+<table class="t">
+    <tr><th>Calls</th><th>Leads</th></tr>
+    @foreach($S::CONNECTION as $key => $label)
+        <tr><td>{{ $label }}</td><td>{{ $d['connection_counts'][$key] }}</td></tr>
+    @endforeach
+</table>
+
 <h2>Where the new leads stand now</h2>
 <table class="t">
     <tr><th>Status group</th><th>Leads</th><th>Share</th></tr>
@@ -92,9 +104,9 @@
 @if(count($d['telecallers']))
 <h2>Telecallers</h2>
 <table class="t">
-    <tr><th>Name</th><th>Leads given</th><th>Called</th><th>Interested</th><th>Closed</th><th>Not interested</th><th>Junk</th></tr>
+    <tr><th>Name</th><th>Leads given</th><th>Connected</th><th>Not connected</th><th>Not called yet</th><th>Interested</th><th>Closed</th><th>Not interested</th><th>Junk</th></tr>
     @foreach($d['telecallers'] as $t)
-        <tr><td>{{ $t['name'] }}</td><td>{{ $t['assigned'] }}</td><td>{{ $t['called'] }}</td><td>{{ $t['interested'] }}</td><td>{{ $t['won'] }}</td><td>{{ $t['lost'] }}</td><td>{{ $t['junk'] }}</td></tr>
+        <tr><td>{{ $t['name'] }}</td><td>{{ $t['assigned'] }}</td><td>{{ $t['connected'] }}</td><td>{{ $t['not_connected'] }}</td><td>{{ $t['not_called'] }}</td><td>{{ $t['interested'] }}</td><td>{{ $t['won'] }}</td><td>{{ $t['lost'] }}</td><td>{{ $t['junk'] }}</td></tr>
     @endforeach
 </table>
 @endif

@@ -39,15 +39,55 @@ class LeadInsightsService
         return 'other';
     }
 
-    public function build(Carbon $from, Carbon $to): array
+    /** connection key => label */
+    public const CONNECTION = [
+        'connected' => 'Connected',
+        'not_connected' => 'Not connected',
+        'not_called' => 'Not called yet',
+    ];
+
+    /**
+     * Did the team reach the person? Connected = someone talked to them (call marked contacted /
+     * interested / not interested, or the lead moved on because of a call). Not connected = we
+     * tried (an unanswered attempt) but never reached them. Not called yet = no attempt at all.
+     * Junk leads are left out of this split.
+     */
+    private function connectionSql(): string
+    {
+        return "CASE
+            WHEN status = 'junk' THEN 'junk'
+            WHEN call_status IN ('contacted','interested','not_interested','converted')
+                 OR status IN ('contacted','interested','visit_scheduled','visit_completed','closed_won','deal_closed','not_interested') THEN 'connected'
+            WHEN coalesce(call_attempts, 0) > 0 OR call_status = 'not_reachable' THEN 'not_connected'
+            ELSE 'not_called' END";
+    }
+
+    private function applyFilters($query, ?string $connection, ?int $telecallerId)
+    {
+        if ($telecallerId) {
+            $query->where('assigned_telecaller_id', $telecallerId);
+        }
+        if ($connection && isset(self::CONNECTION[$connection])) {
+            $query->whereRaw('(' . $this->connectionSql() . ') = ?', [$connection]);
+        }
+
+        return $query;
+    }
+
+    public function build(Carbon $from, Carbon $to, ?string $connection = null, ?int $telecallerId = null): array
     {
         $from = $from->copy()->startOfDay();
         $to = $to->copy()->endOfDay();
         $days = max(1, $from->diffInDays($to->copy()->startOfDay()) + 1);
         $prevFrom = $from->copy()->subDays($days);
         $prevTo = $from->copy()->subSecond();
+        $connection = isset(self::CONNECTION[(string) $connection]) ? $connection : null;
+        $filtered = $connection !== null || $telecallerId;
 
-        $inRange = fn () => Lead::query()->whereBetween('created_at', [$from, $to]);
+        $matching = fn () => $this->applyFilters(Lead::query(), $connection, $telecallerId);
+        $inRange = fn () => $matching()->whereBetween('created_at', [$from, $to]);
+        // unlocks follow the same filters: only leads that match them
+        $unlockBase = fn () => $this->realUnlocks()->when($filtered, fn ($q) => $q->whereIn('lead_unlocks.lead_id', $matching()->select('id')));
 
         // ── status mix of the leads that came in during the range
         $byStatus = $inRange()->selectRaw('status, count(*) as c')->groupBy('status')->pluck('c', 'status')->all();
@@ -62,7 +102,7 @@ class LeadInsightsService
 
         // ── per day: leads by where they are now
         $dailyRaw = $inRange()->selectRaw('DATE(created_at) as d, status, count(*) as c')->groupBy('d', 'status')->get();
-        $unlocksDaily = $this->realUnlocks()->whereBetween('lead_unlocks.created_at', [$from, $to])
+        $unlocksDaily = $unlockBase()->whereBetween('lead_unlocks.created_at', [$from, $to])
             ->selectRaw('DATE(lead_unlocks.created_at) as d, count(*) as c, coalesce(sum(credits_spent),0) as credits')
             ->groupBy('d')->get()->keyBy('d');
 
@@ -91,10 +131,10 @@ class LeadInsightsService
         $daily = array_values($daily);
 
         // ── unlocks in the range
-        $unlockRows = $this->realUnlocks()->whereBetween('lead_unlocks.created_at', [$from, $to]);
+        $unlockRows = $unlockBase()->whereBetween('lead_unlocks.created_at', [$from, $to]);
         $unlocks = (int) (clone $unlockRows)->count();
         $credits = (int) (clone $unlockRows)->sum('credits_spent');
-        $unlockedOfThese = (int) $this->realUnlocks()
+        $unlockedOfThese = (int) $unlockBase()
             ->whereIn('lead_unlocks.lead_id', $inRange()->select('id'))
             ->distinct()->count('lead_unlocks.lead_id');
 
@@ -110,7 +150,7 @@ class LeadInsightsService
         // ── telecallers
         $telecallers = [];
         $tcRows = $inRange()->whereNotNull('assigned_telecaller_id')
-            ->get(['assigned_telecaller_id', 'status', 'call_status', 'called_at']);
+            ->get(['assigned_telecaller_id', 'status', 'call_status', 'called_at', 'call_attempts']);
         $names = DB::table('users')->whereIn('id', $tcRows->pluck('assigned_telecaller_id')->unique())->pluck('name', 'id');
         foreach ($tcRows->groupBy('assigned_telecaller_id') as $id => $leads) {
             $g = fn ($key) => $leads->filter(fn ($l) => self::groupOf($l->status) === $key)->count();
@@ -118,6 +158,9 @@ class LeadInsightsService
                 'name' => $names[$id] ?? ('Telecaller #' . $id),
                 'assigned' => $leads->count(),
                 'called' => $leads->filter(fn ($l) => $l->called_at || ($l->call_status && $l->call_status !== 'not_called'))->count(),
+                'connected' => $leads->filter(fn ($l) => $this->connectionOf($l) === 'connected')->count(),
+                'not_connected' => $leads->filter(fn ($l) => $this->connectionOf($l) === 'not_connected')->count(),
+                'not_called' => $leads->filter(fn ($l) => $this->connectionOf($l) === 'not_called')->count(),
                 'interested' => $g('interested'),
                 'won' => $g('won'),
                 'lost' => $g('lost'),
@@ -135,7 +178,18 @@ class LeadInsightsService
             'refunded' => (int) (clone $reports)->sum('credits_refunded'),
         ];
 
-        $prevTotal = (int) Lead::query()->whereBetween('created_at', [$prevFrom, $prevTo])->count();
+        $prevTotal = (int) $matching()->whereBetween('created_at', [$prevFrom, $prevTo])->count();
+
+        // Connected / not connected for the period (the Calls filter does not narrow this box, so
+        // the three numbers always add up; the telecaller filter does)
+        $connCounts = Lead::query()->when($telecallerId, fn ($q) => $q->where('assigned_telecaller_id', $telecallerId))
+            ->whereBetween('created_at', [$from, $to])
+            ->selectRaw('(' . $this->connectionSql() . ') as k, count(*) as c')->groupBy('k')->pluck('c', 'k')->all();
+        $connection_counts = [];
+        foreach (array_keys(self::CONNECTION) as $k) {
+            $connection_counts[$k] = (int) ($connCounts[$k] ?? 0);
+        }
+        $connection_counts['junk'] = (int) ($connCounts['junk'] ?? 0);
 
         return [
             'from' => $from,
@@ -155,7 +209,27 @@ class LeadInsightsService
             'types' => $types,
             'telecallers' => $telecallers,
             'reports' => $reportStats,
+            'connection_counts' => $connection_counts,
+            'filter_connection' => $connection,
+            'filter_telecaller' => $telecallerId,
         ];
+    }
+
+    /** the same split as connectionSql(), for a lead already in memory */
+    private function connectionOf($l): string
+    {
+        if ($l->status === 'junk') {
+            return 'junk';
+        }
+        if (in_array($l->call_status, ['contacted', 'interested', 'not_interested', 'converted'], true)
+            || in_array($l->status, ['contacted', 'interested', 'visit_scheduled', 'visit_completed', 'closed_won', 'deal_closed', 'not_interested'], true)) {
+            return 'connected';
+        }
+        if ((int) $l->call_attempts > 0 || $l->call_status === 'not_reachable') {
+            return 'not_connected';
+        }
+
+        return 'not_called';
     }
 
     /** lead_unlocks rows, leaving out internal test accounts */

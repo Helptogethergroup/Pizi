@@ -7,6 +7,14 @@
     $maxDay = max(1, collect($d['daily'])->max('total'));
     $unlockPct = $d['total'] > 0 ? round($d['unlocked_of_these'] / $d['total'] * 100) : 0;
     $periodLabel = $d['from']->isSameDay($d['to']) ? $d['from']->format('d M Y') : $d['from']->format('d M Y') . ' – ' . $d['to']->format('d M Y');
+    $keep = collect($query)->only(['connection', 'telecaller'])->filter()->all();
+    $cc = $d['connection_counts'];
+    $ccTotal = max(1, $cc['connected'] + $cc['not_connected'] + $cc['not_called']);
+    $ccStyle = [
+        'connected' => ['bg-emerald-50 border-emerald-200', 'text-emerald-700'],
+        'not_connected' => ['bg-amber-50 border-amber-300', 'text-amber-700'],
+        'not_called' => ['bg-slate-50 border-slate-200', 'text-slate-600'],
+    ];
 @endphp
 
 <div class="flex flex-wrap items-start justify-between gap-4 mb-6">
@@ -24,11 +32,27 @@
 <form method="GET" class="bg-white rounded-2xl border border-ink-900/10 p-4 mb-6 flex flex-wrap items-end gap-3">
     <div class="flex flex-wrap gap-2">
         @foreach($presets as $key => $label)
-            <a href="{{ route('admin.lead-insights.index', ['range' => $key]) }}"
+            <a href="{{ route('admin.lead-insights.index', array_merge(['range' => $key], $keep)) }}"
                class="px-3.5 py-2 rounded-full text-sm font-semibold {{ $range === $key ? 'bg-ink-950 text-cream' : 'bg-cream border border-ink-900/10 hover:bg-ink-900/5' }}">{{ $label }}</a>
         @endforeach
     </div>
-    <div class="flex items-end gap-2 ml-auto">
+    <div class="flex items-end gap-2 ml-auto flex-wrap">
+        <label class="text-xs text-ink-900/60">Calls
+            <select name="connection" class="block mt-1 px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
+                <option value="">All leads</option>
+                @foreach($S::CONNECTION as $key => $label)
+                    <option value="{{ $key }}" @selected($d['filter_connection'] === $key)>{{ $label }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label class="text-xs text-ink-900/60">Telecaller
+            <select name="telecaller" class="block mt-1 px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
+                <option value="">All telecallers</option>
+                @foreach($telecallerList as $t)
+                    <option value="{{ $t->id }}" @selected($d['filter_telecaller'] === $t->id)>{{ $t->name }}</option>
+                @endforeach
+            </select>
+        </label>
         <label class="text-xs text-ink-900/60">From
             <input type="date" name="from" value="{{ $d['from']->toDateString() }}" max="{{ now()->toDateString() }}" class="block mt-1 px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
         </label>
@@ -38,6 +62,29 @@
         <button class="px-4 py-2 rounded-lg bg-coral-500 text-white text-sm font-bold">Show</button>
     </div>
 </form>
+
+{{-- Connected / not connected: click one to filter the whole page --}}
+<div class="grid sm:grid-cols-3 gap-4 mb-6">
+    @foreach($S::CONNECTION as $key => $label)
+        <a href="{{ route('admin.lead-insights.index', array_merge($query, ['connection' => $d['filter_connection'] === $key ? null : $key])) }}"
+           class="rounded-2xl border p-4 flex items-center justify-between {{ $ccStyle[$key][0] }} {{ $d['filter_connection'] === $key ? 'ring-2 ring-ink-950' : '' }}">
+            <div>
+                <div class="text-xs uppercase tracking-wide text-ink-900/60">{{ $label }}</div>
+                <div class="font-display font-black text-3xl tabular-nums {{ $ccStyle[$key][1] }}">{{ number_format($cc[$key]) }}</div>
+            </div>
+            <div class="text-sm font-bold {{ $ccStyle[$key][1] }}">{{ round($cc[$key] / $ccTotal * 100) }}%</div>
+        </a>
+    @endforeach
+</div>
+<p class="text-xs text-ink-900/50 -mt-4 mb-6">
+    Connected = the team spoke to the person. Not connected = we called but never reached them. Not called yet = no call made. Junk leads are left out of these three.
+    @if($d['filter_connection'] || $d['filter_telecaller'])
+        <span class="font-semibold text-ink-950"> Filter on: everything below shows only
+            @if($d['filter_connection']) “{{ $S::CONNECTION[$d['filter_connection']] }}” leads @endif
+            @if($d['filter_telecaller']) of {{ optional($telecallerList->firstWhere('id', $d['filter_telecaller']))->name ?? 'this telecaller' }} @endif
+            · <a class="underline" href="{{ route('admin.lead-insights.index', ['range' => $range === 'custom' ? null : $range, 'from' => $range === 'custom' ? $d['from']->toDateString() : null, 'to' => $range === 'custom' ? $d['to']->toDateString() : null]) }}">clear filters</a></span>
+    @endif
+</p>
 
 {{-- Headline numbers --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -194,10 +241,11 @@
 <div class="bg-white rounded-2xl border border-ink-900/10 p-6">
     <h2 class="font-display font-bold text-xl mb-4">Telecallers</h2>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm min-w-[620px]">
+        <table class="w-full text-sm min-w-[780px]">
             <thead>
                 <tr class="text-left text-xs uppercase tracking-wide text-ink-900/50 border-b border-ink-900/10">
-                    <th class="py-2 pr-3">Name</th><th class="py-2 px-2 text-right">Leads given</th><th class="py-2 px-2 text-right">Called</th>
+                    <th class="py-2 pr-3">Name</th><th class="py-2 px-2 text-right">Leads given</th>
+                    <th class="py-2 px-2 text-right text-emerald-700">Connected</th><th class="py-2 px-2 text-right text-amber-700">Not connected</th><th class="py-2 px-2 text-right">Not called yet</th>
                     <th class="py-2 px-2 text-right">Interested</th><th class="py-2 px-2 text-right">Closed</th><th class="py-2 px-2 text-right">Not interested</th><th class="py-2 pl-2 text-right">Junk</th>
                 </tr>
             </thead>
@@ -206,14 +254,16 @@
                     <tr class="border-b border-ink-900/5">
                         <td class="py-2 pr-3 font-semibold">{{ $t['name'] }}</td>
                         <td class="py-2 px-2 text-right tabular-nums font-bold">{{ $t['assigned'] }}</td>
-                        <td class="py-2 px-2 text-right tabular-nums">{{ $t['called'] }}</td>
+                        <td class="py-2 px-2 text-right tabular-nums font-semibold text-emerald-700">{{ $t['connected'] }}</td>
+                        <td class="py-2 px-2 text-right tabular-nums font-semibold text-amber-700">{{ $t['not_connected'] }}</td>
+                        <td class="py-2 px-2 text-right tabular-nums">{{ $t['not_called'] }}</td>
                         <td class="py-2 px-2 text-right tabular-nums">{{ $t['interested'] }}</td>
                         <td class="py-2 px-2 text-right tabular-nums">{{ $t['won'] }}</td>
                         <td class="py-2 px-2 text-right tabular-nums">{{ $t['lost'] }}</td>
                         <td class="py-2 pl-2 text-right tabular-nums">{{ $t['junk'] }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="py-4 text-ink-900/50">No leads were given to a telecaller in this period.</td></tr>
+                    <tr><td colspan="9" class="py-4 text-ink-900/50">No leads were given to a telecaller in this period.</td></tr>
                 @endforelse
             </tbody>
         </table>

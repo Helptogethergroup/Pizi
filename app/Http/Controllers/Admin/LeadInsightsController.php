@@ -24,30 +24,40 @@ class LeadInsightsController extends Controller
     public function index(Request $request, LeadInsightsService $service)
     {
         [$from, $to, $range] = $this->range($request);
-        $data = $service->build($from, $to);
+        $data = $service->build($from, $to, $this->connection($request), $this->telecaller($request));
 
         return view('admin.lead-insights.index', [
             'd' => $data,
             'range' => $range,
             'presets' => self::PRESETS,
-            'query' => $request->only(['range', 'from', 'to']),
+            'query' => $request->only(['range', 'from', 'to', 'connection', 'telecaller']),
+            'telecallerList' => \App\Models\User::where('role', 'telecaller')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function xlsx(Request $request, LeadInsightsService $service)
     {
         [$from, $to] = $this->range($request);
-        $d = $service->build($from, $to);
+        $d = $service->build($from, $to, $this->connection($request), $this->telecaller($request));
 
         $groupKeys = array_keys(LeadInsightsService::GROUPS);
         $groupLabels = array_map(fn ($g) => $g['label'], $d['groups']);
 
         $summary = [['What', 'Number']];
         $summary[] = ['Period', $d['from']->format('d M Y') . ' to ' . $d['to']->format('d M Y')];
+        if ($d['filter_connection']) {
+            $summary[] = ['Filter: calls', LeadInsightsService::CONNECTION[$d['filter_connection']]];
+        }
+        if ($d['filter_telecaller']) {
+            $summary[] = ['Filter: telecaller', optional(\App\Models\User::find($d['filter_telecaller']))->name];
+        }
         $summary[] = ['New leads', $d['total']];
         $summary[] = ['New leads in the period before this one', $d['prev_total']];
         foreach ($d['groups'] as $g) {
             $summary[] = [$g['label'], $g['count']];
+        }
+        foreach (LeadInsightsService::CONNECTION as $k => $label) {
+            $summary[] = [$label . ' (all new leads, junk left out)', $d['connection_counts'][$k]];
         }
         $summary[] = ['Unlocks by owners in this period', $d['unlocks']];
         $summary[] = ['Credits spent on those unlocks', $d['credits']];
@@ -82,9 +92,9 @@ class LeadInsightsController extends Controller
             $sources[] = [LeadInsightsService::pretty($s), (int) $c];
         }
 
-        $tele = [['Telecaller', 'Leads given', 'Called', 'Interested', 'Closed (won)', 'Not interested / lost', 'Junk']];
+        $tele = [['Telecaller', 'Leads given', 'Connected', 'Not connected', 'Not called yet', 'Interested', 'Closed (won)', 'Not interested / lost', 'Junk']];
         foreach ($d['telecallers'] as $t) {
-            $tele[] = [$t['name'], $t['assigned'], $t['called'], $t['interested'], $t['won'], $t['lost'], $t['junk']];
+            $tele[] = [$t['name'], $t['assigned'], $t['connected'], $t['not_connected'], $t['not_called'], $t['interested'], $t['won'], $t['lost'], $t['junk']];
         }
 
         $file = (new SimpleXlsx())
@@ -93,7 +103,7 @@ class LeadInsightsController extends Controller
             ->addSheet('Status', $status, [28, 10])
             ->addSheet('Calls', $calls, [28, 10])
             ->addSheet('Source and type', $sources, [28, 10])
-            ->addSheet('Telecallers', $tele, [28, 12, 10, 12, 14, 22, 8]);
+            ->addSheet('Telecallers', $tele, [28, 12, 12, 15, 15, 12, 14, 22, 8]);
 
         return $file->download('pizi-lead-insights-' . $d['from']->format('Ymd') . '-' . $d['to']->format('Ymd') . '.xlsx');
     }
@@ -101,11 +111,25 @@ class LeadInsightsController extends Controller
     public function pdf(Request $request, LeadInsightsService $service)
     {
         [$from, $to] = $this->range($request);
-        $d = $service->build($from, $to);
+        $d = $service->build($from, $to, $this->connection($request), $this->telecaller($request));
 
         return \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.lead-insights.pdf', ['d' => $d])
             ->setPaper('a4', 'landscape')
             ->download('pizi-lead-insights-' . $d['from']->format('Ymd') . '-' . $d['to']->format('Ymd') . '.pdf');
+    }
+
+    private function connection(Request $request): ?string
+    {
+        $c = (string) $request->get('connection', '');
+
+        return isset(LeadInsightsService::CONNECTION[$c]) ? $c : null;
+    }
+
+    private function telecaller(Request $request): ?int
+    {
+        $id = (int) $request->get('telecaller', 0);
+
+        return $id > 0 ? $id : null;
     }
 
     /** @return array{0: Carbon, 1: Carbon, 2: string} */
