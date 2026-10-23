@@ -426,6 +426,7 @@ Route::post('/guide/dismiss', [\App\Http\Controllers\Owner\GuideController::clas
 /* ---------- TELECALLER ---------- */
 Route::middleware(['auth', 'role:telecaller,admin'])->prefix('telecaller')->name('telecaller.')->group(function () {
     Route::get('/', [\App\Http\Controllers\TeleCaller\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/insights', [\App\Http\Controllers\Admin\LeadInsightsController::class, 'index'])->name('insights');
     Route::get('/leads', [\App\Http\Controllers\TeleCaller\LeadController::class, 'index'])->name('leads.index');
     Route::get('/leads/{lead}', [\App\Http\Controllers\TeleCaller\LeadController::class, 'show'])->name('leads.show');
     Route::patch('/leads/{lead}', [\App\Http\Controllers\TeleCaller\LeadController::class, 'update'])->name('leads.update');

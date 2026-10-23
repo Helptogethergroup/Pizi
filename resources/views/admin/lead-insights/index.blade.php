@@ -3,6 +3,8 @@
 @section('content')
 @php
     $S = \App\Services\LeadInsightsService::class;
+    $isTelecaller = $isTelecaller ?? false;
+    $indexRoute = $isTelecaller ? 'telecaller.insights' : 'admin.lead-insights.index';
     $delta = $d['prev_total'] > 0 ? round((($d['total'] - $d['prev_total']) / $d['prev_total']) * 100) : null;
     $maxDay = max(1, collect($d['daily'])->max('total'));
     $unlockPct = $d['total'] > 0 ? round($d['unlocked_of_these'] / $d['total'] * 100) : 0;
@@ -22,17 +24,19 @@
         <h1 class="font-display font-black text-3xl">Lead insights</h1>
         <p class="text-ink-900/60 mt-1">What happened to the leads, day by day. <span class="font-semibold text-ink-950">{{ $periodLabel }}</span></p>
     </div>
+    @unless($isTelecaller)
     <div class="flex gap-2">
         <a href="{{ route('admin.lead-insights.xlsx', $query) }}" class="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700"><i class="fa-solid fa-file-excel fa-fw"></i> Download Excel</a>
         <a href="{{ route('admin.lead-insights.pdf', $query) }}" class="px-4 py-2.5 rounded-xl bg-ink-950 text-cream text-sm font-bold hover:bg-ink-900"><i class="fa-solid fa-file-pdf fa-fw"></i> Download PDF</a>
     </div>
+    @endunless
 </div>
 
 {{-- Date range --}}
 <form method="GET" class="bg-white rounded-2xl border border-ink-900/10 p-4 mb-6 flex flex-wrap items-end gap-3">
     <div class="flex flex-wrap gap-2">
         @foreach($presets as $key => $label)
-            <a href="{{ route('admin.lead-insights.index', array_merge(['range' => $key], $keep)) }}"
+            <a href="{{ route($indexRoute, array_merge(['range' => $key], $keep)) }}"
                class="px-3.5 py-2 rounded-full text-sm font-semibold {{ $range === $key ? 'bg-ink-950 text-cream' : 'bg-cream border border-ink-900/10 hover:bg-ink-900/5' }}">{{ $label }}</a>
         @endforeach
     </div>
@@ -45,9 +49,9 @@
                 @endforeach
             </select>
         </label>
-        <label class="text-xs text-ink-900/60">Telecaller
+        <label class="text-xs text-ink-900/60">{{ $isTelecaller ? 'Whose leads' : 'Telecaller' }}
             <select name="telecaller" class="block mt-1 px-3 py-2 rounded-lg border border-ink-900/15 text-sm">
-                <option value="">All telecallers</option>
+                <option value="">{{ $isTelecaller ? 'All leads (shared pool)' : 'All telecallers' }}</option>
                 @foreach($telecallerList as $t)
                     <option value="{{ $t->id }}" @selected($d['filter_telecaller'] === $t->id)>{{ $t->name }}</option>
                 @endforeach
@@ -66,7 +70,7 @@
 {{-- Connected / not connected: click one to filter the whole page --}}
 <div class="grid sm:grid-cols-3 gap-4 mb-6">
     @foreach($S::CONNECTION as $key => $label)
-        <a href="{{ route('admin.lead-insights.index', array_merge($query, ['connection' => $d['filter_connection'] === $key ? null : $key])) }}"
+        <a href="{{ route($indexRoute, array_merge($query, ['connection' => $d['filter_connection'] === $key ? null : $key])) }}"
            class="rounded-2xl border p-4 flex items-center justify-between {{ $ccStyle[$key][0] }} {{ $d['filter_connection'] === $key ? 'ring-2 ring-ink-950' : '' }}">
             <div>
                 <div class="text-xs uppercase tracking-wide text-ink-900/60">{{ $label }}</div>
@@ -82,7 +86,7 @@
         <span class="font-semibold text-ink-950"> Filter on: everything below shows only
             @if($d['filter_connection']) “{{ $S::CONNECTION[$d['filter_connection']] }}” leads @endif
             @if($d['filter_telecaller']) of {{ optional($telecallerList->firstWhere('id', $d['filter_telecaller']))->name ?? 'this telecaller' }} @endif
-            · <a class="underline" href="{{ route('admin.lead-insights.index', ['range' => $range === 'custom' ? null : $range, 'from' => $range === 'custom' ? $d['from']->toDateString() : null, 'to' => $range === 'custom' ? $d['to']->toDateString() : null]) }}">clear filters</a></span>
+            · <a class="underline" href="{{ route($indexRoute, ['range' => $range === 'custom' ? null : $range, 'from' => $range === 'custom' ? $d['from']->toDateString() : null, 'to' => $range === 'custom' ? $d['to']->toDateString() : null]) }}">clear filters</a></span>
     @endif
 </p>
 
@@ -100,11 +104,19 @@
         <div class="font-display font-black text-4xl mt-1 tabular-nums text-teal-700">{{ number_format($d['groups']['interested']['count']) }}</div>
         <div class="text-xs mt-1 text-ink-900/50">{{ $d['total'] > 0 ? round($d['groups']['interested']['count'] / $d['total'] * 100) : 0 }}% of new leads</div>
     </div>
+    @if($isTelecaller)
+    <div class="bg-white rounded-2xl border border-ink-900/10 p-5">
+        <div class="text-xs uppercase tracking-wide text-ink-900/50">Needs another call</div>
+        <div class="font-display font-black text-4xl mt-1 tabular-nums text-amber-700">{{ number_format($cc['not_connected']) }}</div>
+        <div class="text-xs mt-1 text-ink-900/50">{{ number_format($cc['not_called']) }} not called yet</div>
+    </div>
+    @else
     <div class="bg-white rounded-2xl border border-ink-900/10 p-5">
         <div class="text-xs uppercase tracking-wide text-ink-900/50">Unlocked by owners</div>
         <div class="font-display font-black text-4xl mt-1 tabular-nums text-coral-500">{{ number_format($d['unlocks']) }}</div>
         <div class="text-xs mt-1 text-ink-900/50">{{ number_format($d['credits']) }} credits spent</div>
     </div>
+    @endif
     <div class="bg-white rounded-2xl border border-ink-900/10 p-5">
         <div class="text-xs uppercase tracking-wide text-ink-900/50">Closed (won)</div>
         <div class="font-display font-black text-4xl mt-1 tabular-nums text-emerald-700">{{ number_format($d['groups']['won']['count']) }}</div>
@@ -114,7 +126,7 @@
 
 <div class="grid lg:grid-cols-3 gap-6 mb-6">
     {{-- Where the new leads are now --}}
-    <div class="lg:col-span-2 bg-white rounded-2xl border border-ink-900/10 p-6">
+    <div class="{{ $isTelecaller ? 'lg:col-span-3' : 'lg:col-span-2' }} bg-white rounded-2xl border border-ink-900/10 p-6">
         <h2 class="font-display font-bold text-xl">Where the new leads stand now</h2>
         <p class="text-sm text-ink-900/50 mb-4">Leads that came in during this period, by their status today.</p>
         @if($d['total'] > 0)
@@ -147,6 +159,7 @@
     </div>
 
     {{-- Owners and reports --}}
+    @unless($isTelecaller)
     <div class="bg-white rounded-2xl border border-ink-900/10 p-6">
         <h2 class="font-display font-bold text-xl mb-4">Owners and quality</h2>
         <dl class="space-y-3 text-sm">
@@ -161,12 +174,13 @@
             <a href="{{ route('admin.lead-reports.index') }}" class="mt-4 block text-center text-sm font-bold py-2 rounded-lg bg-amber-100 text-amber-900">Review waiting reports</a>
         @endif
     </div>
+    @endunless
 </div>
 
 {{-- Day by day --}}
 <div class="bg-white rounded-2xl border border-ink-900/10 p-6 mb-6">
     <h2 class="font-display font-bold text-xl">Day by day</h2>
-    <p class="text-sm text-ink-900/50 mb-4">New leads of each day and where they are now. “Unlocked” counts the owners’ unlocks made that day.</p>
+    <p class="text-sm text-ink-900/50 mb-4">New leads of each day and where they are now.@unless($isTelecaller) “Unlocked” counts the owners’ unlocks made that day.@endunless</p>
 
     @if($d['days'] > 1)
         <div class="flex items-end gap-1 h-28 mb-5" aria-hidden="true">
@@ -188,8 +202,10 @@
                         @continue($key === 'other')
                         <th class="py-2 px-2 text-right" style="color: {{ $g['colour'] }}">{{ explode(' /', $g['label'])[0] }}</th>
                     @endforeach
+                    @unless($isTelecaller)
                     <th class="py-2 px-2 text-right">Unlocked</th>
                     <th class="py-2 pl-2 text-right">Credits</th>
+                    @endunless
                 </tr>
             </thead>
             <tbody>
@@ -201,8 +217,10 @@
                             @continue($key === 'other')
                             <td class="py-2 px-2 text-right tabular-nums">{{ $row[$key] ?: '·' }}</td>
                         @endforeach
+                        @unless($isTelecaller)
                         <td class="py-2 px-2 text-right tabular-nums font-semibold">{{ $row['unlocks'] ?: '·' }}</td>
                         <td class="py-2 pl-2 text-right tabular-nums">{{ $row['credits'] ?: '·' }}</td>
+                        @endunless
                     </tr>
                 @endforeach
             </tbody>
@@ -237,7 +255,8 @@
     </div>
 </div>
 
-{{-- Telecallers --}}
+{{-- Telecallers (admin only) --}}
+@unless($isTelecaller)
 <div class="bg-white rounded-2xl border border-ink-900/10 p-6">
     <h2 class="font-display font-bold text-xl mb-4">Telecallers</h2>
     <div class="overflow-x-auto">
@@ -269,4 +288,5 @@
         </table>
     </div>
 </div>
+@endunless
 @endsection

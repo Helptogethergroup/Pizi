@@ -167,6 +167,7 @@
             @elseif($role === 'telecaller')
                 <a href="{{ route('telecaller.dashboard') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.dashboard') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-column fa-fw"></i> Dashboard</a>
                 <a href="{{ route('telecaller.leads.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.leads.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bullseye fa-fw"></i> My Leads</a>
+                <a href="{{ route('telecaller.insights') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.insights') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-chart-pie fa-fw"></i> Lead insights</a>
                 <a href="{{ route('leads.manual.create') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('leads.manual.*') ? 'bg-cream/10 text-coral-500' : '' }}">+ Add Lead</a>
                 <a href="{{ route('telecaller.owner-prospects.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('telecaller.owner-prospects.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-house fa-fw"></i> Owner Prospects</a>
 

@@ -31,7 +31,11 @@ class LeadInsightsController extends Controller
             'range' => $range,
             'presets' => self::PRESETS,
             'query' => $request->only(['range', 'from', 'to', 'connection', 'telecaller']),
-            'telecallerList' => \App\Models\User::where('role', 'telecaller')->orderBy('name')->get(['id', 'name']),
+            // a telecaller sees the shared pool, without owner credits or the other telecallers' table
+            'isTelecaller' => $this->isTelecaller(),
+            'telecallerList' => $this->isTelecaller()
+                ? collect([(object) ['id' => (int) auth()->id(), 'name' => 'My leads only']])
+                : \App\Models\User::where('role', 'telecaller')->orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -128,8 +132,17 @@ class LeadInsightsController extends Controller
     private function telecaller(Request $request): ?int
     {
         $id = (int) $request->get('telecaller', 0);
+        // a telecaller can only narrow to their own leads, never look at another telecaller's
+        if ($this->isTelecaller() && $id !== (int) auth()->id()) {
+            return null;
+        }
 
         return $id > 0 ? $id : null;
+    }
+
+    private function isTelecaller(): bool
+    {
+        return auth()->user()?->role === 'telecaller';
     }
 
     /** @return array{0: Carbon, 1: Carbon, 2: string} */
