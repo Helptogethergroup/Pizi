@@ -228,6 +228,50 @@
     </div>
 </div>
 
+@unless($isTelecaller)
+{{-- Who unlocked what, and when --}}
+<div class="bg-white rounded-2xl border border-ink-900/10 p-6 mb-6">
+    <div class="flex flex-wrap items-end justify-between gap-2 mb-1">
+        <h2 class="font-display font-bold text-xl">Unlocks: who and when <span class="text-ink-900/40 font-normal text-base">({{ count($d['unlock_list']) }})</span></h2>
+    </div>
+    <p class="text-sm text-ink-900/50 mb-4">Every lead an owner unlocked in this period.
+        @if($d['test_unlocks'] > 0) <span class="font-semibold text-amber-700">{{ $d['test_unlocks'] }} unlock{{ $d['test_unlocks'] > 1 ? 's' : '' }} by test accounts are left out.</span> @endif
+    </p>
+    @if(count($d['unlock_list']))
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[820px]">
+                <thead>
+                    <tr class="text-left text-xs uppercase tracking-wide text-ink-900/50 border-b border-ink-900/10">
+                        <th class="py-2 pr-3">When</th><th class="py-2 px-2">Owner</th><th class="py-2 px-2">Owner phone</th>
+                        <th class="py-2 px-2">Lead</th><th class="py-2 px-2">Type</th><th class="py-2 pl-2 text-right">Credits</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($d['unlock_list'] as $u)
+                        <tr class="border-b border-ink-900/5">
+                            <td class="py-2 pr-3 whitespace-nowrap font-semibold">{{ \Carbon\Carbon::parse($u['at'])->format('d M, h:i A') }}</td>
+                            <td class="py-2 px-2">
+                                <a class="font-semibold text-ink-950 hover:underline" href="{{ route('admin.users.show', $u['owner_id']) }}">{{ $u['owner_name'] }}</a>
+                                @if($u['payer_id'] && $u['payer_id'] != $u['owner_id'])
+                                    <div class="text-xs text-ink-900/50">by manager {{ $u['payer_name'] }}</div>
+                                @endif
+                            </td>
+                            <td class="py-2 px-2 font-mono"><a class="text-blue-700" href="tel:{{ $u['owner_phone'] }}">{{ $u['owner_phone'] ?: '—' }}</a></td>
+                            <td class="py-2 px-2">{{ $u['lead_name'] ?? 'Deleted lead' }} <span class="text-ink-900/40 text-xs">#{{ $u['lead_id'] }}</span>
+                                @if($u['lead_phone'])<div class="text-xs font-mono text-ink-900/60">{{ $u['lead_phone'] }}</div>@endif</td>
+                            <td class="py-2 px-2">{{ $S::pretty($u['lead_type'] ?: 'direct') }}</td>
+                            <td class="py-2 pl-2 text-right tabular-nums font-bold">{{ $u['credits'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <p class="text-sm text-ink-900/50">No lead was unlocked in this period.</p>
+    @endif
+</div>
+@endunless
+
 <div class="grid lg:grid-cols-3 gap-6 mb-6">
     <div class="bg-white rounded-2xl border border-ink-900/10 p-6">
         <h2 class="font-display font-bold text-lg mb-3">Call results</h2>

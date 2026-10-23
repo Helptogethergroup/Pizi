@@ -74,6 +74,23 @@
     @endforeach
 </table>
 
+@if(count($d['unlock_list']))
+<h2>Unlocks: who and when ({{ count($d['unlock_list']) }})</h2>
+<table class="t">
+    <tr><th>When</th><th>Owner</th><th>Owner phone</th><th>Lead</th><th>Type</th><th>Credits</th></tr>
+    @foreach($d['unlock_list'] as $u)
+        <tr>
+            <td>{{ \Carbon\Carbon::parse($u['at'])->format('d M, h:i A') }}</td>
+            <td>{{ $u['owner_name'] }}@if($u['payer_id'] && $u['payer_id'] != $u['owner_id']) (by manager {{ $u['payer_name'] }})@endif</td>
+            <td>{{ $u['owner_phone'] }}</td>
+            <td>{{ $u['lead_name'] ?? 'Deleted lead' }} #{{ $u['lead_id'] }}</td>
+            <td>{{ $S::pretty($u['lead_type'] ?: 'direct') }}</td>
+            <td>{{ $u['credits'] }}</td>
+        </tr>
+    @endforeach
+</table>
+@endif
+
 <table class="two" style="width:100%; margin-top:6px"><tr>
 <td style="padding-right:10px">
     <h2>Call results</h2>

@@ -138,6 +138,26 @@ class LeadInsightsService
             ->whereIn('lead_unlocks.lead_id', $inRange()->select('id'))
             ->distinct()->count('lead_unlocks.lead_id');
 
+        // ── who unlocked what, and when (newest first)
+        $unlockList = $unlockBase()
+            ->join('users as owner', 'owner.id', '=', 'lead_unlocks.owner_id')
+            ->leftJoin('users as payer', 'payer.id', '=', 'lead_unlocks.user_id')
+            ->leftJoin('leads as l', 'l.id', '=', 'lead_unlocks.lead_id')
+            ->whereBetween('lead_unlocks.created_at', [$from, $to])
+            ->orderByDesc('lead_unlocks.created_at')
+            ->limit(1000)
+            ->get([
+                'lead_unlocks.created_at as at', 'lead_unlocks.credits_spent as credits', 'lead_unlocks.lead_id',
+                'owner.id as owner_id', 'owner.name as owner_name', 'owner.phone as owner_phone',
+                'payer.id as payer_id', 'payer.name as payer_name',
+                'l.name as lead_name', 'l.phone as lead_phone', 'l.lead_type as lead_type',
+            ])
+            ->map(fn ($r) => (array) $r)->all();
+        // unlocks made by internal test accounts are not counted anywhere above; say how many were left out
+        $testUnlocks = (int) DB::table('lead_unlocks')
+            ->whereIn('user_id', fn ($q) => $q->select('id')->from('users')->where('is_test_account', true))
+            ->whereBetween('created_at', [$from, $to])->count();
+
         // ── calls
         $calls = $inRange()->selectRaw("coalesce(nullif(call_status,''), 'not_called') as s, count(*) as c")->groupBy('s')->pluck('c', 's')->all();
         $neverAnswered = (int) $inRange()->where('call_attempts', '>=', 3)
@@ -203,6 +223,8 @@ class LeadInsightsService
             'unlocks' => $unlocks,
             'credits' => $credits,
             'unlocked_of_these' => $unlockedOfThese,
+            'unlock_list' => $unlockList,
+            'test_unlocks' => $testUnlocks,
             'calls' => $calls,
             'never_answered' => $neverAnswered,
             'sources' => $sources,

@@ -101,9 +101,24 @@ class LeadInsightsController extends Controller
             $tele[] = [$t['name'], $t['assigned'], $t['connected'], $t['not_connected'], $t['not_called'], $t['interested'], $t['won'], $t['lost'], $t['junk']];
         }
 
+        $unlockRows = [['When', 'Owner', 'Owner phone', 'Unlocked by (if a manager)', 'Lead', 'Lead phone', 'Lead type', 'Credits']];
+        foreach ($d['unlock_list'] as $u) {
+            $unlockRows[] = [
+                Carbon::parse($u['at'])->format('d M Y, h:i A'),
+                (string) $u['owner_name'],
+                (string) $u['owner_phone'],
+                ($u['payer_id'] && $u['payer_id'] != $u['owner_id']) ? (string) $u['payer_name'] : '',
+                (string) ($u['lead_name'] ?? 'Deleted lead'),
+                (string) $u['lead_phone'],
+                LeadInsightsService::pretty($u['lead_type'] ?: 'direct'),
+                (int) $u['credits'],
+            ];
+        }
+
         $file = (new SimpleXlsx())
             ->addSheet('Summary', $summary, [44, 30])
             ->addSheet('Day by day', $daily, array_merge([16, 11], array_fill(0, count($groupKeys), 16), [18, 14]))
+            ->addSheet('Unlocks', $unlockRows, [20, 28, 16, 26, 28, 16, 12, 9])
             ->addSheet('Status', $status, [28, 10])
             ->addSheet('Calls', $calls, [28, 10])
             ->addSheet('Source and type', $sources, [28, 10])
