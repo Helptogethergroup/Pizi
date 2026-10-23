@@ -1531,6 +1531,83 @@ class OwnerController extends Controller
         return $this->ok($query->get());
     }
 
+    /** Vacant beds of one PG, labelled like the website's "Available bed" list. */
+    public function tenantVacantBeds(Request $request, $property)
+    {
+        $owns = DB::table('properties')->where('id', $property)->where('owner_id', $this->ownerId($request))->exists();
+        if (!$owns) return $this->notFound();
+
+        $beds = DB::table('beds as b')
+            ->join('rooms as r', 'r.id', '=', 'b.room_id')
+            ->where('b.property_id', $property)
+            ->where('b.status', 'vacant')
+            ->whereNull('b.deleted_at')
+            ->whereNull('r.deleted_at')
+            ->orderByRaw('length(r.room_number), r.room_number, b.bed_number')
+            ->get(['b.id', 'b.bed_number', 'b.monthly_rent as bed_rent', 'r.room_number', 'r.monthly_rent as room_rent', 'r.security_deposit']);
+
+        return $this->ok($beds->map(fn ($b) => [
+            'id' => $b->id,
+            'label' => 'Room ' . $b->room_number . ' — Bed ' . $b->bed_number
+                . ($b->bed_rent ? ' (₹' . number_format($b->bed_rent) . '/mo)' : ''),
+            'room_number' => $b->room_number,
+            'bed_number' => $b->bed_number,
+            'monthly_rent' => $b->bed_rent,
+            'security_deposit' => $b->security_deposit,
+        ])->values());
+    }
+
+    // ── Aadhaar instant KYC for a new tenant (Setu): captcha -> OTP -> verified details ──
+
+    private function aadhaarCacheKey(Request $request): string
+    {
+        return 'owner-kyc-aadhaar:' . $request->user()->id;
+    }
+
+    public function tenantAadhaarStart(Request $request, \App\Services\SetuKycService $setu)
+    {
+        $result = $setu->createRequest();
+        if (empty($result['success'])) {
+            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not start Aadhaar verification.'], 422);
+        }
+        \Cache::put($this->aadhaarCacheKey($request), $result['id'], now()->addMinutes(20));
+
+        return $this->ok(['captcha_image' => $result['captcha_image'] ?? null]);
+    }
+
+    public function tenantAadhaarCaptcha(Request $request, \App\Services\SetuKycService $setu)
+    {
+        $data = $request->validate(['aadhaar_number' => 'required|digits:12', 'captcha' => 'required|string']);
+        $requestId = \Cache::get($this->aadhaarCacheKey($request));
+        if (!$requestId) {
+            return response()->json(['success' => false, 'message' => 'This took too long. Please start the Aadhaar check again.'], 410);
+        }
+
+        $result = $setu->verifyAadhaar($requestId, $data['aadhaar_number'], $data['captcha']);
+        if (empty($result['success'])) {
+            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not send the OTP.'], 422);
+        }
+
+        return $this->ok(['message' => $result['message'] ?? 'OTP sent to the Aadhaar-linked mobile number.']);
+    }
+
+    public function tenantAadhaarOtp(Request $request, \App\Services\SetuKycService $setu)
+    {
+        $data = $request->validate(['otp' => 'required|digits_between:4,6', 'share_code' => 'required|digits:4']);
+        $requestId = \Cache::get($this->aadhaarCacheKey($request));
+        if (!$requestId) {
+            return response()->json(['success' => false, 'message' => 'This took too long. Please start the Aadhaar check again.'], 410);
+        }
+
+        $result = $setu->verifyOtp($requestId, $data['otp'], $data['share_code']);
+        \Cache::forget($this->aadhaarCacheKey($request));
+        if (empty($result['success'])) {
+            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Verification failed.'], 422);
+        }
+
+        return $this->ok($result['data'] ?? []);
+    }
+
     public function tenantShow(Request $request, $id)
     {
         $tenant = $this->scopeProps(DB::table('tenants')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
@@ -1574,8 +1651,20 @@ class OwnerController extends Controller
             'advance_rent_amount'     => 'nullable|numeric|min:0',
             'move_in_date'            => 'nullable|date',
             'notes'                   => 'nullable|string',
+            'kyc_verified_now'        => 'nullable|boolean',
+            'aadhaar_verified'        => 'nullable|boolean',
+            'aadhaar_number_masked'   => 'nullable|string|max:20',
+            'aadhaar_name'            => 'nullable|string|max:200',
+            'aadhaar_photo_base64'    => 'nullable|string',
         ]);
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+
+        // Only into one of the owner's own PGs (the website form lists just those).
+        $ownsProperty = DB::table('properties')->where('id', $request->property_id)
+            ->where('owner_id', $this->ownerId($request))->exists();
+        if (!$ownsProperty) {
+            return response()->json(['success' => false, 'errors' => ['property_id' => ['Choose one of your own PGs.']]], 422);
+        }
 
         // Bed select ki hai to uski room_number/bed_number/rent nikal ke bhar do,
         // aur usko occupied mark kr do (web form ka wahi behaviour).
@@ -1607,11 +1696,19 @@ class OwnerController extends Controller
                 'password'   => bcrypt(Str::random(32)),
                 'role'       => 'tenant',
                 'is_active'  => 1,
+                // an owner-added tenant skips the sign-up journey, same as the website
+                'journey_stage'        => 5,
+                'journey_completed_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         } else {
             $userId = $user->id;
+            if ((int) ($user->journey_stage ?? 0) < 5) {
+                DB::table('users')->where('id', $userId)->update([
+                    'journey_stage' => 5, 'journey_completed_at' => now(), 'updated_at' => now(),
+                ]);
+            }
         }
 
         $fields = $request->only([
@@ -1633,14 +1730,38 @@ class OwnerController extends Controller
             $fields['notes'] = trim(($fields['notes'] ?? '') . "\nSecurity Deposit Status: " . ucfirst($request->security_deposit_status) . " paid.");
         }
 
-        $id = DB::table('tenants')->insertGetId(array_merge($fields, [
+        // KYC: approved at once when Aadhaar was verified, or the owner says they checked the
+        // documents themselves (walk-in) - the same two ways the website form has.
+        $aadhaarVerified = $request->boolean('aadhaar_verified');
+        $kycApproved = $aadhaarVerified || $request->boolean('kyc_verified_now');
+        $kycFields = ['kyc_status' => $kycApproved ? 'approved' : 'pending', 'onboarding_source' => 'owner_added'];
+        if ($aadhaarVerified) {
+            $kycFields['aadhaar_number_masked'] = $request->input('aadhaar_number_masked');
+            $kycFields['aadhaar_name'] = $request->input('aadhaar_name');
+            $kycFields['aadhaar_verified_at'] = now();
+        }
+
+        $id = DB::table('tenants')->insertGetId(array_merge($fields, $kycFields, [
             'owner_id'   => $ownerId,
             'user_id'    => $userId,
-            'kyc_status' => 'pending',
             'status'     => 'active',
             'created_at' => now(),
             'updated_at' => now(),
         ]));
+
+        // the photo UIDAI sent with the verified Aadhaar, kept as the tenant's photo
+        if ($aadhaarVerified && $request->filled('aadhaar_photo_base64')) {
+            try {
+                $path = 'tenants/' . $id . '/aadhaar-photo-' . time() . '.jpg';
+                Storage::disk('public')->put($path, base64_decode($request->aadhaar_photo_base64));
+                DB::table('tenant_documents')->insert([
+                    'tenant_id' => $id, 'document_type' => 'photo', 'file_path' => $path,
+                    'created_at' => now(), 'updated_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                \Log::warning('Aadhaar photo save failed: ' . $e->getMessage());
+            }
+        }
 
         if ($bed) {
             DB::table('beds')->where('id', $bed->id)->update([

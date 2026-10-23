@@ -235,6 +235,11 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
 
     // Tenants
     Route::get('/tenants',          [OwnerController::class, 'tenants']);
+    // the add-tenant form: vacant beds of a PG, and the Aadhaar instant-KYC steps
+    Route::get('/tenants/vacant-beds/{property}', [OwnerController::class, 'tenantVacantBeds']);
+    Route::post('/tenants/aadhaar/start',          [OwnerController::class, 'tenantAadhaarStart']);
+    Route::post('/tenants/aadhaar/verify-captcha', [OwnerController::class, 'tenantAadhaarCaptcha']);
+    Route::post('/tenants/aadhaar/verify-otp',     [OwnerController::class, 'tenantAadhaarOtp']);
     Route::get('/tenants/{id}',     [OwnerController::class, 'tenantShow']);
     Route::post('/tenants',         [OwnerController::class, 'tenantStore']);
     Route::post('/tenants/{id}',    [OwnerController::class, 'tenantUpdate']);
