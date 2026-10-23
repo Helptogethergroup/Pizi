@@ -1615,7 +1615,15 @@ class OwnerController extends Controller
 
         $tenant = (array) $tenant;
         $tenant['property']   = DB::table('properties')->where('id', $tenant['property_id'])->first();
-        $tenant['documents']  = DB::table('tenant_documents')->where('tenant_id', $id)->get();
+        $documents = DB::table('tenant_documents')->where('tenant_id', $id)->get();
+        $tenant['documents']  = $documents->map(function ($d) {
+            $d = (array) $d;
+            $d['url'] = $this->resolveUrl($d['file_path'] ?? null);
+            return (object) $d;
+        })->values();
+        // the same three documents the website counts towards "% complete"
+        $uploaded = $documents->pluck('document_type')->all();
+        $tenant['kyc_progress'] = (int) ((count(array_intersect(['aadhaar_front', 'pan', 'photo'], $uploaded)) / 3) * 100);
         $tenant['bills']      = DB::table('rent_bills')->where('tenant_id', $id)->orderBy('due_date', 'desc')->limit(12)->get();
         $tenant['complaints'] = DB::table('complaints')->where('tenant_id', $id)->orderBy('created_at', 'desc')->limit(10)->get();
         $tenant['agreement']  = DB::table('rent_agreements')->where('tenant_id', $id)->latest()->first();
@@ -1840,8 +1848,133 @@ class OwnerController extends Controller
     {
         $tenant = DB::table('tenants')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
         if (!$tenant) return $this->notFound();
-        DB::table('tenants')->where('id', $id)->delete();
-        return $this->ok(['message' => 'Deleted']);
+
+        DB::transaction(function () use ($id) {
+            // the bed this tenant was in goes back to vacant, so it can be given to someone else
+            DB::table('beds')->where('tenant_id', $id)->update([
+                'tenant_id' => null, 'status' => 'vacant', 'occupied_since' => null, 'updated_at' => now(),
+            ]);
+            DB::table('tenants')->where('id', $id)->delete();
+        });
+
+        return $this->ok(['message' => 'Tenant removed']);
+    }
+
+    // ── KYC of a tenant that is still pending: the same ways the website offers ──
+
+    private function ownedTenant(Request $request, $id)
+    {
+        return DB::table('tenants')->where('id', $id)->where('owner_id', $this->ownerId($request))->first();
+    }
+
+    /** The owner checked the documents himself (walk-in), or approves what the tenant uploaded. */
+    public function tenantKycApprove(Request $request, $id)
+    {
+        if (!$this->ownedTenant($request, $id)) return $this->notFound();
+        DB::table('tenants')->where('id', $id)->update(['kyc_status' => 'approved', 'kyc_remarks' => null, 'updated_at' => now()]);
+
+        return $this->ok(['message' => 'KYC approved', 'kyc_status' => 'approved']);
+    }
+
+    public function tenantKycReject(Request $request, $id)
+    {
+        $data = $request->validate(['remarks' => 'nullable|string|max:500']);
+        if (!$this->ownedTenant($request, $id)) return $this->notFound();
+        DB::table('tenants')->where('id', $id)->update([
+            'kyc_status' => 'rejected', 'kyc_remarks' => $data['remarks'] ?? null, 'updated_at' => now(),
+        ]);
+
+        return $this->ok(['message' => 'KYC rejected', 'kyc_status' => 'rejected']);
+    }
+
+    /** After the Aadhaar OTP check (the aadhaar/* steps): mark approved and keep what UIDAI sent. */
+    public function tenantKycAadhaar(Request $request, $id)
+    {
+        $data = $request->validate([
+            'aadhaar_number_masked' => 'required|string|max:20',
+            'aadhaar_name' => 'nullable|string|max:200',
+            'aadhaar_photo_base64' => 'nullable|string',
+            'dob' => 'nullable|date',
+            'gender' => 'nullable|in:male,female,other',
+            'address_line' => 'nullable|string',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'pincode' => 'nullable|string|max:10',
+        ]);
+        $tenant = $this->ownedTenant($request, $id);
+        if (!$tenant) return $this->notFound();
+
+        $update = [
+            'kyc_status' => 'approved', 'kyc_remarks' => null,
+            'aadhaar_number_masked' => $data['aadhaar_number_masked'],
+            'aadhaar_name' => $data['aadhaar_name'] ?? null,
+            'aadhaar_verified_at' => now(), 'updated_at' => now(),
+        ];
+        // fill what the owner left empty; never overwrite what is already written
+        foreach (['dob', 'gender', 'address_line', 'city', 'state', 'pincode'] as $f) {
+            if (!empty($data[$f]) && empty($tenant->{$f})) {
+                $update[$f] = $data[$f];
+            }
+        }
+        DB::table('tenants')->where('id', $id)->update($update);
+
+        if (!empty($data['aadhaar_photo_base64'])) {
+            try {
+                $path = 'tenants/' . $id . '/aadhaar-photo-' . time() . '.jpg';
+                Storage::disk('public')->put($path, base64_decode($data['aadhaar_photo_base64']));
+                DB::table('tenant_documents')->insert([
+                    'tenant_id' => $id, 'document_type' => 'photo', 'file_path' => $path,
+                    'created_at' => now(), 'updated_at' => now(),
+                ]);
+            } catch (\Throwable $e) {
+                \Log::warning('Aadhaar photo save failed: ' . $e->getMessage());
+            }
+        }
+
+        return $this->ok(['message' => 'KYC verified with Aadhaar', 'kyc_status' => 'approved']);
+    }
+
+    public function tenantDocumentStore(Request $request, $id)
+    {
+        $request->validate([
+            'document_type' => 'required|in:aadhaar_front,aadhaar_back,pan,employment_id,student_id,address_proof,photo,other',
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'document_number' => 'nullable|string|max:50',
+        ]);
+        $tenant = $this->ownedTenant($request, $id);
+        if (!$tenant) return $this->notFound();
+
+        $path = $request->file('file')->store('tenants/' . $id, 'public');
+        DB::table('tenant_documents')->insert([
+            'tenant_id' => $id,
+            'document_type' => $request->document_type,
+            'file_path' => $path,
+            'document_number' => $request->document_number,
+            'created_at' => now(), 'updated_at' => now(),
+        ]);
+        // documents are in: waiting for the owner to approve them
+        if ($tenant->kyc_status === 'pending') {
+            DB::table('tenants')->where('id', $id)->update(['kyc_status' => 'submitted', 'updated_at' => now()]);
+        }
+
+        return $this->ok(['message' => 'Document uploaded', 'kyc_status' => $tenant->kyc_status === 'pending' ? 'submitted' : $tenant->kyc_status]);
+    }
+
+    public function tenantDocumentDelete(Request $request, $docId)
+    {
+        $doc = DB::table('tenant_documents as d')
+            ->join('tenants as t', 't.id', '=', 'd.tenant_id')
+            ->where('d.id', $docId)->where('t.owner_id', $this->ownerId($request))
+            ->first(['d.id', 'd.file_path']);
+        if (!$doc) return $this->notFound();
+
+        DB::table('tenant_documents')->where('id', $docId)->delete();
+        try {
+            Storage::disk('public')->delete($doc->file_path);
+        } catch (\Throwable $e) {
+        }
+
+        return $this->ok(['message' => 'Document removed']);
     }
 
     // ═══════════════════════════════════════════════════════════════

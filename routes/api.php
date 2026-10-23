@@ -240,6 +240,12 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     Route::post('/tenants/aadhaar/start',          [OwnerController::class, 'tenantAadhaarStart']);
     Route::post('/tenants/aadhaar/verify-captcha', [OwnerController::class, 'tenantAadhaarCaptcha']);
     Route::post('/tenants/aadhaar/verify-otp',     [OwnerController::class, 'tenantAadhaarOtp']);
+    // KYC of a tenant: Aadhaar check, "I verified it myself", documents, approve / reject
+    Route::delete('/tenants/documents/{docId}',   [OwnerController::class, 'tenantDocumentDelete']);
+    Route::post('/tenants/{id}/documents',        [OwnerController::class, 'tenantDocumentStore']);
+    Route::post('/tenants/{id}/kyc/approve',      [OwnerController::class, 'tenantKycApprove']);
+    Route::post('/tenants/{id}/kyc/reject',       [OwnerController::class, 'tenantKycReject']);
+    Route::post('/tenants/{id}/kyc/aadhaar',      [OwnerController::class, 'tenantKycAadhaar']);
     Route::get('/tenants/{id}',     [OwnerController::class, 'tenantShow']);
     Route::post('/tenants',         [OwnerController::class, 'tenantStore']);
     Route::post('/tenants/{id}',    [OwnerController::class, 'tenantUpdate']);

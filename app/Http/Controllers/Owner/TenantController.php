@@ -355,6 +355,8 @@ class TenantController extends Controller
     public function destroy(Tenant $tenant)
     {
         $this->authorize_owner($tenant);
+        // the bed goes back to vacant, otherwise it would stay "occupied" by nobody
+        Bed::where('tenant_id', $tenant->id)->update(['tenant_id' => null, 'status' => 'vacant', 'occupied_since' => null]);
         $tenant->delete();
         return redirect()->route('owner.tenants.index')->with('success', '✓ Tenant removed.');
     }
