@@ -46,16 +46,36 @@ class TenantController extends Controller
             });
         }
 
-        $tenants = $query->latest()->paginate(20)->withQueryString();
+        // One PG at a time (chips above the list); counts below follow the PG picked.
+        $propertyId = (int) $request->get('property', 0);
+        if (!in_array($propertyId, collect($managedIds)->map(fn ($i) => (int) $i)->all(), true)) {
+            $propertyId = 0;
+        }
+        $mine = !($filter === 'unassigned' && auth()->user()->role !== 'pg_manager');
+        if ($mine && $propertyId) {
+            $query->where('property_id', $propertyId);
+        }
 
+        // PG by PG, then room by room ("Room 9" before "Room 10"); unassigned sign-ups stay newest first
+        $tenants = ($mine
+                ? $query->orderByRaw('(select name from properties where properties.id = tenants.property_id), length(room_number), room_number, name')
+                : $query->latest())
+            ->paginate(30)->withQueryString();
+
+        $scope = fn () => Tenant::whereIn('property_id', $managedIds)->when($propertyId, fn ($q) => $q->where('property_id', $propertyId));
         $stats = [
-            'total' => Tenant::whereIn('property_id', $managedIds)->count(),
-            'active' => Tenant::whereIn('property_id', $managedIds)->where('status', 'active')->count(),
-            'pending_kyc' => Tenant::whereIn('property_id', $managedIds)->whereIn('kyc_status', ['pending', 'submitted'])->count(),
-            'notice' => Tenant::whereIn('property_id', $managedIds)->where('status', 'notice_period')->count(),
+            'total' => $scope()->count(),
+            'active' => $scope()->where('status', 'active')->count(),
+            'pending_kyc' => $scope()->whereIn('kyc_status', ['pending', 'submitted'])->count(),
+            'notice' => $scope()->where('status', 'notice_period')->count(),
         ];
 
-        return view('owner.tenants.index', compact('tenants', 'stats'));
+        // the chips: every PG that has tenants, with how many
+        $counts = Tenant::whereIn('property_id', $managedIds)->selectRaw('property_id, count(*) as c')->groupBy('property_id')->pluck('c', 'property_id');
+        $propertyTabs = Property::whereIn('id', $counts->keys())->orderBy('name')->get(['id', 'name'])
+            ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name, 'count' => (int) $counts[$p->id]]);
+
+        return view('owner.tenants.index', compact('tenants', 'stats', 'propertyTabs', 'propertyId'));
     }
 
     public function create()

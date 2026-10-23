@@ -1,6 +1,14 @@
 @extends('layouts.dashboard')
 @section('title', 'My Tenants')
 @section('content')
+@php
+    // one colour per PG, the same one everywhere (also used by the app)
+    $pgPalette = ['#2563EB', '#7C3AED', '#0D9488', '#D97706', '#DB2777', '#4F46E5', '#65A30D', '#EA580C'];
+    $pgColor = fn ($id) => $pgPalette[abs((int) $id) % count($pgPalette)];
+    $isMine = request('filter', 'mine') === 'mine';
+    $showHeadings = $isMine && !$propertyId && $propertyTabs->count() > 1;
+    $totalAllPgs = $propertyTabs->sum('count');
+@endphp
 
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
     <div>
@@ -20,6 +28,24 @@
         <i class="fa-solid fa-certificate fa-fw"></i> New Sign-ups Awaiting Assignment
     </a>
 </div>
+
+@if($isMine && $propertyTabs->count() > 1)
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-1">
+        <a href="{{ route('owner.tenants.index', array_filter(['q' => request('q'), 'status' => request('status'), 'kyc' => request('kyc')])) }}"
+           class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap {{ !$propertyId ? 'bg-ink-950 text-cream' : 'bg-white border border-ink-200 text-ink-700' }}">
+            All PGs ({{ $totalAllPgs }})
+        </a>
+        @foreach($propertyTabs as $tab)
+            @php $on = $propertyId === $tab['id']; @endphp
+            <a href="{{ route('owner.tenants.index', array_filter(['property' => $tab['id'], 'q' => request('q'), 'status' => request('status'), 'kyc' => request('kyc')])) }}"
+               class="px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap flex items-center gap-2 border"
+               style="{{ $on ? 'background:' . $pgColor($tab['id']) . ';border-color:' . $pgColor($tab['id']) . ';color:#fff' : 'background:#fff;border-color:#e2e8f0;color:#334155' }}">
+                <span class="inline-block w-2 h-2 rounded-full" style="background: {{ $on ? '#fff' : $pgColor($tab['id']) }}"></span>
+                {{ $tab['name'] }} ({{ $tab['count'] }})
+            </a>
+        @endforeach
+    </div>
+@endif
 
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     <div class="bg-white p-5 rounded-2xl border border-ink-100">
@@ -41,6 +67,8 @@
 </div>
 
 <form method="GET" class="bg-white p-3 rounded-xl border border-ink-100 mb-4 flex gap-2 flex-wrap">
+    @if($propertyId)<input type="hidden" name="property" value="{{ $propertyId }}">@endif
+    @if(request('filter') === 'unassigned')<input type="hidden" name="filter" value="unassigned">@endif
     <input name="q" value="{{ request('q') }}" placeholder="Name, phone, room..." class="flex-1 min-w-[200px] px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
     <select name="status" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
         <option value="">All Status</option>
@@ -66,7 +94,16 @@
     </div>
 @else
     <div class="space-y-3">
+        @php $lastPg = null; @endphp
         @foreach($tenants as $tenant)
+            @if($showHeadings && $tenant->property_id !== $lastPg)
+                @php $lastPg = $tenant->property_id; @endphp
+                <div class="flex items-center gap-3 pt-3 {{ $loop->first ? '' : 'mt-3' }}">
+                    <span class="w-1 h-5 rounded" style="background: {{ $pgColor($tenant->property_id) }}"></span>
+                    <h2 class="font-display font-bold text-lg">{{ $tenant->property?->name ?? 'No PG' }}</h2>
+                    <span class="text-xs text-ink-500">{{ $propertyTabs->firstWhere('id', $tenant->property_id)['count'] ?? '' }} tenants</span>
+                </div>
+            @endif
             <div class="bg-white p-4 rounded-2xl border border-ink-100 hover:border-coral-300 transition">
                 <div class="flex items-center gap-4 flex-wrap">
                     <div class="w-12 h-12 rounded-full bg-coral-100 text-coral-700 flex items-center justify-center font-bold text-lg flex-shrink-0">
@@ -100,7 +137,9 @@
                         <div class="flex items-center gap-3 text-xs text-ink-700 flex-wrap">
                             <span><i class="fa-solid fa-phone fa-fw"></i> {{ $tenant->phone }}</span>
                             @if($tenant->room_number)<span><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $tenant->room_number }}</span>@endif
-                            <span><i class="fa-solid fa-house fa-fw"></i> {{ $tenant->property?->name }}</span>
+                            @if($tenant->property)
+                                <span class="px-2 py-0.5 rounded-full font-bold" style="background: {{ $pgColor($tenant->property_id) }}1f; color: {{ $pgColor($tenant->property_id) }}"><i class="fa-solid fa-house fa-fw"></i> {{ $tenant->property->name }}</span>
+                            @endif
                             @if($tenant->monthly_rent > 0)<span class="font-bold text-coral-600">₹{{ number_format($tenant->monthly_rent) }}/mo</span>@endif
                         </div>
                     </div>
