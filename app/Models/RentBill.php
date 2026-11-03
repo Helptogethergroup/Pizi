@@ -77,6 +77,17 @@ class RentBill extends Model
         return $base . '/pay/' . $this->bill_number;
     }
 
+    /**
+     * What goes into the "pay" slot of the WhatsApp bill templates: the payment link while online
+     * payment is on, otherwise plain words, so no payment link reaches a tenant (config/rent.php).
+     */
+    public function getMessagePayTextAttribute(): string
+    {
+        return config('rent.online_payment')
+            ? $this->pay_url
+            : 'Pay your PG owner directly (cash or UPI)';
+    }
+
     public function recalculate(): void
     {
         $total = $this->rent_amount + $this->electricity + $this->water 

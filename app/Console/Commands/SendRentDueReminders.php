@@ -47,7 +47,7 @@ class SendRentDueReminders extends Command
                     number_format($bill->due_amount, 0),
                     $bill->month_label,
                     $bill->due_date->format('d M Y'),
-                    $bill->pay_url,
+                    $bill->message_pay_text,
                 ]
             );
 

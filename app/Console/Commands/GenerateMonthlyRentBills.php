@@ -60,7 +60,7 @@ class GenerateMonthlyRentBills extends Command
                     \Carbon\Carbon::parse($month . '-01')->format('M Y'),
                     number_format($tenant->monthly_rent, 0),
                     \Carbon\Carbon::parse($dueDate)->format('d M Y'),
-                    $bill->pay_url,
+                    $bill->message_pay_text,
                 ]
             );
 

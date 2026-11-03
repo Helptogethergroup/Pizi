@@ -57,7 +57,7 @@ class RentBillingService
             $bill->month_label,
             number_format($bill->total_amount, 0),
             $bill->due_date->format('d M Y'),
-            $bill->pay_url,
+            $bill->message_pay_text,
         ]);
 
         return $bill;
@@ -94,7 +94,7 @@ class RentBillingService
                 Carbon::createFromFormat('Y-m', $month)->format('M Y'),
                 number_format($tenant->monthly_rent, 0),
                 Carbon::parse($dueDate)->format('d M Y'),
-                $bill->pay_url,
+                $bill->message_pay_text,
             ]);
             $created++;
         }
@@ -225,7 +225,7 @@ class RentBillingService
             $bill->month_label,
             number_format($bill->due_amount, 0),
             $bill->due_date->format('d M Y'),
-            $bill->pay_url,
+            $bill->message_pay_text,
         ]);
 
         if (!empty($result['ok'])) {

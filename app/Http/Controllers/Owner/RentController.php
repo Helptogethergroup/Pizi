@@ -168,7 +168,7 @@ class RentController extends Controller
                 $bill->month_label,
                 number_format($bill->total_amount, 0),
                 $bill->due_date->format('d M Y'),
-                $bill->pay_url,
+                $bill->message_pay_text,
             ]
         );
 
@@ -311,7 +311,7 @@ class RentController extends Controller
             $bill->month_label,
             number_format($bill->due_amount, 0),
             $bill->due_date->format('d M Y'),
-            $payUrl,
+            $bill->message_pay_text,
         ]
     );
 
@@ -492,7 +492,7 @@ class RentController extends Controller
                     \Carbon\Carbon::createFromFormat('Y-m', $request->month)->format('M Y'),
                     number_format($tenant->monthly_rent, 0),
                     \Carbon\Carbon::parse($request->due_date)->format('d M Y'),
-                    $bill->pay_url,
+                    $bill->message_pay_text,
                 ]
             );
 
