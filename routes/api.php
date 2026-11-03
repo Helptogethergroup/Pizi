@@ -229,6 +229,8 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     // Rent / Bills
     Route::get('/rent',                    [OwnerController::class, 'rent']);
     Route::get('/rent/summary',            [OwnerController::class, 'rentSummary']);
+    Route::get('/rent/collect-list',       [OwnerController::class, 'rentCollectList']);
+    Route::post('/rent/collect',           [OwnerController::class, 'rentCollect']);
     Route::get('/rent-archive',            [OwnerController::class, 'rentArchive']);
     Route::get('/rent/receipt/{paymentId}', [OwnerController::class, 'rentReceipt']);
     Route::delete('/rent/payments/{paymentId}', [OwnerController::class, 'rentPaymentDelete']);

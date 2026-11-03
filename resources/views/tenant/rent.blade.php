@@ -34,7 +34,11 @@
                             </td>
                             <td class="px-4 py-3">
                                 @if($bill->status !== 'paid')
+                                    @if(config('rent.online_payment'))
                                     <a href="{{ route('tenant.pay-rent', $bill->id) }}" class="px-3 py-1.5 bg-coral-500 hover:bg-coral-600 text-white rounded-lg text-xs font-bold">Pay Now</a>
+                                    @else
+                                    <span class="text-xs text-ink-500">Pay your PG owner</span>
+                                    @endif
                                 @else
                                     <span class="text-emerald-600 font-bold text-xs">✓ Paid</span>
                                 @endif

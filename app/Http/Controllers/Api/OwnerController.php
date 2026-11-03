@@ -1483,7 +1483,7 @@ class OwnerController extends Controller
         $row['tenant_room'] = $tenant->room_number ?? null;
         $row['tenant_bed'] = $tenant->bed_number ?? null;
         $row['property_name'] = DB::table('properties')->where('id', $bill->property_id)->value('name');
-        $row['pay_url'] = $bill->pay_url;
+        $row['pay_url'] = config('rent.online_payment') ? $bill->pay_url : null;   // no payment link while online payment is off
         $row['payments'] = DB::table('rent_payments')->where('rent_bill_id', $id)->orderBy('paid_at', 'desc')->get();
 
         return $this->ok((object) $row);
@@ -1521,6 +1521,102 @@ class OwnerController extends Controller
         }
 
         return $this->ok(['id' => $bill->id, 'bill_number' => $bill->bill_number]);
+    }
+
+    /**
+     * "Collected rent": the owner's active tenants with the state of this month's bill, so rent
+     * already taken in cash or UPI can be put into the software in one go.
+     */
+    public function rentCollectList(Request $request)
+    {
+        $data = $request->validate(['month' => 'nullable|date_format:Y-m', 'property_id' => 'nullable|integer']);
+        $month = $data['month'] ?? now()->format('Y-m');
+
+        $all = Tenant::where('owner_id', $this->ownerId($request))->where('status', 'active')
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 'property_id'))
+            ->get(['id', 'name', 'phone', 'property_id', 'room_number', 'bed_number', 'monthly_rent']);
+
+        $names = DB::table('properties')->whereIn('id', $all->pluck('property_id')->unique())->pluck('name', 'id');
+        $properties = $all->groupBy('property_id')->map(fn ($g, $pid) => ['id' => (int) $pid, 'name' => $names[$pid] ?? ('PG ' . $pid), 'count' => $g->count()])
+            ->sortBy(fn ($p) => strtolower($p['name']))->values();
+
+        $tenants = empty($data['property_id']) ? $all : $all->where('property_id', (int) $data['property_id']);
+        $bills = RentBill::withTrashed()->where('month', $month)->whereIn('tenant_id', $tenants->pluck('id'))->get()->keyBy('tenant_id');
+
+        // PG by name, then room and bed in natural order (2 before 10)
+        $rows = $tenants->sort(function ($a, $b) use ($names) {
+                return strnatcasecmp(($names[$a->property_id] ?? '') . '|' . $a->room_number . '|' . $a->bed_number, ($names[$b->property_id] ?? '') . '|' . $b->room_number . '|' . $b->bed_number);
+            })
+            ->map(function ($t) use ($bills, $names) {
+                $bill = $bills->get($t->id);
+                $state = 'no_bill';
+                if ($bill) {
+                    $state = $bill->trashed() ? 'archived' : ((float) $bill->due_amount <= 0.009 ? 'paid' : ($bill->status === 'partial' ? 'partial' : 'pending'));
+                }
+
+                return [
+                    'tenant_id' => $t->id,
+                    'name' => $t->name,
+                    'phone' => $t->phone,
+                    'property_id' => (int) $t->property_id,
+                    'property_name' => $names[$t->property_id] ?? null,
+                    'room_number' => $t->room_number,
+                    'bed_number' => $t->bed_number,
+                    'monthly_rent' => (float) $t->monthly_rent,
+                    'state' => $state,   // no_bill | pending | partial | paid | archived
+                    'bill_id' => $bill?->id,
+                    'due_amount' => $bill && ! $bill->trashed() ? (float) $bill->due_amount : null,
+                ];
+            })->values();
+
+        return $this->ok(['month' => $month, 'properties' => $properties, 'tenants' => $rows]);
+    }
+
+    /** Puts rent that was already collected (cash / UPI) into the software for the chosen tenants. */
+    public function rentCollect(Request $request, RentBillingService $rent)
+    {
+        $data = $request->validate([
+            'month' => 'required|date_format:Y-m',
+            'paid_at' => 'nullable|date|before_or_equal:today',
+            'payment_method' => 'nullable|string|max:30',
+            'notify' => 'nullable|boolean',
+            'items' => 'required|array|min:1|max:300',
+            'items.*.tenant_id' => 'required|integer',
+            'items.*.amount' => 'required|numeric|gt:0',
+            'items.*.payment_method' => 'nullable|string|max:30',
+        ]);
+
+        $oid = $this->ownerId($request);
+        $paidAt = $data['paid_at'] ?? now()->toDateString();
+        $tenants = Tenant::where('owner_id', $oid)->where('status', 'active')
+            ->tap(fn ($q) => $this->scopeProps($q, $request, 'property_id'))
+            ->whereIn('id', collect($data['items'])->pluck('tenant_id'))->get()->keyBy('id');
+
+        $recorded = 0;
+        $skipped = 0;
+        $total = 0.0;
+        $results = [];
+
+        foreach ($data['items'] as $item) {
+            $tenant = $tenants->get((int) $item['tenant_id']);
+            if (! $tenant) {
+                $skipped++;
+                $results[] = ['tenant_id' => (int) $item['tenant_id'], 'name' => null, 'status' => 'not_found', 'message' => 'Tenant not found.', 'amount' => 0];
+                continue;
+            }
+
+            $r = $rent->recordCollected(
+                $tenant, $data['month'], (float) $item['amount'],
+                $this->dbPaymentMethod($item['payment_method'] ?? $data['payment_method'] ?? 'cash'),
+                $paidAt, $oid, (int) $request->user()->id, (bool) ($data['notify'] ?? false)
+            );
+
+            $r['status'] === 'recorded' ? $recorded++ : $skipped++;
+            $total += $r['amount'];
+            $results[] = ['tenant_id' => $tenant->id, 'name' => $tenant->name] + $r;
+        }
+
+        return $this->ok(['recorded' => $recorded, 'skipped' => $skipped, 'total' => $total, 'results' => $results]);
     }
 
     public function rentPayment(Request $request, $id, RentBillingService $rent)

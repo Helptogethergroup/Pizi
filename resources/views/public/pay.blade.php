@@ -56,7 +56,7 @@
                 </div>
             @elseif($errorMsg || !$order)
                 <div class="p-8 text-center">
-                    <p class="text-sm text-gray-500">Online payment isn't available right now. Please contact your PG owner directly.</p>
+                    <p class="text-sm text-gray-500">{{ $errorMsg ?: "Online payment isn't available right now. Please contact your PG owner directly." }}</p>
                 </div>
             @else
                 <div class="p-6 text-center">

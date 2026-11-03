@@ -198,6 +198,10 @@ class TenantPortalController extends Controller
      */
     public function payRent($billId)
     {
+        if (! config('rent.online_payment')) {
+            return redirect()->route('tenant.rent.history')->with('error', config('rent.offline_message'));
+        }
+
         $user = Auth::user();
         $tenant = Tenant::where('user_id', $user->id)->first();
 
@@ -216,6 +220,10 @@ class TenantPortalController extends Controller
  */
 public function createRazorpayOrder(Request $request, $billId)
 {
+    if (! config('rent.online_payment')) {
+        return response()->json(['error' => config('rent.offline_message')], 403);
+    }
+
     $user = Auth::user();
     $tenant = Tenant::where('user_id', $user->id)->first();
     $bill = $tenant->bills()->where('id', $billId)->firstOrFail();

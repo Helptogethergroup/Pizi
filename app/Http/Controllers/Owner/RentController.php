@@ -326,7 +326,7 @@ class RentController extends Controller
             "Amount: ₹" . number_format($bill->due_amount, 0) . "\n" .
             "Due Date: " . $bill->due_date->format('d M Y') . "\n" .
             "Bill No: {$bill->bill_number}\n\n" .
-            "Pay here: {$payUrl}\n\n" .
+            (config('rent.online_payment') ? "Pay here: {$payUrl}\n\n" : "Please pay your PG owner directly (cash or UPI).\n\n") .
             "- Pizi Team"
         );
 
@@ -351,6 +351,91 @@ class RentController extends Controller
 
         $payment->load('bill.property', 'tenant');
         return view('owner.rent.receipt', compact('payment'));
+    }
+
+    /**
+     * "Rent already collected": tick the tenants whose rent was taken in cash or UPI and put it into
+     * the software in one go. Makes the month's bill when there is none. No WhatsApp goes to tenants.
+     */
+    public function collected(Request $request)
+    {
+        $this->checkAccess();
+
+        $month = preg_match('/^\d{4}-\d{2}$/', (string) $request->get('month')) ? $request->get('month') : now()->format('Y-m');
+        $all = Tenant::whereIn('property_id', auth()->user()->getManagedPropertyIds())
+            ->where('status', 'active')->with('property:id,name')->get();
+
+        $properties = $all->groupBy('property_id')->map(fn ($g) => (object) [
+            'id' => $g->first()->property_id,
+            'name' => $g->first()->property?->name ?? 'PG',
+            'count' => $g->count(),
+        ])->sortBy(fn ($p) => strtolower($p->name))->values();
+
+        $propertyId = (int) $request->get('property_id');
+        if ($propertyId && ! $properties->contains('id', $propertyId)) {
+            $propertyId = 0;
+        }
+
+        $tenants = ($propertyId ? $all->where('property_id', $propertyId) : $all)
+            ->sort(fn ($a, $b) => strnatcasecmp(
+                ($a->property?->name ?? '') . '|' . $a->room_number . '|' . $a->bed_number,
+                ($b->property?->name ?? '') . '|' . $b->room_number . '|' . $b->bed_number
+            ))->values();
+
+        $bills = RentBill::withTrashed()->where('month', $month)->whereIn('tenant_id', $tenants->pluck('id'))->get()->keyBy('tenant_id');
+
+        return view('owner.rent.collected', compact('month', 'properties', 'propertyId', 'tenants', 'bills'));
+    }
+
+    public function collectedStore(Request $request, \App\Services\RentBillingService $rent)
+    {
+        $this->checkAccess();
+
+        $data = $request->validate([
+            'month' => 'required|date_format:Y-m',
+            'paid_at' => 'required|date|before_or_equal:today',
+            'payment_method' => 'required|in:cash,upi,bank_transfer,phonepe,paytm,cheque,other',
+            'rows' => 'required|array',
+            'rows.*.amount' => 'nullable|numeric|min:0',
+            'rows.*.method' => 'nullable|in:cash,upi,bank_transfer,phonepe,paytm,cheque,other',
+        ]);
+
+        // $data['rows'] only keeps the validated keys; the tick ("on") has to be read from the request
+        $picked = collect($request->input('rows'))->filter(fn ($r) => ! empty($r['on']) && (float) ($r['amount'] ?? 0) > 0);
+        if ($picked->isEmpty()) {
+            return back()->withInput()->with('error', 'Tick at least one tenant and enter the amount you collected.');
+        }
+
+        $tenants = Tenant::whereIn('property_id', auth()->user()->getManagedPropertyIds())
+            ->where('status', 'active')->whereIn('id', $picked->keys())->get()->keyBy('id');
+
+        $recorded = 0;
+        $total = 0.0;
+        $skipped = [];
+
+        foreach ($picked as $tenantId => $row) {
+            $tenant = $tenants->get((int) $tenantId);
+            if (! $tenant) {
+                continue;
+            }
+            $r = $rent->recordCollected(
+                $tenant, $data['month'], (float) $row['amount'], $row['method'] ?? $data['payment_method'],
+                $data['paid_at'], $this->effectiveOwnerId(), auth()->id(), $request->boolean('notify')
+            );
+            if ($r['status'] === 'recorded') {
+                $recorded++;
+                $total += $r['amount'];
+            } else {
+                $skipped[] = $tenant->name . ' (' . $r['message'] . ')';
+            }
+        }
+
+        $msg = "✓ {$recorded} payment" . ($recorded === 1 ? '' : 's') . ' recorded, ₹' . number_format($total, 0) . ' in total.';
+        if ($skipped) {
+            $msg .= ' Skipped: ' . implode(', ', array_slice($skipped, 0, 5)) . (count($skipped) > 5 ? ' and ' . (count($skipped) - 5) . ' more.' : '.');
+        }
+
+        return redirect()->route('owner.rent.collected', ['month' => $data['month'], 'property_id' => $request->get('property_id') ?: null])->with('success', $msg);
     }
 
     public function generateAll(Request $request)

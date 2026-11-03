@@ -21,6 +21,16 @@ class PublicPaymentController extends Controller
             ->with('tenant', 'property')
             ->firstOrFail();
 
+        // Online payment is switched off (see config/rent.php): the link only shows the bill, no order is made
+        if (! config('rent.online_payment')) {
+            return view('public.pay', [
+                'bill' => $bill,
+                'order' => null,
+                'errorMsg' => config('rent.offline_message'),
+                'razorpayKey' => null,
+            ]);
+        }
+
         $order = null;
         $errorMsg = null;
 

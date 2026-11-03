@@ -155,6 +155,7 @@
             
                         {{-- Payment Link — always works, independent of WhatsApp template/button approval --}}
             @if($bill->status !== 'paid')
+            @if(config('rent.online_payment'))
             <div class="bg-white p-5 rounded-2xl border border-ink-100">
                 <h3 class="font-display font-bold mb-3"><i class="fa-solid fa-link fa-fw"></i> Payment Link</h3>
                 <div class="flex items-center gap-2 mb-3">
@@ -171,6 +172,8 @@
                     <i class="fa-solid fa-comment-dots fa-fw"></i> Share on WhatsApp
                 </a>
             </div>
+
+            @endif
 
             {{-- WhatsApp Template Reminder --}}
             <div class="bg-white p-5 rounded-2xl border border-ink-100">

@@ -9,6 +9,7 @@
     </div>
     <div class="flex gap-2 flex-wrap">
         <button onclick="document.getElementById('genAllModal').classList.remove('hidden')" class="px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-bolt fa-fw"></i> Generate All Bills</button>
+        <a href="{{ route('owner.rent.collected') }}" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-hand-holding-dollar fa-fw"></i> Add collected rent</a>
         <a href="{{ route('owner.rent.create') }}" class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-coral-500/30">+ New Bill</a>
     </div>
 </div>

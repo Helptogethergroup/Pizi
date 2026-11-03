@@ -103,7 +103,7 @@ class RentBillingService
     }
 
     /** @throws RuntimeException */
-    public function recordPayment(RentBill $bill, array $data, int $receivedById): RentPayment
+    public function recordPayment(RentBill $bill, array $data, int $receivedById, bool $notify = true): RentPayment
     {
         $amount = (float) $data['amount'];
         if ($amount > (float) $bill->due_amount + 0.009) {
@@ -126,11 +126,75 @@ class RentBillingService
         $bill->refresh()->recalculate();
 
         $tenant = $bill->tenant;
-        if ($tenant) {
+        if ($tenant && $notify) {
             $this->tell($tenant->phone, 'payment_confirmed', [$tenant->name, number_format($amount, 0), $bill->month_label]);
         }
 
         return $payment;
+    }
+
+    /**
+     * Rent the owner already took in cash or UPI before it was in the software.
+     * Makes the month's bill when there is none, then records the payment on it.
+     * The tenant gets no "new bill" message (they already paid); the "payment received"
+     * message goes only when $notify is true.
+     *
+     * @return array{status:string, message:string, amount:float, bill_id:?int}
+     *         status: recorded | already_paid | archived | invalid
+     */
+    public function recordCollected(Tenant $tenant, string $month, float $amount, string $method, string $paidAt, int $ownerId, int $receivedById, bool $notify = false): array
+    {
+        $result = fn (string $status, string $message, float $amt = 0, ?int $billId = null) => [
+            'status' => $status, 'message' => $message, 'amount' => $amt, 'bill_id' => $billId,
+        ];
+
+        if ($amount <= 0) {
+            return $result('invalid', 'Enter an amount above zero.');
+        }
+
+        $bill = RentBill::withTrashed()->where('tenant_id', $tenant->id)->where('month', $month)->first();
+
+        if ($bill && $bill->trashed()) {
+            return $result('archived', 'This month\'s bill is in the Bill Archive. Restore it first.', 0, $bill->id);
+        }
+        if ($bill && (float) $bill->due_amount <= 0.009) {
+            return $result('already_paid', 'Already fully paid.', 0, $bill->id);
+        }
+
+        return \DB::transaction(function () use ($tenant, $month, $amount, $method, $paidAt, $ownerId, $receivedById, $notify, $bill, $result) {
+            if (! $bill) {
+                $rent = (float) $tenant->monthly_rent;
+                $total = max($rent, $amount);
+                $bill = RentBill::create([
+                    'tenant_id' => $tenant->id,
+                    'property_id' => $tenant->property_id,
+                    'owner_id' => $ownerId,
+                    'bill_number' => $this->billNumber(),
+                    'month' => $month,
+                    'rent_amount' => $rent > 0 ? $rent : $amount,
+                    // collected more than the rent: the extra is kept as a visible charge so the bill adds up
+                    'other_charges' => ($rent > 0 && $amount > $rent) ? $amount - $rent : 0,
+                    'other_charges_label' => ($rent > 0 && $amount > $rent) ? 'Extra collected' : null,
+                    'total_amount' => $total,
+                    'paid_amount' => 0,
+                    'due_amount' => $total,
+                    'due_date' => Carbon::createFromFormat('Y-m', $month)->day(5)->toDateString(),
+                    'status' => 'pending',
+                    'notes' => 'Added as already collected.',
+                ]);
+            }
+
+            // never record more than is due on the bill
+            $pay = min($amount, (float) $bill->due_amount);
+            $this->recordPayment($bill, [
+                'amount' => $pay,
+                'payment_method' => $method,
+                'paid_at' => Carbon::parse($paidAt)->setTime(12, 0),
+                'notes' => 'Collected outside the software.',
+            ], $receivedById, $notify);
+
+            return $result('recorded', 'Payment recorded.', $pay, $bill->id);
+        });
     }
 
     public function deletePayment(RentPayment $payment): void
@@ -153,6 +217,9 @@ class RentBillingService
         }
 
         $tenant = $bill->tenant;
+        if (! $tenant) {
+            return ['ok' => false, 'message' => 'This bill has no tenant any more, so there is nobody to remind.'];
+        }
         $result = app(WhatsAppService::class)->sendTemplate($tenant->phone, 'bill_generated', [
             $tenant->name,
             $bill->month_label,
@@ -175,7 +242,8 @@ class RentBillingService
             . 'Amount: ₹' . number_format($bill->due_amount, 0) . "\n"
             . 'Due date: ' . $bill->due_date->format('d M Y') . "\n"
             . "Bill no: {$bill->bill_number}\n\n"
-            . "Pay here: {$bill->pay_url}\n\n- Pizi";
+            . (config('rent.online_payment') ? "Pay here: {$bill->pay_url}\n\n" : "Please pay your PG owner directly (cash or UPI).\n\n")
+            . '- Pizi';
 
         return [
             'ok' => false,

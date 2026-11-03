@@ -61,9 +61,13 @@
                 <div class="flex justify-between"><span>Due:</span> <strong>{{ \Carbon\Carbon::parse($currentBill->due_date)->format('d M') }}</strong></div>
                 <div class="flex justify-between"><span>Status:</span> <span class="font-bold uppercase text-amber-700">{{ $currentBill->status }}</span></div>
             </div>
+            @if(config('rent.online_payment'))
             <a href="{{ route('tenant.pay-rent', $currentBill->id) }}" class="block mt-4 text-center py-3 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold">
                 Pay Now →
             </a>
+            @else
+            <p class="mt-4 text-sm text-ink-700 bg-cream rounded-xl p-3">Please pay your PG owner directly (cash or UPI) and ask for a receipt.</p>
+            @endif
         @else
             <p class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check fa-fw"></i> No pending bills!</p>
         @endif

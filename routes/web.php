@@ -363,6 +363,8 @@ Route::post('/guide/dismiss', [\App\Http\Controllers\Owner\GuideController::clas
     Route::get('/rent/create', [\App\Http\Controllers\Owner\RentController::class, 'create'])->name('rent.create');
     Route::post('/rent', [\App\Http\Controllers\Owner\RentController::class, 'store'])->name('rent.store');
     Route::post('/rent/generate-all', [\App\Http\Controllers\Owner\RentController::class, 'generateAll'])->name('rent.generateAll');
+    Route::get('/rent/collected', [\App\Http\Controllers\Owner\RentController::class, 'collected'])->name('rent.collected');
+    Route::post('/rent/collected', [\App\Http\Controllers\Owner\RentController::class, 'collectedStore'])->name('rent.collected.store');
     Route::get('/rent/{bill}', [\App\Http\Controllers\Owner\RentController::class, 'show'])->name('rent.show');
     Route::delete('/rent/{bill}', [\App\Http\Controllers\Owner\RentController::class, 'destroy'])->name('rent.destroy');
     Route::get('/rent-archive', [\App\Http\Controllers\Owner\RentController::class, 'archive'])->name('rent.archive');
