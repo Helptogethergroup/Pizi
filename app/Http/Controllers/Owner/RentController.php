@@ -17,7 +17,19 @@ class RentController extends Controller
         $this->checkAccess();
         $managedIds = auth()->user()->getManagedPropertyIds();
 
-               $query = RentBill::whereIn('property_id', $managedIds)
+        // PG picker: every PG the user manages, with how many bills each has. Picking one narrows the list,
+        // the four numbers and the tab counts to that PG (an id outside the user's PGs is ignored).
+        $billCounts = RentBill::whereIn('property_id', $managedIds)->selectRaw('property_id, count(*) as c')->groupBy('property_id')->pluck('c', 'property_id');
+        $propertyOptions = \App\Models\Property::whereIn('id', $billCounts->keys())->orderBy('name')->get(['id', 'name'])
+            ->map(fn ($p) => (object) ['id' => $p->id, 'name' => $p->name, 'count' => (int) $billCounts[$p->id]]);
+        $propertyId = (int) $request->get('property_id');
+        if ($propertyId && $billCounts->has($propertyId)) {
+            $managedIds = [$propertyId];
+        } else {
+            $propertyId = 0;
+        }
+
+        $query = RentBill::whereIn('property_id', $managedIds)
             ->with(['tenant', 'property', 'payments' => function($q) {
                 $q->latest('paid_at');
             }]);
@@ -70,7 +82,7 @@ class RentController extends Controller
             'paid' => RentBill::whereIn('property_id', $managedIds)->where('status', 'paid')->count(),
         ];
 
-        return view('owner.rent.index', compact('bills', 'stats', 'tabCounts'));
+        return view('owner.rent.index', compact('bills', 'stats', 'tabCounts', 'propertyOptions', 'propertyId'));
     }
 
     public function create(Request $request)

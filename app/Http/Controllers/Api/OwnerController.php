@@ -1427,7 +1427,7 @@ class OwnerController extends Controller
             ->whereNull('rb.deleted_at')
             ->where('rb.owner_id', $this->ownerId($request))
             ->tap(fn ($q) => $this->scopeProps($q, $request, 'rb.property_id'))
-            ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 'p.name as property_name')
+            ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 't.room_number as tenant_room', 't.bed_number as tenant_bed', 'p.name as property_name')
             ->orderBy('rb.month', 'desc')
             ->orderBy('rb.created_at', 'desc');
 
@@ -1480,6 +1480,8 @@ class OwnerController extends Controller
         $row['tenant_name'] = $tenant->name ?? null;
         $row['tenant_phone'] = $tenant->phone ?? null;
         $row['room_number'] = $tenant->room_number ?? null;
+        $row['tenant_room'] = $tenant->room_number ?? null;
+        $row['tenant_bed'] = $tenant->bed_number ?? null;
         $row['property_name'] = DB::table('properties')->where('id', $bill->property_id)->value('name');
         $row['pay_url'] = $bill->pay_url;
         $row['payments'] = DB::table('rent_payments')->where('rent_bill_id', $id)->orderBy('paid_at', 'desc')->get();
@@ -1584,7 +1586,7 @@ class OwnerController extends Controller
         $shape = function ($query) {
             return $query->join('tenants as t', 't.id', '=', 'rb.tenant_id')
                 ->leftJoin('properties as p', 'p.id', '=', 'rb.property_id')
-                ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 'p.name as property_name');
+                ->select('rb.*', 't.name as tenant_name', 't.phone as tenant_phone', 't.room_number as tenant_room', 't.bed_number as tenant_bed', 'p.name as property_name');
         };
 
         $old = $shape(DB::table('rent_bills as rb')->whereNull('rb.deleted_at')->where('rb.owner_id', $oid)

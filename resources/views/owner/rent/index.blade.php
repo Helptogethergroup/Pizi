@@ -54,6 +54,14 @@
 
 <form method="GET" class="bg-white p-3 rounded-xl border border-ink-100 mb-4 flex gap-2 flex-wrap">
     <input type="hidden" name="status" value="{{ request('status') }}">
+    @if($propertyOptions->count() > 1)
+        <select name="property_id" onchange="this.form.submit()" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm font-semibold">
+            <option value="">All PGs ({{ $propertyOptions->sum('count') }} bills)</option>
+            @foreach($propertyOptions as $opt)
+                <option value="{{ $opt->id }}" @selected($propertyId === $opt->id)>{{ $opt->name }} ({{ $opt->count }} bills)</option>
+            @endforeach
+        </select>
+    @endif
     <input name="q" value="{{ request('q') }}" placeholder="Tenant name or phone..." class="flex-1 min-w-[200px] px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
     <input name="month" type="month" value="{{ request('month') }}" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
       <select name="payment_method" onchange="this.form.submit()" class="px-4 py-2.5 rounded-lg border border-ink-200 text-sm">
@@ -94,7 +102,8 @@
                         </div>
                                                <div class="flex items-center gap-3 text-xs text-ink-700 flex-wrap">
                             <span><i class="fa-solid fa-mobile-screen fa-fw"></i> {{ $bill->tenant?->phone }}</span>
-                            @if($bill->tenant?->room_number)<span><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $bill->tenant->room_number }}</span>@endif
+                            @if($bill->property?->name)<span class="font-semibold text-ink-900"><i class="fa-solid fa-building fa-fw"></i> {{ $bill->property->name }}</span>@endif
+                            @if($bill->tenant?->room_number)<span><i class="fa-solid fa-door-open fa-fw"></i> Room {{ $bill->tenant->room_number }}@if($bill->tenant?->bed_number) · Bed {{ $bill->tenant->bed_number }}@endif</span>@endif
                             <span><i class="fa-solid fa-calendar-days fa-fw"></i> Due: {{ $bill->due_date->format('d M Y') }}</span>
                             <span class="font-mono">#{{ $bill->bill_number }}</span>
                         </div>
