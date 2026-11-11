@@ -247,7 +247,10 @@ class WalletService
                 ->whereNotIn('user_id', DB::table('users')->where('is_test_account', true)->select('id'))
                 ->exists();
 
-            if ($lockedByOther) {
+            // an internal test account may try the unlock of a lead a paying owner already took (LEADS_TEST_SEES_ALL)
+            $testerMayUnlock = (bool) ($owner->is_test_account ?? false) && (bool) config('leads.test_sees_all', true);
+
+            if ($lockedByOther && ! $testerMayUnlock) {
                 throw new RuntimeException('This lead has already been taken by another owner.');
             }
 

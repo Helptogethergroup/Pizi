@@ -148,6 +148,12 @@ public function isRelevantToOwner(Lead $lead, Collection $activeProperties, arra
     return $mode === 'strict' ? in_array($lead->lead_type, ['verified', 'converted'], true) : true;
 }
 
+/** Is this an internal test account that should see every (non-junk) lead of its cities? */
+public function testerSeesAll($owner): bool
+{
+    return (bool) ($owner->is_test_account ?? false) && (bool) config('leads.test_sees_all', true);
+}
+
 public function leadsForOwner($owner, int $limit = 60)
 {
     $properties = $owner->leadProperties()->where('is_active', true)
@@ -172,6 +178,15 @@ public function leadsForOwner($owner, int $limit = 60)
     $lockedByAnyone = \App\Models\LeadUnlock::whereHas('user', fn ($q) => $q->where('is_test_account', false))
         ->pluck('lead_id')->toArray();
 
+    // An internal test account exists to try the whole flow, so it is not held to the quality and
+    // "taken by another owner" rules that protect paying owners (stale, unverified Facebook, not
+    // interested, unanswered, already sold). The city rule and junk/closed leads still apply.
+    // Switch off with LEADS_TEST_SEES_ALL=false (config/leads.php).
+    $testerSeesAll = $this->testerSeesAll($owner);
+    if ($testerSeesAll) {
+        $lockedByAnyone = [];
+    }
+
     $ownerLocalities = $properties->pluck('locality.name')->filter()->unique()->toArray();
     $ownerCities = $properties->pluck('city.name')->filter()->unique()->toArray();
 
@@ -192,7 +207,7 @@ public function leadsForOwner($owner, int $limit = 60)
         // worth selling: not one the telecaller found "not interested" (already found a PG, too
         // expensive, wrong location...), not one already closed, not a number that never answered
         // after three tries, and not a stale enquiry.
-        ->where(function ($q) use ($unlockedByMe) {
+        ->when(! $testerSeesAll, fn ($outer) => $outer->where(function ($q) use ($unlockedByMe) {
             $q->whereIn('id', $unlockedByMe)->orWhere(function ($free) {
                 $free->whereNotIn('status', ['closed_won', 'not_interested'])
                     ->where(fn ($c) => $c->whereNull('call_status')->orWhere('call_status', '!=', 'not_interested'))
@@ -205,16 +220,16 @@ public function leadsForOwner($owner, int $limit = 60)
                     $free->where('created_at', '>=', now()->subDays($days));
                 }
             });
-        })
+        }))
         // Meta (Facebook/Instagram) ad leads are unconfirmed until a
         // telecaller actually talks to the person and marks them Verified
         // — a lot of these are fake numbers, wrong numbers, or people just
         // tapping the ad by mistake. Every other source (website,
         // WhatsApp, referral, walk-in) is a direct enquiry and still
         // reaches owners immediately, as before.
-        ->where(function ($q) {
+        ->when(! $testerSeesAll, fn ($outer) => $outer->where(function ($q) {
             $q->where('source', '!=', 'meta_ads')->orWhereIn('lead_type', ['verified', 'converted']);
-        })
+        }))
         ->with(['property.locality', 'property.city'])
         ->where(function ($q) use ($lockedByAnyone, $unlockedByMe) {
             $q->whereNotIn('id', $lockedByAnyone)  // Available (not locked)
@@ -243,7 +258,8 @@ public function leadsForOwner($owner, int $limit = 60)
 
     // Keep only leads that are really about this owner's area (mode in config/leads.php).
     $ownerPropertyIds = $owner->leadProperties()->pluck('id')->map(fn ($i) => (int) $i)->all();
-    $leads = $leads->filter(fn ($lead) => $this->isRelevantToOwner($lead, $properties, $ownerPropertyIds, $unlockedByMe))->values();
+    // (a test account sees leads whose area is not known yet too, to try the flow with them)
+    $leads = $leads->filter(fn ($lead) => $testerSeesAll || $this->isRelevantToOwner($lead, $properties, $ownerPropertyIds, $unlockedByMe))->values();
 
     $wallet = $owner->wallet;
 

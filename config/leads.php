@@ -31,6 +31,12 @@ return [
     // elsewhere). 0 turns the limit off. A lead an owner already unlocked always stays visible.
     'max_age_days' => (int) env('LEADS_MAX_AGE_DAYS', 60),
 
+    // Internal test accounts (users.is_test_account) see every non-junk lead of their cities: not held
+    // to the age, "not interested", unanswered, unverified-Facebook and "already taken" rules that
+    // protect paying owners, so the whole flow can be tried with plenty of leads. false = treat
+    // them like any other owner.
+    'test_sees_all' => (bool) env('LEADS_TEST_SEES_ALL', true),
+
     // An owner can report an unlocked lead as not genuine within this many hours of unlocking it.
     'report_hours' => (int) env('LEADS_REPORT_HOURS', 72),
 ];
