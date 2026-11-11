@@ -252,6 +252,10 @@ public function leadsForOwner($owner, int $limit = 60)
                      });
               });
         })
+        // A test account is shown far more leads than a paying owner, so the newest-first cut would push
+        // the telecaller-verified / manual ones (the few worth testing the "Verified" tab with) off the
+        // end. Put those first before the cut; the page still sorts what it shows by date.
+        ->when($testerSeesAll, fn ($q) => $q->orderByRaw("(lead_type IN ('verified','manual','converted')) DESC"))
         ->latest()
         ->take($limit * 6)
         ->get();

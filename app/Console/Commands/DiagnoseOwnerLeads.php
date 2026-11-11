@@ -57,6 +57,7 @@ class DiagnoseOwnerLeads extends Command
 
         $reasons = [];
         $examples = [];
+        $byType = [];      // lead type => [in database, shown, hidden reasons]
         $visible = 0;
         $total = 0;
         $tester = $matcher->testerSeesAll($owner);
@@ -65,14 +66,18 @@ class DiagnoseOwnerLeads extends Command
             $this->newLine();
         }
 
-        Lead::with('property.city')->orderByDesc('id')->chunk(500, function ($leads) use (&$reasons, &$examples, &$visible, &$total, $mine, $lockedByOthers, $maxAge, $cities, $active, $propertyIds, $matcher, $tester) {
+        Lead::with('property.city')->orderByDesc('id')->chunk(500, function ($leads) use (&$reasons, &$examples, &$byType, &$visible, &$total, $mine, $lockedByOthers, $maxAge, $cities, $active, $propertyIds, $matcher, $tester) {
             foreach ($leads as $lead) {
                 $total++;
                 $why = $this->firstReasonHidden($lead, $mine, $lockedByOthers, $maxAge, $cities, $active, $propertyIds, $matcher, $tester);
+                $type = $lead->lead_type ?: '(none)';
+                $byType[$type]['total'] = ($byType[$type]['total'] ?? 0) + 1;
                 if ($why === null) {
                     $visible++;
+                    $byType[$type]['shown'] = ($byType[$type]['shown'] ?? 0) + 1;
                     continue;
                 }
+                $byType[$type]['why'][$why] = ($byType[$type]['why'][$why] ?? 0) + 1;
                 $reasons[$why] = ($reasons[$why] ?? 0) + 1;
                 $examples[$why][] = $lead;
             }
@@ -85,6 +90,17 @@ class DiagnoseOwnerLeads extends Command
             $rows[] = [$why, $n];
         }
         $this->table(['What happens to the lead', 'Leads'], $rows);
+
+        // "Verified" = a telecaller spoke to the person; "manual" = added by the team; "direct" = straight from
+        // the website / Facebook form, not yet confirmed. The Leads page tabs are built on these types.
+        $typeRows = [];
+        foreach ($byType as $type => $d) {
+            $hiddenTop = collect($d['why'] ?? [])->sortDesc()->take(2)->map(fn ($n, $w) => "{$n} x ".preg_replace('/^d+. /', '', $w))->implode('; ');
+            $typeRows[] = [$type, $d['total'], $d['shown'] ?? 0, $hiddenTop ?: '-'];
+        }
+        $this->newLine();
+        $this->line('By lead type (this is what the Verified / Direct tabs count):');
+        $this->table(['Lead type', 'In database', 'Shown to this owner', 'Main reasons the rest are hidden'], $typeRows);
 
         $real = $matcher->leadsForOwner($owner, 60)->count();
         $this->line("Cross-check, what the Leads page really lists for this owner: {$real}"
