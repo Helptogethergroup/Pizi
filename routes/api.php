@@ -67,6 +67,48 @@ Route::prefix('v2/auth')->group(function () {
     });
 });
 
+// ============ AUTH v2 for the RENTER app (people living in a PG, and people looking for one) ============
+// Same sessions, rotating refresh tokens, lockout and device list as the owner app; only the roles differ.
+Route::prefix('v2/renter/auth')->group(function () {
+    $c = \App\Http\Controllers\Api\RenterAuthController::class;
+
+    Route::post('/login/password', [$c, 'loginPassword']);
+    Route::post('/login/confirm', [$c, 'loginConfirm']);
+    Route::post('/otp/send', [$c, 'otpSend']);
+    Route::post('/otp/verify', [$c, 'otpVerify']);
+    Route::post('/refresh', [$c, 'refresh']);
+    Route::post('/register/start', [$c, 'registerStart']);
+    Route::post('/register/verify', [$c, 'registerVerify']);
+
+    Route::middleware('pizi.auth')->group(function () use ($c) {
+        Route::get('/me', [$c, 'me']);
+        Route::post('/logout', [$c, 'logout']);
+        Route::post('/logout-all', [$c, 'logoutAll']);
+        Route::get('/sessions', [$c, 'sessions']);
+        Route::delete('/sessions/{uuid}', [$c, 'revokeSession']);
+        Route::post('/password/change', [$c, 'changePassword']);
+    });
+});
+
+// ============ RENTER APP: what a tenant (someone living in a PG) can see and do ============
+// Always the signed-in tenant's own data; see App\Http\Controllers\Api\Renter\RenterController.
+Route::prefix('renter')->middleware(['pizi.auth', 'role:tenant'])->group(function () {
+    $c = \App\Http\Controllers\Api\Renter\RenterController::class;
+
+    Route::get('/home', [$c, 'home']);
+    Route::get('/room', [$c, 'room']);
+    Route::get('/rent', [$c, 'rent']);
+    Route::get('/rent/{id}', [$c, 'rentShow'])->whereNumber('id');
+    Route::get('/complaints', [$c, 'complaints']);
+    Route::post('/complaints', [$c, 'complaintStore'])->middleware('throttle:20,1');
+    Route::get('/complaints/{id}', [$c, 'complaintShow'])->whereNumber('id');
+    Route::post('/complaints/{id}/comments', [$c, 'complaintComment'])->whereNumber('id')->middleware('throttle:30,1');
+    Route::post('/complaints/{id}/rating', [$c, 'complaintRate'])->whereNumber('id');
+    Route::post('/complaints/{id}/cancel', [$c, 'complaintCancel'])->whereNumber('id');
+    Route::get('/profile', [$c, 'profile']);
+    Route::post('/profile', [$c, 'profileUpdate']);
+});
+
 // ============ PUBLIC (no auth) ============
 Route::prefix('public')->group(function () {
     Route::get('/home', [PublicController::class, 'home']);

@@ -20,4 +20,7 @@ return [
     // Only these roles may sign in through the owner app.
     // A PG Manager signs in with the login their owner created for them.
     'allowed_roles' => ['owner', 'pg_manager'],
+
+    // Only these roles may sign in through the renter app (people living in a PG, and people looking for one).
+    'renter_roles' => ['tenant', 'guest'],
 ];

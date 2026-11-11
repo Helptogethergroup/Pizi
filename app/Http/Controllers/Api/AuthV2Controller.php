@@ -34,6 +34,18 @@ class AuthV2Controller extends Controller
     ) {
     }
 
+    /** Roles that may sign in through this controller. The renter app overrides it (RenterAuthController). */
+    protected function allowedRoles(): array
+    {
+        return config('api_auth.allowed_roles');
+    }
+
+    /** Role of an account created by registerVerify(). */
+    protected function signupRole(): string
+    {
+        return 'owner';
+    }
+
     // ── Password login ──────────────────────────────────────────────────────
 
     public function loginPassword(Request $request): JsonResponse
@@ -290,26 +302,32 @@ class AuthV2Controller extends Controller
             // same placeholder the website uses when no email was given
             'email' => $pending['email'] ?: $pending['phone'] . '@temp.pizi.in',
             'password' => $pending['password'],
-            'role' => 'owner',
+            'role' => $this->signupRole(),
             // free sign-up, like the website's /register-free; credits are bought later
             'signup_type' => 'free',
             'is_active' => true,
         ]);
 
-        try {
-            User::where('role', 'admin')->get()->each(
-                fn ($admin) => $admin->notify(new \App\Notifications\NewOwnerSignup($user))
-            );
-        } catch (\Throwable $e) {
-            \Log::warning('Owner signup notification failed: ' . $e->getMessage());
+        $isOwner = $user->role === 'owner';
+
+        if ($isOwner) {
+            try {
+                User::where('role', 'admin')->get()->each(
+                    fn ($admin) => $admin->notify(new \App\Notifications\NewOwnerSignup($user))
+                );
+            } catch (\Throwable $e) {
+                \Log::warning('Owner signup notification failed: ' . $e->getMessage());
+            }
         }
 
         try {
             $wa = app(\App\Services\WhatsAppService::class);
             $wa->sendTemplate($user->phone, 'account_create', [$user->name, $user->phone]);
-            $wa->sendTemplate($user->phone, 'pg_owner_welcome', []);
+            if ($isOwner) {
+                $wa->sendTemplate($user->phone, 'pg_owner_welcome', []);
+            }
         } catch (\Throwable $e) {
-            \Log::warning('Owner welcome WhatsApp failed: ' . $e->getMessage());
+            \Log::warning('Signup WhatsApp failed: ' . $e->getMessage());
         }
 
         return $this->sessionResponse($user, $request, 'api_register', 'Account created from the owner app', $pending['device']);
@@ -516,7 +534,7 @@ class AuthV2Controller extends Controller
 
     private function findOwner(string $identifier, string $type): ?User
     {
-        $q = User::query()->whereIn('role', config('api_auth.allowed_roles'));
+        $q = User::query()->whereIn('role', $this->allowedRoles());
 
         if ($type === 'email') {
             return $q->whereRaw('LOWER(email) = ?', [$identifier])->first();
