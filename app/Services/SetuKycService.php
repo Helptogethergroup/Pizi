@@ -106,7 +106,7 @@ class SetuKycService
             ]);
 
             $body = $response->json();
-            Log::info('Setu Aadhaar verifyAadhaar', ['status' => $response->status(), 'body' => $body]);
+            Log::info('Setu Aadhaar verifyAadhaar', ['status' => $response->status(), 'fields' => array_keys(is_array($body) ? $body : [])]);
 
             if ($response->successful()) {
                 return ['success' => true, 'message' => 'OTP sent to the Aadhaar-linked mobile number.'];
@@ -136,7 +136,8 @@ class SetuKycService
             ]);
 
             $body = $response->json();
-            Log::info('Setu Aadhaar verifyOtp', ['status' => $response->status(), 'body' => array_diff_key($body ?? [], ['photo' => 1])]);
+            // never write the person's name, address or Aadhaar number to the log
+            Log::info('Setu Aadhaar verifyOtp', ['status' => $response->status(), 'fields' => array_keys(is_array($body) ? $body : [])]);
 
             if ($response->successful() && !empty($body['name'])) {
                 return [

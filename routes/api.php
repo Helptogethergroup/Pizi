@@ -116,6 +116,11 @@ Route::prefix('renter')->middleware(['pizi.auth', 'role:tenant'])->group(functio
     Route::get('/kyc/documents/{type}/file', [$k, 'file'])->middleware('throttle:60,1');
     Route::delete('/kyc/documents/{type}', [$k, 'destroy']);
     Route::post('/kyc/submit', [$k, 'submit'])->middleware('throttle:10,1');
+
+    // Aadhaar e-KYC through Setu (needs SETU_KYC_PRODUCT_INSTANCE_ID on the server)
+    Route::post('/kyc/aadhaar/start', [$k, 'aadhaarStart'])->middleware('throttle:5,15');
+    Route::post('/kyc/aadhaar/captcha', [$k, 'aadhaarCaptcha'])->middleware('throttle:8,15');
+    Route::post('/kyc/aadhaar/verify', [$k, 'aadhaarVerify'])->middleware('throttle:8,15');
 });
 
 // ============ PUBLIC (no auth) ============

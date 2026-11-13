@@ -7,6 +7,8 @@ use App\Models\Tenant;
 use App\Models\TenantDocument;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Services\SetuKycService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -56,6 +58,13 @@ class RenterKycController extends Controller
         $docs = TenantDocument::where('tenant_id', $tenant->id)->get()->keyBy('document_type');
 
         return [
+            'aadhaar' => [
+                'verified' => !empty($tenant->aadhaar_verified_at),
+                'masked' => $tenant->aadhaar_number_masked,
+                'name' => $tenant->aadhaar_name,
+                // false until Pizi has its Setu Aadhaar product switched on
+                'available' => app(SetuKycService::class)->isConfigured(),
+            ],
             'status' => $tenant->kyc_status ?: 'pending',
             'remarks' => $tenant->kyc_status === 'rejected' ? ($tenant->kyc_remarks ?? null) : null,
             'min_to_submit' => self::MIN_TO_SUBMIT,
@@ -163,6 +172,118 @@ class RenterKycController extends Controller
             'Cache-Control' => 'private, no-store',
             'X-Content-Type-Options' => 'nosniff',
         ]);
+    }
+
+    // ─── Aadhaar e-KYC (Setu): captcha, then OTP on the Aadhaar-linked phone ─────────────────
+
+    /** The Setu request this tenant started; bound to them, so nobody can finish somebody else's. */
+    private function aadhaarKey(Request $request): string
+    {
+        return 'renter:aadhaar:' . $request->user()->id;
+    }
+
+    private function aadhaarGuard(Request $request): ?JsonResponse
+    {
+        $tenant = $this->tenantOf($request);
+        if (!$tenant) {
+            return $this->noTenant();
+        }
+        if (!app(SetuKycService::class)->isConfigured()) {
+            return $this->fail('Aadhaar verification is not switched on yet. Please upload your Aadhaar photos instead.', 503, 'aadhaar_unavailable');
+        }
+        if (!empty($tenant->aadhaar_verified_at)) {
+            return $this->fail('Your Aadhaar is already verified.', 409, 'already_verified');
+        }
+
+        return null;
+    }
+
+    /** Step 1: get a captcha. */
+    public function aadhaarStart(Request $request): JsonResponse
+    {
+        if ($blocked = $this->aadhaarGuard($request)) {
+            return $blocked;
+        }
+
+        $result = app(SetuKycService::class)->createRequest();
+        if (!$result['success']) {
+            return $this->fail($result['message'] ?? 'Could not start Aadhaar verification.', 502, 'aadhaar_failed');
+        }
+
+        Cache::put($this->aadhaarKey($request), ['id' => $result['id'], 'otp_sent' => false], now()->addMinutes(10));
+
+        return $this->ok(['captcha_image' => $result['captcha_image'], 'valid_upto' => $result['valid_upto']]);
+    }
+
+    /** Step 2: Aadhaar number and captcha; Setu sends an OTP to the Aadhaar-linked phone. The number is never stored. */
+    public function aadhaarCaptcha(Request $request): JsonResponse
+    {
+        if ($blocked = $this->aadhaarGuard($request)) {
+            return $blocked;
+        }
+        $data = $request->validate([
+            'aadhaar_number' => ['required', 'digits:12'],
+            'captcha_code' => ['required', 'string', 'max:12'],
+        ]);
+
+        $state = Cache::get($this->aadhaarKey($request));
+        if (!$state) {
+            return $this->fail('This check has expired. Please start again.', 410, 'expired');
+        }
+
+        $result = app(SetuKycService::class)->verifyAadhaar($state['id'], $data['aadhaar_number'], $data['captcha_code']);
+        if (!$result['success']) {
+            return $this->fail($result['message'] ?? 'The Aadhaar number or captcha did not match.', 422, 'aadhaar_rejected');
+        }
+
+        Cache::put($this->aadhaarKey($request), ['id' => $state['id'], 'otp_sent' => true], now()->addMinutes(10));
+
+        return $this->ok(['otp_sent' => true, 'message' => $result['message'] ?? 'OTP sent to the Aadhaar-linked mobile number.']);
+    }
+
+    /** Step 3: OTP and a 4-digit share code (any 4 digits; Setu uses it to lock the returned data). */
+    public function aadhaarVerify(Request $request): JsonResponse
+    {
+        if ($blocked = $this->aadhaarGuard($request)) {
+            return $blocked;
+        }
+        $data = $request->validate([
+            'otp' => ['required', 'digits_between:4,6'],
+            'share_code' => ['required', 'digits:4'],
+        ]);
+
+        $state = Cache::get($this->aadhaarKey($request));
+        if (!$state || empty($state['otp_sent'])) {
+            return $this->fail('This check has expired. Please start again.', 410, 'expired');
+        }
+
+        $result = app(SetuKycService::class)->verifyOtp($state['id'], $data['otp'], $data['share_code']);
+        if (!$result['success']) {
+            return $this->fail($result['message'] ?? 'The OTP is not correct.', 422, 'otp_rejected');
+        }
+
+        $tenant = $this->tenantOf($request);
+        $d = $result['data'] ?? [];
+        $update = [
+            'aadhaar_number_masked' => $result['masked_aadhaar'] ?? ('XXXX-XXXX-' . ($d['aadhaar_last4'] ?? '')),
+            'aadhaar_name' => $result['name'] ?? null,
+            'aadhaar_verified_at' => now(),
+        ];
+        // fill what the person left blank from Aadhaar; never overwrite what they or the owner entered
+        foreach (['dob' => 'dob', 'gender' => 'gender', 'address_line' => 'address', 'city' => 'city', 'state' => 'state', 'pincode' => 'pincode'] as $col => $key) {
+            if (empty($tenant->{$col}) && !empty($d[$key])) {
+                $update[$col] = $d[$key];
+            }
+        }
+        $tenant->forceFill($update)->save();
+
+        \DB::table('users')->where('id', $request->user()->id)->update([
+            'journey_stage' => \DB::raw('GREATEST(COALESCE(journey_stage, 0), 2)'),
+            'updated_at' => now(),
+        ]);
+        Cache::forget($this->aadhaarKey($request));
+
+        return $this->ok($this->payload($tenant->fresh()));
     }
 
     public function submit(Request $request): JsonResponse
