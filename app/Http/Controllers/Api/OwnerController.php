@@ -1939,6 +1939,12 @@ class OwnerController extends Controller
         // warna naya tenant-role user bana do (web form jaisa behaviour).
         $phone = substr(preg_replace('/[^0-9]/', '', $request->phone), -10);
         $user = DB::table('users')->where('phone', $phone)->first();
+        // Someone who signed up in the Pizi app to look for a PG becomes a tenant when an owner
+        // adds them (only a "guest" can be turned into a tenant, never an owner).
+        if ($user && $user->role === 'guest') {
+            DB::table('users')->where('id', $user->id)->update(['role' => 'tenant', 'updated_at' => now()]);
+            $user->role = 'tenant';
+        }
         if ($user && $user->role !== 'tenant') {
             return response()->json(['success' => false, 'errors' => ['phone' => ["This number is already registered as a '{$user->role}' account."]]], 422);
         }

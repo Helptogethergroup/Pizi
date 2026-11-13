@@ -175,6 +175,15 @@ class TenantController extends Controller
                 // ---- 3. Existing User dhoondo is phone se
                 $user = User::where('phone', $phone)->first();
 
+                // Someone who signed up in the Pizi app to look for a PG becomes a tenant the moment
+                // an owner adds them (only a "guest" can be turned into a tenant, never an owner).
+                if ($user && $user->role === 'guest') {
+                    DB::table('users')->where('id', $user->id)->update([
+                        'role' => 'tenant', 'journey_stage' => 5, 'journey_completed_at' => now(), 'updated_at' => now(),
+                    ]);
+                    $user->refresh();
+                }
+
                 if ($user && $user->role !== 'tenant') {
                     throw ValidationException::withMessages([
                         'phone' => "This number is already registered as a '{$user->role}' account. Please use a different number.",
