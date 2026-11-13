@@ -13,7 +13,9 @@
     @endif
 
     <div class="bg-gradient-to-br from-ink-950 to-ink-900 text-cream rounded-3xl p-6 lg:p-8">
-        <h1 class="font-display font-black text-2xl lg:text-3xl">Pay Token Amount</h1>
+        <h1 class="font-display font-black text-2xl lg:text-3xl">Pay Token Amount <span class="text-sm font-bold text-ink-900/50">(optional)</span></h1>
+        <p class="text-sm text-ink-900/60 mt-1">The token only books your bed in advance. If you are paying the PG owner directly, you do not need it.
+            <a href="{{ route('tenant.onboarding') }}" class="font-bold text-coral-600 underline">Skip, I will pay the owner</a></p>
         <p class="text-cream/70 mt-1">Confirm your PG booking by paying the token amount.</p>
     </div>
 

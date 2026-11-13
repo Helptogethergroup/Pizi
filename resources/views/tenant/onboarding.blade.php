@@ -21,9 +21,11 @@
 @endif
 
 @php
-    $completedCount = collect($steps)->where('completed', true)->count();
-    $totalSteps = count($steps);
-    $percentage = round(($completedCount / $totalSteps) * 100);
+    // an optional step (the token amount) is not counted: skipping it never holds the dashboard back
+    $required = collect($steps)->where('optional', '!=', true);
+    $completedCount = $required->where('completed', true)->count();
+    $totalSteps = $required->count();
+    $percentage = round(($completedCount / max(1, $totalSteps)) * 100);
 @endphp
 
 <div class="max-w-4xl mx-auto">
@@ -86,6 +88,9 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
                             <span class="text-xs font-bold text-ink-900/40 uppercase">Step {{ $step['id'] }}</span>
+                            @if(!empty($step['optional']))
+                                <span class="px-2 py-0.5 bg-ink-100 text-ink-600 text-xs rounded-full font-bold uppercase">Optional</span>
+                            @endif
                             @if($step['completed'])
                                 <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs rounded-full font-bold uppercase">✓ Completed</span>
                             @elseif($step['unlocked'])

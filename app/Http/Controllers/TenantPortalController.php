@@ -514,7 +514,9 @@ public function agreementDownload($id)
         $this->linkLeadsToUser($user);
 
         $steps = $this->calculateJourneySteps($user, $tenant);
-        $newStage = collect($steps)->where('completed', true)->count();
+        $requiredDone = collect($steps)->where('optional', '!=', true)->every(fn ($st) => $st['completed']);
+        // stage 5 = journey complete (opens the dashboard); an optional token that was skipped does not block it
+        $newStage = $requiredDone ? 5 : min(4, collect($steps)->where('completed', true)->count());
 
         // DB stage ko hamesha latest count pe rakho (single source of truth)
         if ($newStage != $user->journey_stage) {
@@ -592,8 +594,9 @@ public function agreementDownload($id)
 
         // ===== SEQUENCE: har step tabhi complete jab pichla bhi complete ho =====
        $agreementSigned = $agreementSigned && $profileComplete;
-        $tokenPaid        = $tokenPaid        && $agreementSigned;
-        $ownerConfirmed   = $ownerConfirmed   && $tokenPaid;
+        // The token amount is optional (a tenant who walks in and pays the owner directly never needs it),
+        // so it neither waits for the agreement nor holds back the owner's confirmation.
+        $ownerConfirmed   = $ownerConfirmed   && $agreementSigned;
 
         return [
             [
@@ -621,13 +624,14 @@ public function agreementDownload($id)
             ],
             [
                 'id' => 3,
-               'title' => 'Pay Token Amount',
-                'desc' => 'Pay the token amount to confirm your booking',
+               'title' => 'Pay Token Amount (optional)',
+                'desc' => 'Only if you want to book in advance. Skip this if you are paying the owner directly.',
                 'icon' => '💳',
                 'completed' => $tokenPaid,
+                'optional' => true,
                 'cta' => 'Pay Token',
                 'cta_route' => 'tenant.token.pay',
-                'unlocked' => $agreementSigned,
+                'unlocked' => true,
                 'who' => 'You',
             ],
             [
@@ -638,7 +642,7 @@ public function agreementDownload($id)
                 'completed' => $ownerConfirmed,
                 'cta' => 'Wait for confirmation',
                 'cta_route' => null,
-                'unlocked' => $tokenPaid,
+                'unlocked' => $agreementSigned,
                 'who' => 'PG Owner',
             ],
         ];

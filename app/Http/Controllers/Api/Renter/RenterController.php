@@ -128,7 +128,7 @@ class RenterController extends Controller
 
         $currentBill = $tenant->bills()->where('status', '!=', 'paid')->reorder('month')->first();
         $journey = collect(app(TenantPortalController::class)->calculateJourneySteps($user, $tenant))
-            ->map(fn ($s) => ['id' => $s['id'], 'title' => $s['title'], 'description' => $s['desc'], 'completed' => (bool) $s['completed'], 'unlocked' => (bool) $s['unlocked'], 'who' => $s['who']])
+            ->map(fn ($s) => ['id' => $s['id'], 'title' => $s['title'], 'description' => $s['desc'], 'completed' => (bool) $s['completed'], 'optional' => (bool) ($s['optional'] ?? false), 'unlocked' => (bool) $s['unlocked'], 'who' => $s['who']])
             ->values();
         $agreement = $tenant->activeAgreement;
 
@@ -171,6 +171,8 @@ class RenterController extends Controller
                 'signed_at' => $agreement->signed_at,
             ] : null,
             'journey' => $journey,
+            // every required step is done (an optional one, like the token amount, may be skipped)
+            'journey_complete' => $journey->where('optional', false)->every(fn ($st) => $st['completed']),
             // the app hides the documents screen once KYC is done (for example through Aadhaar)
             'kyc' => [
                 'status' => $tenant->kyc_status ?: 'pending',
