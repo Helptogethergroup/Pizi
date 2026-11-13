@@ -46,9 +46,15 @@ $app = Application::configure(basePath: dirname(__DIR__))
                         'errors' => $e->errors(),
                     ], 422);
                 }
+                // A server error never shows its internals (SQL, file paths) to the app in production;
+                // the real error is still written to the log.
+                $message = ($status >= 500 && !config('app.debug'))
+                    ? 'Something went wrong. Please try again.'
+                    : ($e->getMessage() ?: 'Server error');
+
                 return response()->json([
                     'success' => false,
-                    'message' => $e->getMessage() ?: 'Server error',
+                    'message' => $message,
                 ], $status);
             }
             return null;

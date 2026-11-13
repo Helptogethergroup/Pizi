@@ -117,6 +117,16 @@ Route::prefix('renter')->middleware(['pizi.auth', 'role:tenant'])->group(functio
     Route::delete('/kyc/documents/{type}', [$k, 'destroy']);
     Route::post('/kyc/submit', [$k, 'submit'])->middleware('throttle:10,1');
 
+    // Rental agreement (read, PDF, e-sign through Setu) and the notice to leave the PG
+    $g = \App\Http\Controllers\Api\Renter\RenterAgreementController::class;
+    Route::get('/agreement', [$g, 'show']);
+    Route::get('/agreement/signed-copy', [$g, 'signedCopy'])->middleware('throttle:10,1');
+    Route::get('/agreement/{id}/pdf', [$g, 'pdf'])->whereNumber('id')->middleware('throttle:20,1');
+    Route::post('/agreement/sign', [$g, 'signStart'])->middleware('throttle:5,10');
+    Route::post('/agreement/sign/refresh', [$g, 'signRefresh'])->middleware('throttle:20,1');
+    Route::get('/notice', [$g, 'noticeShow']);
+    Route::post('/notice', [$g, 'noticeStore'])->middleware('throttle:5,10');
+
     // Aadhaar e-KYC through Setu (needs SETU_KYC_PRODUCT_INSTANCE_ID on the server)
     Route::post('/kyc/aadhaar/start', [$k, 'aadhaarStart'])->middleware('throttle:5,15');
     Route::post('/kyc/aadhaar/captcha', [$k, 'aadhaarCaptcha'])->middleware('throttle:8,15');
