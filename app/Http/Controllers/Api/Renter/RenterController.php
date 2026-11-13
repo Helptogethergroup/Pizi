@@ -258,6 +258,11 @@ class RenterController extends Controller
         return $this->ok([
             'has_tenant' => true,
             'total_due' => (float) $tenant->bills()->where('status', '!=', 'paid')->sum('due_amount'),
+            'paid_total' => (float) $tenant->payments()->sum('amount'),
+            // every payment the owner has recorded for this tenant, newest first, with the month it was for
+            'payments' => $tenant->payments()->with('bill:id,month')->limit(30)->get()->map(fn ($p) => $this->paymentResource($p) + [
+                'month' => $p->bill?->month,
+            ])->values(),
             'online_payment_enabled' => (bool) config('rent.online_payment'),
             'pay_note' => config('rent.online_payment') ? null : 'Please pay your PG owner directly (cash or UPI) and ask for a receipt.',
             'bills' => $bills->getCollection()->map(fn ($b) => $this->billResource($b))->values(),
