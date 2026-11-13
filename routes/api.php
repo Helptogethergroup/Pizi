@@ -108,6 +108,14 @@ Route::prefix('renter')->middleware(['pizi.auth', 'role:tenant'])->group(functio
     Route::post('/complaints/{id}/cancel', [$c, 'complaintCancel'])->whereNumber('id');
     Route::get('/profile', [$c, 'profile']);
     Route::post('/profile', [$c, 'profileUpdate']);
+
+    // KYC documents (own documents only; no public links)
+    $k = \App\Http\Controllers\Api\Renter\RenterKycController::class;
+    Route::get('/kyc', [$k, 'show']);
+    Route::post('/kyc/documents', [$k, 'upload'])->middleware('throttle:30,1');
+    Route::get('/kyc/documents/{type}/file', [$k, 'file'])->middleware('throttle:60,1');
+    Route::delete('/kyc/documents/{type}', [$k, 'destroy']);
+    Route::post('/kyc/submit', [$k, 'submit'])->middleware('throttle:10,1');
 });
 
 // ============ PUBLIC (no auth) ============
