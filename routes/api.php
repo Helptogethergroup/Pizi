@@ -96,6 +96,7 @@ Route::prefix('renter')->middleware(['pizi.auth', 'role:tenant'])->group(functio
     $c = \App\Http\Controllers\Api\Renter\RenterController::class;
 
     Route::get('/home', [$c, 'home']);
+    Route::get('/notices', [$c, 'notices']);
     Route::get('/room', [$c, 'room']);
     Route::get('/rent', [$c, 'rent']);
     Route::get('/rent/{id}', [$c, 'rentShow'])->whereNumber('id');
@@ -285,6 +286,11 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     Route::post('/rent/{id}/restore',      [OwnerController::class, 'rentRestore']);
 
     // Tenants
+    // Notices for the tenants of the owner's PGs (shown in the tenant app)
+    Route::get('/notices',          [\App\Http\Controllers\Api\OwnerNoticeController::class, 'index']);
+    Route::post('/notices',         [\App\Http\Controllers\Api\OwnerNoticeController::class, 'store'])->middleware('throttle:30,1');
+    Route::delete('/notices/{id}',  [\App\Http\Controllers\Api\OwnerNoticeController::class, 'destroy'])->whereNumber('id');
+
     Route::get('/tenants',          [OwnerController::class, 'tenants']);
     // the add-tenant form: vacant beds of a PG, and the Aadhaar instant-KYC steps
     Route::get('/tenants/vacant-beds/{property}', [OwnerController::class, 'tenantVacantBeds']);

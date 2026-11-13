@@ -137,6 +137,7 @@
                 @if(auth()->user()->hasFeature('rent'))
                 <a href="{{ route('owner.rent.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rent.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-sack-dollar fa-fw"></i> Rent Collection</a>
                 @endif
+                <a href="{{ route('owner.notices.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.notices.*') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-bullhorn fa-fw"></i> Tenant Notices</a>
                 @if(auth()->user()->role === 'owner')
 <a href="{{ route('owner.rent.archive') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-cream/5 {{ request()->routeIs('owner.rent.archive') ? 'bg-cream/10 text-coral-500' : '' }}"><i class="fa-solid fa-box-archive fa-fw"></i> Bill Archive</a>
 @endif

@@ -358,6 +358,11 @@ Route::post('/guide/dismiss', [\App\Http\Controllers\Owner\GuideController::clas
     Route::patch('/tenants/{tenant}/status', [\App\Http\Controllers\Owner\TenantController::class, 'changeStatus'])->name('tenants.status');
     
     
+    // ============ TENANT NOTICES (shown in the tenant app) ============
+    Route::get('/notices', [\App\Http\Controllers\Owner\NoticeController::class, 'index'])->name('notices.index');
+    Route::post('/notices', [\App\Http\Controllers\Owner\NoticeController::class, 'store'])->name('notices.store');
+    Route::delete('/notices/{id}', [\App\Http\Controllers\Owner\NoticeController::class, 'destroy'])->whereNumber('id')->name('notices.destroy');
+
     // ============ RENT COLLECTION ============
     Route::get('/rent', [\App\Http\Controllers\Owner\RentController::class, 'index'])->name('rent.index');
     Route::get('/rent/create', [\App\Http\Controllers\Owner\RentController::class, 'create'])->name('rent.create');

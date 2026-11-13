@@ -175,6 +175,29 @@ class RenterController extends Controller
         ]);
     }
 
+    // ─── notices from the owner ─────────────────────────────────────────────
+
+    public function notices(Request $request): JsonResponse
+    {
+        $tenant = $this->tenantOf($request);
+        if (!$tenant || $tenant->status !== 'active') {
+            return $this->noTenant();
+        }
+
+        $rows = \App\Models\PropertyNotice::live()->forTenant($tenant)
+            ->orderByDesc('pinned')->orderByDesc('created_at')->limit(50)->get()
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'title' => $n->title,
+                'body' => $n->body,
+                'kind' => $n->kind,
+                'pinned' => $n->pinned,
+                'created_at' => $n->created_at?->toIso8601String(),
+            ])->values();
+
+        return $this->ok(['has_tenant' => true, 'notices' => $rows]);
+    }
+
     // ─── my room ────────────────────────────────────────────────────────────
 
     public function room(Request $request): JsonResponse
