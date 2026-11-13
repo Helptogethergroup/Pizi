@@ -268,6 +268,9 @@ class RenterKycController extends Controller
             'aadhaar_number_masked' => $result['masked_aadhaar'] ?? ('XXXX-XXXX-' . ($d['aadhaar_last4'] ?? '')),
             'aadhaar_name' => $result['name'] ?? null,
             'aadhaar_verified_at' => now(),
+            // Aadhaar checked with the government's OTP: nothing more to upload or approve
+            'kyc_status' => 'approved',
+            'kyc_remarks' => 'Verified with Aadhaar OTP (Setu)',
         ];
         // fill what the person left blank from Aadhaar; never overwrite what they or the owner entered
         foreach (['dob' => 'dob', 'gender' => 'gender', 'address_line' => 'address', 'city' => 'city', 'state' => 'state', 'pincode' => 'pincode'] as $col => $key) {

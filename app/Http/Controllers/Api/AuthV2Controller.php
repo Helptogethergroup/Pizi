@@ -307,6 +307,9 @@ class AuthV2Controller extends Controller
             'signup_type' => 'free',
             'is_active' => true,
         ]);
+        // they chose this password themselves just now
+        DB::table('users')->where('id', $user->id)->update(['password_set_at' => now()]);
+        $user->password_set_at = now();
 
         $isOwner = $user->role === 'owner';
 
@@ -421,6 +424,40 @@ class AuthV2Controller extends Controller
         return response()->json(['success' => true]);
     }
 
+    /**
+     * First password for an account that has none yet (an owner-added tenant who signed in with an
+     * OTP). Allowed once; after that the person uses changePassword with the current password.
+     */
+    public function setPassword(Request $request): JsonResponse
+    {
+        $data = $this->validated($request, [
+            'new_password' => ['required', 'string', 'min:10', 'max:200', 'regex:/[a-z]/', 'regex:/[A-Z]/', 'regex:/[0-9]/'],
+        ]);
+        if ($data instanceof JsonResponse) {
+            return $data;
+        }
+
+        $user = $request->user;
+        // each app only sets passwords for its own kind of account
+        if (!in_array($user->role, $this->allowedRoles(), true)) {
+            return $this->fail('This account cannot be changed from this app.', 403, 'forbidden');
+        }
+        if (!empty($user->password_set_at)) {
+            return $this->fail('You already have a password. Use "Change password" instead.', 409, 'password_already_set');
+        }
+
+        $limiter = 'v2:pwset:' . $user->id;
+        if (RateLimiter::tooManyAttempts($limiter, 5)) {
+            return $this->fail('Too many attempts. Please try again later.', 429, 'rate_limited');
+        }
+        RateLimiter::hit($limiter, 900);
+
+        $user->forceFill(['password' => Hash::make($data['new_password']), 'password_set_at' => now()])->save();
+        $this->audit($user->id, 'api_password_set', 'Chose a first password');
+
+        return response()->json(['success' => true, 'data' => ['has_password' => true]]);
+    }
+
     public function changePassword(Request $request): JsonResponse
     {
         $data = $this->validated($request, [
@@ -443,7 +480,7 @@ class AuthV2Controller extends Controller
             return $this->fail('Your current password is incorrect.', 422, 'wrong_password');
         }
 
-        $user->forceFill(['password' => Hash::make($data['new_password'])])->save();
+        $user->forceFill(['password' => Hash::make($data['new_password']), 'password_set_at' => now()])->save();
 
         // Every other device has to sign in again with the new password.
         $current = $request->attributes->get('api_session');
@@ -593,6 +630,8 @@ class AuthV2Controller extends Controller
             'phone' => $user->phone,
             'role' => $user->role,
             'avatar' => $user->avatar ?? null,
+            // false for an owner-added tenant who has only ever used an OTP
+            'has_password' => !empty($user->password_set_at),
             // what a PG Manager may open; owners get everything
             'permissions' => $user->role === 'pg_manager'
                 ? (json_decode($user->permissions ?? '[]', true) ?: [])

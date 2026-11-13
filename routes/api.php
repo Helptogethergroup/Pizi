@@ -87,6 +87,7 @@ Route::prefix('v2/renter/auth')->group(function () {
         Route::get('/sessions', [$c, 'sessions']);
         Route::delete('/sessions/{uuid}', [$c, 'revokeSession']);
         Route::post('/password/change', [$c, 'changePassword']);
+        Route::post('/password/set', [$c, 'setPassword'])->middleware('throttle:10,15');
     });
 });
 

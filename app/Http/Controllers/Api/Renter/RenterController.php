@@ -171,6 +171,11 @@ class RenterController extends Controller
                 'signed_at' => $agreement->signed_at,
             ] : null,
             'journey' => $journey,
+            // the app hides the documents screen once KYC is done (for example through Aadhaar)
+            'kyc' => [
+                'status' => $tenant->kyc_status ?: 'pending',
+                'aadhaar_verified' => !empty($tenant->aadhaar_verified_at),
+            ],
             'online_payment_enabled' => (bool) config('rent.online_payment'),
         ]);
     }
