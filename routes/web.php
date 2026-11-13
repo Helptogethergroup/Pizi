@@ -868,6 +868,10 @@ Route::middleware(['auth', 'role:tenant'])->prefix('tenant')->name('tenant.')->g
 Route::get('/tenant/agreement/return', [\App\Http\Controllers\Api\Renter\RenterAgreementController::class, 'landing'])
     ->middleware('throttle:30,1')->name('renter.agreement.return');
 
+// Where DigiLocker sends a tenant's browser after the Aadhaar check in the Pizi app (no login: Setu is asked to confirm)
+Route::get('/tenant/digilocker/return', [\App\Http\Controllers\Api\Renter\RenterKycController::class, 'landing'])
+    ->middleware('throttle:30,1')->name('renter.digilocker.return');
+
 Route::get('/debug-journey/{userId}', function ($userId) {
     $user = \App\Models\User::find($userId);
     if (!$user) return 'User not found';

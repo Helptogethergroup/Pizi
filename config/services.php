@@ -19,6 +19,16 @@ return [
         'redirect_url'        => env('SETU_REDIRECT_URL'),
     ],
 
+    // Setu DigiLocker (Aadhaar check in the tenant app). Its keys come from Setu Bridge > KYC and are NOT the
+    // eSign keys above, so they have their own names.
+    'setu_kyc' => [
+        'client_id'           => env('SETU_KYC_CLIENT_ID'),
+        'client_secret'       => env('SETU_KYC_CLIENT_SECRET'),
+        'product_instance_id' => env('SETU_KYC_PRODUCT_INSTANCE_ID'),
+        // sandbox until Setu approves going live; production is https://dg.setu.co
+        'base_url'            => env('SETU_KYC_BASE_URL', 'https://dg-sandbox.setu.co'),
+    ],
+
     'google' => [
         'client_id'     => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

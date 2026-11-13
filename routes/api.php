@@ -128,10 +128,9 @@ Route::prefix('renter')->middleware(['pizi.auth', 'role:tenant'])->group(functio
     Route::get('/notice', [$g, 'noticeShow']);
     Route::post('/notice', [$g, 'noticeStore'])->middleware('throttle:5,10');
 
-    // Aadhaar e-KYC through Setu (needs SETU_KYC_PRODUCT_INSTANCE_ID on the server)
-    Route::post('/kyc/aadhaar/start', [$k, 'aadhaarStart'])->middleware('throttle:5,15');
-    Route::post('/kyc/aadhaar/captcha', [$k, 'aadhaarCaptcha'])->middleware('throttle:8,15');
-    Route::post('/kyc/aadhaar/verify', [$k, 'aadhaarVerify'])->middleware('throttle:8,15');
+    // Aadhaar check through Setu DigiLocker (needs the SETU_KYC_* keys on the server)
+    Route::post('/kyc/aadhaar/start', [$k, 'aadhaarStart'])->middleware('throttle:6,15');
+    Route::post('/kyc/aadhaar/check', [$k, 'aadhaarCheck'])->middleware('throttle:30,15');
 });
 
 // ============ PUBLIC (no auth) ============
