@@ -112,6 +112,9 @@ class RoomController extends Controller
         $amenityIds = $data['amenities'] ?? [];
         unset($data['amenities']);
 
+        $data['monthly_rent'] = $data['monthly_rent'] ?? 0;
+        $data['security_deposit'] = $data['security_deposit'] ?? 0;
+
         $room = Room::create($data);
         $room->amenities()->sync($amenityIds);
 
@@ -189,6 +192,10 @@ class RoomController extends Controller
 
         $amenityIds = $data['amenities'] ?? [];
         unset($data['amenities']);
+
+        // an empty Rent / Deposit field arrives as null; keep the amount at 0 instead of failing
+        $data['monthly_rent'] = $data['monthly_rent'] ?? 0;
+        $data['security_deposit'] = $data['security_deposit'] ?? 0;
 
         $room->update($data);
         $room->amenities()->sync($amenityIds);
@@ -268,6 +275,8 @@ class RoomController extends Controller
         $data['property_id'] = $room->property_id;
         $data['owner_id'] = $this->effectiveOwnerId();
         $data['status'] = 'vacant';
+        // an empty Rent field arrives as null, and the column does not accept null
+        $data['monthly_rent'] = $data['monthly_rent'] ?? 0;
 
         Bed::create($data);
         return back()->with('success', '✓ Bed added.');
