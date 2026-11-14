@@ -97,42 +97,21 @@
 
     <div class="bg-white p-6 rounded-2xl border-2 border-emerald-200 relative overflow-hidden">
         <h2 class="font-display font-bold text-lg mb-1"><i class="fa-solid fa-id-badge fa-fw"></i> Aadhaar Verification (Instant KYC)</h2>
-        <p class="text-xs text-ink-900/50 mb-4">Tenant ka Aadhaar number daalo — OTP unke Aadhaar-linked mobile pe jayega. Verify hote hi naam, DOB, gender, address neeche khud bhar jayenge — koi document upload nahi karna padega.</p>
+        <p class="text-xs text-ink-900/50 mb-4">DigiLocker se: aap Start dabao, tenant apne phone par link kholkar Allow dabata hai. Naam, DOB, gender, address neeche khud bhar jayenge. Koi document upload nahi karna padega.</p>
 
         <div id="aadhaarStep0">
             <button type="button" id="aadhaarStartBtn" class="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold">Start Aadhaar Verification</button>
         </div>
 
-        <div id="aadhaarStep1" class="hidden mt-3">
-            <div class="flex flex-wrap gap-4 items-start">
-                <div class="min-w-[160px]">
-                    <label class="text-xs font-bold uppercase text-ink-900/60">Captcha</label>
-                    <img id="aadhaarCaptchaImg" src="" alt="Captcha" class="mt-1 h-12 rounded-lg border border-ink-200 bg-white">
-                </div>
-                <div class="flex-1 min-w-[180px]">
-                    <label class="text-xs font-bold uppercase text-ink-900/60">Enter Captcha</label>
-                    <input type="text" id="aadhaarCaptchaInput" placeholder="Captcha text" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
-                </div>
+        <div id="aadhaarStepLink" class="hidden mt-3">
+            <p class="text-sm text-ink-900/70">Tenant apne phone par ye link kholega, DigiLocker mein sign in karke <b>Allow</b> dabayega. Aap yahin ruko, details apne aap bhar jayengi.</p>
+            <div class="mt-2 flex flex-wrap gap-2 items-center">
+                <input type="text" id="aadhaarLink" readonly class="flex-1 min-w-[220px] px-3 py-2.5 rounded-xl border border-ink-200 text-xs">
+                <button type="button" id="aadhaarCopyBtn" class="px-4 py-2.5 bg-ink-900 text-white rounded-xl text-sm font-bold">Copy link</button>
+                <a id="aadhaarWaBtn" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold">WhatsApp par bhejo</a>
+                <a id="aadhaarOpenBtn" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 border border-ink-200 rounded-xl text-sm font-bold">Isi phone par kholo</a>
             </div>
-            <div class="flex flex-wrap gap-2 items-end mt-3">
-                <div class="flex-1 min-w-[220px]">
-                    <label class="text-xs font-bold uppercase text-ink-900/60">Aadhaar Number</label>
-                    <input type="text" id="aadhaarNumberInput" maxlength="12" placeholder="12-digit Aadhaar number" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200" inputmode="numeric">
-                </div>
-                <button type="button" id="aadhaarSendOtpBtn" class="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold whitespace-nowrap">Send OTP</button>
-            </div>
-        </div>
-
-        <div id="aadhaarStep2" class="hidden mt-3 flex flex-wrap gap-2 items-end">
-            <div class="flex-1 min-w-[140px]">
-                <label class="text-xs font-bold uppercase text-ink-900/60">Enter OTP</label>
-                <input type="text" id="aadhaarOtpInput" maxlength="6" placeholder="••••••" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200" inputmode="numeric">
-            </div>
-            <div class="flex-1 min-w-[140px]">
-                <label class="text-xs font-bold uppercase text-ink-900/60">Share Code (any 4 digits)</label>
-                <input type="text" id="aadhaarShareCodeInput" maxlength="4" placeholder="e.g. 1234" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200" inputmode="numeric">
-            </div>
-            <button type="button" id="aadhaarVerifyOtpBtn" class="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold whitespace-nowrap">Verify</button>
+            <p class="text-xs text-ink-900/50 mt-2"><i class="fa-solid fa-spinner fa-spin fa-fw"></i> Tenant ke Allow karne ka intezaar...</p>
         </div>
 
         <p id="aadhaarStatus" class="text-xs mt-2"></p>
@@ -339,25 +318,22 @@
     advanceMonthsSelect.addEventListener('change', recalcAdvance);
     monthlyRentInput.addEventListener('input', recalcAdvance);
 
-    // ---- Aadhaar auto-KYC (3-step Setu flow: captcha → OTP+share-code) ----
+    // ---- Aadhaar auto-KYC through DigiLocker: the tenant opens a link on their own phone ----
     (function () {
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '{{ csrf_token() }}';
 
         const startBtn = document.getElementById('aadhaarStartBtn');
-        const sendBtn = document.getElementById('aadhaarSendOtpBtn');
-        const verifyBtn = document.getElementById('aadhaarVerifyOtpBtn');
-
-        const numberInput = document.getElementById('aadhaarNumberInput');
-        const captchaInput = document.getElementById('aadhaarCaptchaInput');
-        const captchaImg = document.getElementById('aadhaarCaptchaImg');
-        const otpInput = document.getElementById('aadhaarOtpInput');
-        const shareCodeInput = document.getElementById('aadhaarShareCodeInput');
-
         const step0 = document.getElementById('aadhaarStep0');
-        const step1 = document.getElementById('aadhaarStep1');
-        const step2 = document.getElementById('aadhaarStep2');
+        const stepLink = document.getElementById('aadhaarStepLink');
+        const linkInput = document.getElementById('aadhaarLink');
+        const copyBtn = document.getElementById('aadhaarCopyBtn');
+        const waBtn = document.getElementById('aadhaarWaBtn');
+        const openBtn = document.getElementById('aadhaarOpenBtn');
         const status = document.getElementById('aadhaarStatus');
         const badge = document.getElementById('aadhaarVerifiedBadge');
+
+        let timer = null;
+        let giveUpAt = 0;
 
         function setStatus(msg, ok) {
             status.textContent = msg;
@@ -367,32 +343,84 @@
         function post(url, body) {
             return fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                 body: JSON.stringify(body),
             }).then(r => r.json());
         }
 
-        // Step 0 → 1: start request, show captcha
+        function stopPolling() {
+            if (timer) { clearInterval(timer); timer = null; }
+        }
+
+        function resetToStart(msg) {
+            stopPolling();
+            stepLink.classList.add('hidden');
+            step0.classList.remove('hidden');
+            startBtn.disabled = false;
+            startBtn.textContent = 'Start Aadhaar Verification';
+            if (msg) setStatus(msg, false);
+        }
+
+        function fill(data) {
+            document.querySelector('[name="name"]').value = data.name || '';
+            document.querySelector('[name="dob"]').value = data.dob || '';
+            if (data.gender) document.querySelector('[name="gender"]').value = data.gender;
+            document.querySelector('[name="address_line"]').value = data.address || '';
+            if (data.city) document.querySelector('[name="city"]').value = data.city;
+            if (data.state) document.querySelector('[name="state"]').value = data.state;
+            if (data.pincode) document.querySelector('[name="pincode"]').value = data.pincode;
+
+            document.getElementById('aadhaarVerifiedInput').value = '1';
+            document.getElementById('aadhaarMaskedInput').value = 'XXXX-XXXX-' + (data.aadhaar_last4 || '');
+            document.getElementById('aadhaarNameInput').value = data.name || '';
+
+            const kycCheckbox = document.getElementById('kycCheckbox');
+            if (kycCheckbox) kycCheckbox.checked = true;
+
+            stepLink.classList.add('hidden');
+            status.textContent = '';
+            badge.classList.remove('hidden');
+        }
+
+        function poll() {
+            if (Date.now() > giveUpAt) {
+                return resetToStart('Bahut der ho gayi, link expire ho gaya. Dobara Start dabao.');
+            }
+            post('{{ route("owner.tenants.aadhaar.verifycaptcha") }}', {})
+                .then(d => {
+                    if (!d.success) { return resetToStart(d.message || 'Verification fail ho gaya.'); }
+                    if (d.pending) { return; }
+                    stopPolling();
+                    fill(d.data);
+                })
+                .catch(() => { /* a hiccup in the network: try again on the next tick */ });
+        }
+
         startBtn.addEventListener('click', function () {
             startBtn.disabled = true;
             startBtn.textContent = 'Loading...';
+            setStatus('', true);
 
             post('{{ route("owner.tenants.aadhaar.start") }}', {})
                 .then(d => {
-                    startBtn.disabled = false;
-                    startBtn.textContent = 'Start Aadhaar Verification';
-
                     if (!d.success) {
+                        startBtn.disabled = false;
+                        startBtn.textContent = 'Start Aadhaar Verification';
                         setStatus(d.message || 'Could not start verification.', false);
                         return;
                     }
 
-                    if (d.captcha_image) {
-                        captchaImg.src = d.captcha_image.startsWith('data:') ? d.captcha_image : 'data:image/png;base64,' + d.captcha_image;
-                    }
+                    linkInput.value = d.url;
+                    openBtn.href = d.url;
+                    const phone = (document.querySelector('[name="phone"]')?.value || '').replace(/\D/g, '').slice(-10);
+                    const text = encodeURIComponent('Pizi: apna Aadhaar verify karne ke liye ye link kholo aur Allow dabao: ' + d.url);
+                    waBtn.href = 'https://wa.me/' + (phone.length === 10 ? '91' + phone : '') + '?text=' + text;
+
                     step0.classList.add('hidden');
-                    step1.classList.remove('hidden');
-                    setStatus('', true);
+                    stepLink.classList.remove('hidden');
+                    giveUpAt = Date.now() + 10 * 60 * 1000;
+                    stopPolling();
+                    timer = setInterval(poll, 3000);
                 })
                 .catch(() => {
                     startBtn.disabled = false;
@@ -401,102 +429,11 @@
                 });
         });
 
-        // Step 1 → 2: Aadhaar + captcha, triggers OTP send
-        sendBtn.addEventListener('click', function () {
-            const aadhaar = numberInput.value.trim();
-            const captcha = captchaInput.value.trim();
-
-            if (!/^\d{12}$/.test(aadhaar)) {
-                setStatus('12-digit valid Aadhaar number daalo.', false);
-                return;
-            }
-            if (!captcha) {
-                setStatus('Captcha daalo.', false);
-                return;
-            }
-
-            sendBtn.disabled = true;
-            sendBtn.textContent = 'Sending...';
-
-            post('{{ route("owner.tenants.aadhaar.verifycaptcha") }}', { aadhaar_number: aadhaar, captcha: captcha })
-                .then(d => {
-                    sendBtn.disabled = false;
-                    sendBtn.textContent = 'Send OTP';
-
-                    if (d.success) {
-                        setStatus(d.message, true);
-                        step2.classList.remove('hidden');
-                    } else {
-                        setStatus(d.message || 'OTP nahi bhej paye.', false);
-                    }
-                })
-                .catch(() => {
-                    sendBtn.disabled = false;
-                    sendBtn.textContent = 'Send OTP';
-                    setStatus('Kuch gadbad ho gayi, dobara try karo.', false);
-                });
-        });
-
-        // Step 2 → done: OTP + share code, get KYC data
-        verifyBtn.addEventListener('click', function () {
-            const otp = otpInput.value.trim();
-            const shareCode = shareCodeInput.value.trim();
-
-            if (!/^\d{4,6}$/.test(otp)) {
-                setStatus('Sahi OTP daalo.', false);
-                return;
-            }
-            if (!/^\d{4}$/.test(shareCode)) {
-                setStatus('4-digit share code daalo (koi bhi 4 number, khud choose karo).', false);
-                return;
-            }
-
-            verifyBtn.disabled = true;
-            verifyBtn.textContent = 'Verifying...';
-
-            post('{{ route("owner.tenants.aadhaar.verifyotp") }}', { otp: otp, share_code: shareCode })
-                .then(d => {
-                    verifyBtn.disabled = false;
-                    verifyBtn.textContent = 'Verify';
-
-                    if (!d.success) {
-                        setStatus(d.message || 'Verification fail ho gaya.', false);
-                        return;
-                    }
-
-                    const data = d.data;
-
-                    // Auto-fill the form
-                    document.querySelector('[name="name"]').value = data.name || '';
-                    document.querySelector('[name="dob"]').value = data.dob || '';
-                    if (data.gender) document.querySelector('[name="gender"]').value = data.gender;
-                    document.querySelector('[name="address_line"]').value = data.address || '';
-                    if (data.city) document.querySelector('[name="city"]').value = data.city;
-                    if (data.state) document.querySelector('[name="state"]').value = data.state;
-                    if (data.pincode) document.querySelector('[name="pincode"]').value = data.pincode;
-
-                    document.getElementById('aadhaarVerifiedInput').value = '1';
-                    document.getElementById('aadhaarMaskedInput').value = 'XXXX-XXXX-' + (data.aadhaar_last4 || '');
-                    document.getElementById('aadhaarNameInput').value = data.name || '';
-                    if (data.photo_base64) {
-                        document.getElementById('aadhaarPhotoInput').value = data.photo_base64;
-                    }
-
-                    // Also tick the manual "verified now" checkbox for clarity —
-                    // harmless either way since kyc_status logic checks both.
-                    const kycCheckbox = document.getElementById('kycCheckbox');
-                    if (kycCheckbox) kycCheckbox.checked = true;
-
-                    step1.classList.add('hidden');
-                    step2.classList.add('hidden');
-                    status.textContent = '';
-                    badge.classList.remove('hidden');
-                })
-                .catch(() => {
-                    verifyBtn.disabled = false;
-                    verifyBtn.textContent = 'Verify';
-                    setStatus('Kuch gadbad ho gayi, dobara try karo.', false);
-                });
+        copyBtn.addEventListener('click', function () {
+            linkInput.select();
+            try { navigator.clipboard.writeText(linkInput.value); } catch (e) { document.execCommand('copy'); }
+            copyBtn.textContent = 'Copied';
+            setTimeout(() => { copyBtn.textContent = 'Copy link'; }, 1500);
         });
     })();
 

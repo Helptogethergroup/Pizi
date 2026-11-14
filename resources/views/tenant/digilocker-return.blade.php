@@ -25,8 +25,8 @@
         <p>Nothing was shared. Go back to the Pizi app and try again.</p>
         <p style="margin-top:16px"><a href="{{ url('/tenant/kyc') }}" style="color:#ed4e3d;font-weight:700">Or go to your KYC page on pizi.in →</a></p>
     @else
-        <h1>We are checking</h1>
-        <p>This can take a moment. Go back to the Pizi app, it will show the result.</p>
+        <h1>Thank you</h1>
+        <p>You can close this page now. Go back to the Pizi app or website, or tell the person who sent you this link. The result shows up there.</p>
     @endif
 </div>
 </body>

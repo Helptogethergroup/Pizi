@@ -86,62 +86,77 @@ class TenantController extends Controller
     }
 
     /**
-     * Step 1 of Aadhaar auto-KYC — start a request, get a captcha to show
-     * the owner. Lets the owner pull the tenant's verified details
-     * straight from UIDAI, so the tenant never uploads any ID photos.
+     * Aadhaar check for a new tenant, through Setu DigiLocker. The owner presses Start and gets a link;
+     * the tenant opens it on their own phone, signs in to DigiLocker and taps Allow. The Add Tenant form
+     * then fills itself from the tenant's Aadhaar. (DigiLocker needs the tenant's own consent, so it
+     * cannot be done by typing the tenant's Aadhaar number here.)
      */
-    public function aadhaarStart(\App\Services\SetuKycService $setu)
+    public function aadhaarStart(\App\Services\SetuDigilockerService $dl)
     {
-        $result = $setu->createRequest();
-
-        if ($result['success']) {
-            session(['owner_kyc_aadhaar_id' => $result['id']]);
+        if (!$dl->isConfigured()) {
+            return response()->json(['success' => false, 'message' => 'Aadhaar check is not switched on yet. Please add the tenant and upload their documents instead.']);
         }
 
-        return response()->json($result);
+        $result = $dl->createRequest(route('renter.digilocker.return'));
+        if (!$result['success']) {
+            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not start the Aadhaar check. Please try again.']);
+        }
+
+        session(['owner_kyc_aadhaar_id' => $result['id']]);
+
+        return response()->json(['success' => true, 'id' => $result['id'], 'url' => $result['url']]);
     }
 
     /**
-     * Step 2 — Aadhaar number + captcha text. On success, Setu texts an
-     * OTP to the Aadhaar-linked mobile.
+     * Asked every few seconds by the Add Tenant page while the tenant is on DigiLocker: still waiting,
+     * failed, or done with the details to fill into the form.
      */
-    public function aadhaarVerifyCaptcha(Request $request, \App\Services\SetuKycService $setu)
+    public function aadhaarVerifyCaptcha(Request $request, \App\Services\SetuDigilockerService $dl)
     {
-        $request->validate([
-            'aadhaar_number' => 'required|digits:12',
-            'captcha' => 'required|string',
-        ]);
-
         $requestId = session('owner_kyc_aadhaar_id');
         if (!$requestId) {
-            return response()->json(['success' => false, 'message' => 'Session expired — start over.']);
+            return response()->json(['success' => false, 'message' => 'Session expired. Please start again.']);
         }
 
-        $result = $setu->verifyAadhaar($requestId, $request->aadhaar_number, $request->captcha);
+        $status = $dl->status($requestId);
+        if (!$status['success']) {
+            return response()->json(['success' => false, 'message' => $status['message'] ?? 'Could not check right now.']);
+        }
+        if (($status['status'] ?? '') === 'revoked') {
+            session()->forget('owner_kyc_aadhaar_id');
 
-        return response()->json($result);
-    }
-
-    /**
-     * Step 3 — OTP + a 4-digit share code the owner picks. Returns the
-     * fetched details so the "Add Tenant" form can auto-fill itself.
-     */
-    public function aadhaarVerifyOtp(Request $request, \App\Services\SetuKycService $setu)
-    {
-        $request->validate([
-            'otp' => 'required|digits_between:4,6',
-            'share_code' => 'required|digits:4',
-        ]);
-
-        $requestId = session('owner_kyc_aadhaar_id');
-        if (!$requestId) {
-            return response()->json(['success' => false, 'message' => 'Session expired — start over.']);
+            return response()->json(['success' => false, 'message' => 'This check has expired. Please start again.']);
+        }
+        if (($status['status'] ?? '') !== 'authenticated') {
+            return response()->json(['success' => true, 'pending' => true]);
         }
 
-        $result = $setu->verifyOtp($requestId, $request->otp, $request->share_code);
+        $result = $dl->aadhaar($requestId);
+        if (!$result['success']) {
+            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not read the Aadhaar details.']);
+        }
         session()->forget('owner_kyc_aadhaar_id');
 
-        return response()->json($result);
+        $d = $result['data'];
+
+        return response()->json(['success' => true, 'pending' => false, 'data' => [
+            'name' => $d['name'],
+            'dob' => $d['dob'],
+            'gender' => $d['gender'],
+            'address' => $d['address'],
+            'city' => $d['city'],
+            'state' => $d['state'],
+            'pincode' => $d['pincode'],
+            'aadhaar_last4' => substr(preg_replace('/\D/', '', (string) $d['masked_aadhaar']), -4),
+            // the photo is not taken: it is not needed and is not stored
+            'photo_base64' => null,
+        ]]);
+    }
+
+    /** The old OTP step. DigiLocker has no OTP typed here, so there is nothing to do. */
+    public function aadhaarVerifyOtp(Request $request)
+    {
+        return response()->json(['success' => false, 'message' => 'This step is no longer used.'], 410);
     }
 
     public function store(Request $request)

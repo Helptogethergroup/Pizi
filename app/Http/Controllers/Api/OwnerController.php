@@ -1812,13 +1812,12 @@ class OwnerController extends Controller
 
     public function tenantAadhaarStart(Request $request, \App\Services\SetuKycService $setu)
     {
-        $result = $setu->createRequest();
-        if (empty($result['success'])) {
-            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not start Aadhaar verification.'], 422);
-        }
-        \Cache::put($this->aadhaarCacheKey($request), $result['id'], now()->addMinutes(20));
-
-        return $this->ok(['captcha_image' => $result['captcha_image'] ?? null]);
+        // Aadhaar is now checked through DigiLocker, which needs the tenant's own sign-in, so it cannot be
+        // started from this app. The tenant verifies in the Pizi tenant app, or the owner uploads documents.
+        return response()->json([
+            'success' => false,
+            'message' => 'Aadhaar check is not available from here. Ask the tenant to verify their Aadhaar in the Pizi tenant app, or upload their documents.',
+        ], 422);
     }
 
     public function tenantAadhaarCaptcha(Request $request, \App\Services\SetuKycService $setu)
