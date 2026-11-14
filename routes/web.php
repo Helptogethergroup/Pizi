@@ -331,6 +331,7 @@ Route::middleware(['auth', 'role:owner,admin,pg_manager', 'owner.paid'])->prefix
     Route::get('/tenants/create', [\App\Http\Controllers\Owner\TenantController::class, 'create'])->name('tenants.create');
     Route::post('/tenants', [\App\Http\Controllers\Owner\TenantController::class, 'store'])->name('tenants.store');
     Route::get('/tenants/{tenant}', [\App\Http\Controllers\Owner\TenantController::class, 'show'])->name('tenants.show');
+    Route::get('/tenants/{tenant}/overview', [\App\Http\Controllers\Owner\TenantController::class, 'overview'])->name('tenants.overview');
     Route::get('/tenants/{tenant}/edit', [\App\Http\Controllers\Owner\TenantController::class, 'edit'])->name('tenants.edit');
     Route::patch('/tenants/{tenant}', [\App\Http\Controllers\Owner\TenantController::class, 'update'])->name('tenants.update');
     Route::post('/tenants/{tenant}/claim', [\App\Http\Controllers\Owner\TenantController::class, 'claim'])->name('tenants.claim');
@@ -829,6 +830,7 @@ Route::middleware(['auth', 'role:tenant'])->prefix('tenant')->name('tenant.')->g
     
     // Profile (always accessible)
     Route::get('/profile', [\App\Http\Controllers\TenantPortalController::class, 'profile'])->name('profile');
+    Route::get('/overview', [\App\Http\Controllers\TenantPortalController::class, 'overview'])->name('overview');
     Route::post('/profile', [\App\Http\Controllers\TenantPortalController::class, 'profileUpdate'])->name('profile.update');
   Route::post('/profile/setup-password', [\App\Http\Controllers\TenantPortalController::class, 'setupPasswordLogin'])->name('profile.setup-password');
     

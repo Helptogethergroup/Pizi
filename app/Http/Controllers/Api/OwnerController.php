@@ -2188,12 +2188,28 @@ class OwnerController extends Controller
     public function tenantDocumentStore(Request $request, $id)
     {
         $request->validate([
-            'document_type' => 'required|in:aadhaar_front,aadhaar_back,pan,employment_id,student_id,address_proof,photo,other',
+            'document_type' => 'required|in:aadhaar_front,aadhaar_back,pan,employment_id,student_id,address_proof,photo,police_verification,other',
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'document_number' => 'nullable|string|max:50',
         ]);
         $tenant = $this->ownedTenant($request, $id);
         if (!$tenant) return $this->notFound();
+
+        // the police document replaces the earlier one and marks the police verification done (it is not a KYC document)
+        if ($request->document_type === 'police_verification') {
+            foreach (DB::table('tenant_documents')->where('tenant_id', $id)->where('document_type', 'police_verification')->get() as $old) {
+                \Storage::disk('public')->delete($old->file_path);
+                DB::table('tenant_documents')->where('id', $old->id)->delete();
+            }
+            DB::table('tenant_documents')->insert([
+                'tenant_id' => $id, 'document_type' => 'police_verification',
+                'file_path' => $request->file('file')->store('tenants/' . $id, 'public'),
+                'created_at' => now(), 'updated_at' => now(),
+            ]);
+            DB::table('tenants')->where('id', $id)->update(['police_verification_status' => 'done', 'updated_at' => now()]);
+
+            return $this->ok(['message' => 'Police verification document uploaded', 'police_verification_status' => 'done']);
+        }
 
         $path = $request->file('file')->store('tenants/' . $id, 'public');
         DB::table('tenant_documents')->insert([

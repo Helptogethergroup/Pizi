@@ -3,7 +3,16 @@
 @section('content')
 
 <h1 class="font-display font-black text-4xl text-ink-950">Welcome, {{ auth()->user()->name }} <i class="fa-solid fa-hand fa-fw"></i></h1>
-<p class="text-ink-900/60 mt-2">Aapka tenant portal — sab ek jagah pe.</p>
+<p class="text-ink-900/60 mt-2">Your tenant portal, everything in one place.</p>
+
+@if(($tenant->police_verification_status ?? 'pending') !== 'done')
+    <div class="mt-5 p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+        <i class="fa-solid fa-hourglass-half fa-fw text-amber-600 mt-0.5"></i>
+        <div class="text-sm text-amber-900"><b>Police verification: Pending.</b> Your PG owner needs this document. It shows as done once it is uploaded. <a href="{{ route('tenant.overview') }}" class="font-bold underline">See all my details</a></div>
+    </div>
+@else
+    <a href="{{ route('tenant.overview') }}" class="inline-block mt-4 text-sm font-bold text-coral-600 underline">See all my details</a>
+@endif
 
 {{-- STATS --}}
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">

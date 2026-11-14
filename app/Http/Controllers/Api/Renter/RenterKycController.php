@@ -28,7 +28,11 @@ class RenterKycController extends Controller
         'photo' => 'Your photo',
         'id_card' => 'College / office ID',
         'address_proof' => 'Address proof',
+        // not part of KYC: the owner or the tenant uploads it, and it changes the police verification status
+        'police_verification' => 'Police verification (PDF or photo)',
     ];
+
+    private const POLICE = 'police_verification';
 
     private const MIN_TO_SUBMIT = 3;
     private const MAX_KB = 5120;
@@ -58,6 +62,10 @@ class RenterKycController extends Controller
         $docs = TenantDocument::where('tenant_id', $tenant->id)->get()->keyBy('document_type');
 
         return [
+            'police' => [
+                'status' => $tenant->police_verification_status ?: 'pending',
+                'uploaded' => $docs->has(self::POLICE),
+            ],
             'aadhaar' => [
                 'verified' => !empty($tenant->aadhaar_verified_at),
                 'masked' => $tenant->aadhaar_number_masked,
@@ -72,6 +80,8 @@ class RenterKycController extends Controller
             'documents' => collect(self::TYPES)->map(fn ($label, $type) => [
                 'type' => $type,
                 'label' => $label,
+                // an approved KYC is locked, but the police document can still be added or replaced
+                'can_change' => $type === self::POLICE || $tenant->kyc_status !== 'approved',
                 'uploaded' => $docs->has($type),
                 'file_name' => $docs->get($type)?->file_name,
                 'uploaded_at' => $docs->get($type)?->created_at?->toIso8601String(),
@@ -93,15 +103,15 @@ class RenterKycController extends Controller
         if (!$tenant) {
             return $this->noTenant();
         }
-        if ($tenant->kyc_status === 'approved') {
-            return $this->fail('Your KYC is approved, documents cannot be changed.', 409, 'kyc_approved');
-        }
-
         $data = $request->validate([
             'type' => 'required|in:' . implode(',', array_keys(self::TYPES)),
             // mimes checks the real content of the file, not just its name
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:' . self::MAX_KB,
         ]);
+
+        if ($tenant->kyc_status === 'approved' && $data['type'] !== self::POLICE) {
+            return $this->fail('Your KYC is approved, documents cannot be changed.', 409, 'kyc_approved');
+        }
 
         $file = $request->file('file');
 
@@ -123,6 +133,12 @@ class RenterKycController extends Controller
             'file_name' => mb_substr(preg_replace('/[^\w.\- ]+/u', '_', $file->getClientOriginalName()), 0, 120),
         ]);
 
+        if ($data['type'] === self::POLICE) {
+            $tenant->forceFill(['police_verification_status' => 'done'])->save();
+
+            return $this->ok($this->payload($tenant->fresh()), 201);
+        }
+
         // a rejected KYC goes back to the owner for a new look once something is uploaded
         if ($tenant->kyc_status === 'rejected') {
             $tenant->update(['kyc_status' => 'pending']);
@@ -140,7 +156,7 @@ class RenterKycController extends Controller
         if (!array_key_exists($type, self::TYPES)) {
             return $this->fail('Unknown document type.', 404, 'not_found');
         }
-        if ($tenant->kyc_status === 'approved') {
+        if ($tenant->kyc_status === 'approved' && $type !== self::POLICE) {
             return $this->fail('Your KYC is approved, documents cannot be deleted.', 409, 'kyc_approved');
         }
 
@@ -152,6 +168,9 @@ class RenterKycController extends Controller
             Storage::disk('public')->delete($doc->file_path);
         }
         $doc->delete();
+        if ($type === self::POLICE) {
+            $tenant->forceFill(['police_verification_status' => 'pending'])->save();
+        }
 
         return $this->ok($this->payload($tenant->fresh()));
     }
@@ -329,7 +348,7 @@ class RenterKycController extends Controller
         if ($tenant->kyc_status === 'approved') {
             return $this->fail('Your KYC is already approved.', 409, 'kyc_approved');
         }
-        if (TenantDocument::where('tenant_id', $tenant->id)->count() < self::MIN_TO_SUBMIT) {
+        if (TenantDocument::where('tenant_id', $tenant->id)->where('document_type', '!=', self::POLICE)->count() < self::MIN_TO_SUBMIT) {
             return $this->fail('Please upload at least ' . self::MIN_TO_SUBMIT . ' documents before submitting.', 422, 'too_few_documents');
         }
 

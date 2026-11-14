@@ -8,7 +8,7 @@
     <p class="text-ink-900/60 mt-1">Fill basic details. KYC documents can be uploaded next.</p>
 </div>
 
-<form method="POST" action="{{ route('owner.tenants.store') }}" class="space-y-5 max-w-4xl" id="tenantForm">
+<form method="POST" action="{{ route('owner.tenants.store') }}" class="space-y-5 max-w-4xl" id="tenantForm" enctype="multipart/form-data">
     @csrf
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
@@ -97,21 +97,21 @@
 
     <div class="bg-white p-6 rounded-2xl border-2 border-emerald-200 relative overflow-hidden">
         <h2 class="font-display font-bold text-lg mb-1"><i class="fa-solid fa-id-badge fa-fw"></i> Aadhaar Verification (Instant KYC)</h2>
-        <p class="text-xs text-ink-900/50 mb-4">DigiLocker se: aap Start dabao, tenant apne phone par link kholkar Allow dabata hai. Naam, DOB, gender, address neeche khud bhar jayenge. Koi document upload nahi karna padega.</p>
+        <p class="text-xs text-ink-900/50 mb-4">Through DigiLocker: press Start, the tenant opens the link on their own phone and taps Allow. Name, date of birth, gender and address fill in below by themselves. No document upload needed.</p>
 
         <div id="aadhaarStep0">
             <button type="button" id="aadhaarStartBtn" class="px-5 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold">Start Aadhaar Verification</button>
         </div>
 
         <div id="aadhaarStepLink" class="hidden mt-3">
-            <p class="text-sm text-ink-900/70">Tenant apne phone par ye link kholega, DigiLocker mein sign in karke <b>Allow</b> dabayega. Aap yahin ruko, details apne aap bhar jayengi.</p>
+            <p class="text-sm text-ink-900/70">The tenant opens this link on their own phone, signs in to DigiLocker and taps <b>Allow</b>. Wait here, the details fill in by themselves.</p>
             <div class="mt-2 flex flex-wrap gap-2 items-center">
                 <input type="text" id="aadhaarLink" readonly class="flex-1 min-w-[220px] px-3 py-2.5 rounded-xl border border-ink-200 text-xs">
                 <button type="button" id="aadhaarCopyBtn" class="px-4 py-2.5 bg-ink-900 text-white rounded-xl text-sm font-bold">Copy link</button>
-                <a id="aadhaarWaBtn" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold">WhatsApp par bhejo</a>
-                <a id="aadhaarOpenBtn" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 border border-ink-200 rounded-xl text-sm font-bold">Isi phone par kholo</a>
+                <a id="aadhaarWaBtn" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-sm font-bold">Send on WhatsApp</a>
+                <a id="aadhaarOpenBtn" href="#" target="_blank" rel="noopener" class="px-4 py-2.5 border border-ink-200 rounded-xl text-sm font-bold">Open on this phone</a>
             </div>
-            <p class="text-xs text-ink-900/50 mt-2"><i class="fa-solid fa-spinner fa-spin fa-fw"></i> Tenant ke Allow karne ka intezaar...</p>
+            <p class="text-xs text-ink-900/50 mt-2"><i class="fa-solid fa-spinner fa-spin fa-fw"></i> Waiting for the tenant to tap Allow...</p>
         </div>
 
         <p id="aadhaarStatus" class="text-xs mt-2"></p>
@@ -205,6 +205,25 @@
         </div>
     </div>
 
+    <div class="bg-white p-6 rounded-2xl border border-ink-100" id="policeBox">
+        <h2 class="font-display font-bold text-lg mb-1"><i class="fa-solid fa-shield-halved fa-fw"></i> Police Verification</h2>
+        <p class="text-xs text-ink-900/50 mb-4">Has the tenant's police verification been done?</p>
+        <div class="flex flex-wrap gap-3">
+            <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-ink-200 cursor-pointer">
+                <input type="radio" name="police_verification" value="yes" class="w-4 h-4" @checked(old('police_verification') === 'yes')>
+                <span class="font-bold text-sm">Yes, it is done</span>
+            </label>
+            <label class="flex items-center gap-2 px-4 py-3 rounded-xl border border-ink-200 cursor-pointer">
+                <input type="radio" name="police_verification" value="no" class="w-4 h-4" @checked(old('police_verification', 'no') === 'no')>
+                <span class="font-bold text-sm">No, it is still pending</span>
+            </label>
+        </div>
+        <div id="policeFileBox" class="hidden mt-4">
+            <label class="text-xs font-bold uppercase text-ink-900/60">Police verification document (PDF or photo, up to 5 MB)</label>
+            <input type="file" name="police_document" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*" class="w-full mt-1 text-sm">
+        </div>
+        <p id="policePendingNote" class="mt-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3"><i class="fa-solid fa-hourglass-half fa-fw"></i> It will show as <b>Pending</b> to you and to the tenant until the document is uploaded. You can upload it later from the tenant's page.</p>
+    </div>
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
         <h2 class="font-display font-bold text-lg mb-4"><i class="fa-solid fa-circle-check fa-fw"></i> KYC (Walk-in Verification)</h2>
         <label class="flex items-start gap-3 cursor-pointer">
@@ -384,11 +403,11 @@
 
         function poll() {
             if (Date.now() > giveUpAt) {
-                return resetToStart('Bahut der ho gayi, link expire ho gaya. Dobara Start dabao.');
+                return resetToStart('This took too long and the link expired. Press Start again.');
             }
             post('{{ route("owner.tenants.aadhaar.verifycaptcha") }}', {})
                 .then(d => {
-                    if (!d.success) { return resetToStart(d.message || 'Verification fail ho gaya.'); }
+                    if (!d.success) { return resetToStart(d.message || 'Verification failed.'); }
                     if (d.pending) { return; }
                     stopPolling();
                     fill(d.data);
@@ -413,7 +432,7 @@
                     linkInput.value = d.url;
                     openBtn.href = d.url;
                     const phone = (document.querySelector('[name="phone"]')?.value || '').replace(/\D/g, '').slice(-10);
-                    const text = encodeURIComponent('Pizi: apna Aadhaar verify karne ke liye ye link kholo aur Allow dabao: ' + d.url);
+                    const text = encodeURIComponent('Pizi: open this link to verify your Aadhaar and tap Allow: ' + d.url);
                     waBtn.href = 'https://wa.me/' + (phone.length === 10 ? '91' + phone : '') + '?text=' + text;
 
                     step0.classList.add('hidden');
@@ -425,7 +444,7 @@
                 .catch(() => {
                     startBtn.disabled = false;
                     startBtn.textContent = 'Start Aadhaar Verification';
-                    setStatus('Kuch gadbad ho gayi, dobara try karo.', false);
+                    setStatus('Something went wrong. Please try again.', false);
                 });
         });
 
@@ -437,6 +456,19 @@
         });
     })();
 
+    // ---- Police verification: Yes shows the upload box, No shows the "pending" note ----
+    (function () {
+        const radios = document.querySelectorAll('input[name="police_verification"]');
+        const fileBox = document.getElementById('policeFileBox');
+        const note = document.getElementById('policePendingNote');
+        function sync() {
+            const yes = document.querySelector('input[name="police_verification"]:checked')?.value === 'yes';
+            fileBox.classList.toggle('hidden', !yes);
+            note.classList.toggle('hidden', yes);
+        }
+        radios.forEach(r => r.addEventListener('change', sync));
+        sync();
+    })();
 </script>
 
 @endsection

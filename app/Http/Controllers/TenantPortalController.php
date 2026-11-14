@@ -76,6 +76,17 @@ class TenantPortalController extends Controller
     /**
      * Profile
      */
+    /** One page with everything the owner has about this tenant. */
+    public function overview()
+    {
+        $tenant = Tenant::where('user_id', Auth::id())->with('documents', 'property.city', 'property.locality')->first();
+        if (!$tenant) {
+            return redirect()->route('tenant.dashboard');
+        }
+
+        return view('tenant.overview', compact('tenant'));
+    }
+
     public function profile()
     {
         $user = Auth::user();

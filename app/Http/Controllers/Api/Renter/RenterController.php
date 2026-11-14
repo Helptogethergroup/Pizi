@@ -178,7 +178,71 @@ class RenterController extends Controller
                 'status' => $tenant->kyc_status ?: 'pending',
                 'aadhaar_verified' => !empty($tenant->aadhaar_verified_at),
             ],
+            // pending until a police verification document is uploaded; the owner and the tenant both see this
+            'police' => [
+                'status' => $tenant->police_verification_status ?: 'pending',
+            ],
             'online_payment_enabled' => (bool) config('rent.online_payment'),
+        ]);
+    }
+
+    /** Everything about the tenant in one place, laid out like the Add Tenant form. */
+    public function overview(Request $request): JsonResponse
+    {
+        $tenant = $this->tenantOf($request);
+        if (!$tenant) {
+            return $this->noTenant();
+        }
+        $tenant->load(['property.city', 'property.locality', 'documents']);
+        $p = $tenant->property;
+        $real = fn ($v) => ($v !== null && $v !== '') ? $v : null;
+        $email = str_ends_with((string) $tenant->email, '@temp.pizi.in') ? null : $real($tenant->email);
+        $date = fn ($v) => $v ? \Carbon\Carbon::parse($v)->toDateString() : null;
+
+        return $this->ok([
+            'has_tenant' => true,
+            'name' => $tenant->name,
+            'phone' => $tenant->phone,
+            'personal' => [
+                'email' => $email,
+                'dob' => $date($tenant->dob),
+                'gender' => $real($tenant->gender),
+                'occupation' => $real($tenant->occupation),
+                'company_college' => $real($tenant->company_college),
+            ],
+            'address' => [
+                'address_line' => $real($tenant->address_line),
+                'city' => $real($tenant->city),
+                'state' => $real($tenant->state),
+                'pincode' => $real($tenant->pincode),
+            ],
+            'emergency' => [
+                'name' => $real($tenant->emergency_name),
+                'phone' => $real($tenant->emergency_phone),
+                'relation' => $real($tenant->emergency_relation),
+            ],
+            'stay' => [
+                'pg' => $p?->name,
+                'room_number' => $real($tenant->room_number),
+                'bed_number' => $real($tenant->bed_number),
+                'monthly_rent' => (float) $tenant->monthly_rent,
+                'security_deposit' => (float) $tenant->security_deposit,
+                'move_in_date' => $date($tenant->move_in_date),
+                'status' => $tenant->status,
+            ],
+            'verification' => [
+                'kyc_status' => $tenant->kyc_status ?: 'pending',
+                'aadhaar_verified' => !empty($tenant->aadhaar_verified_at),
+                'aadhaar_masked' => !empty($tenant->aadhaar_verified_at) ? $tenant->aadhaar_number_masked : null,
+                'police_status' => $tenant->police_verification_status ?: 'pending',
+                'agreement_signed' => !empty($tenant->agreement_signed_at),
+                'agreement_signed_at' => $date($tenant->agreement_signed_at),
+            ],
+            // names only: the app never gets a link to a document
+            'documents' => $tenant->documents->map(fn ($d) => [
+                'type' => $d->document_type,
+                'uploaded_at' => $d->created_at?->toDateString(),
+            ])->values(),
         ]);
     }
 

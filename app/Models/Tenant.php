@@ -19,7 +19,7 @@ class Tenant extends Model
         'kyc_status', 'kyc_remarks', 'kyc_reminder_sent_at', 'onboarding_source',
         'aadhaar_number_masked', 'aadhaar_name', 'aadhaar_verified_at',
         'agreement_signed_at', 'agreement_ip',
-        'status', 'notes',
+        'status', 'notes', 'police_verification_status',
         'notice_date', 'notice_reason',
     ];
 

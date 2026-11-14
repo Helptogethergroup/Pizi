@@ -159,6 +159,15 @@ class TenantController extends Controller
         return response()->json(['success' => false, 'message' => 'This step is no longer used.'], 410);
     }
 
+    /** One page with everything about the tenant, laid out like the Add Tenant form. */
+    public function overview(Tenant $tenant)
+    {
+        $this->authorize_owner($tenant);
+        $tenant->load('documents', 'property.city', 'property.locality');
+
+        return view('owner.tenants.overview', ['tenant' => $tenant]);
+    }
+
     public function store(Request $request)
     {
         $this->checkAccess();
@@ -274,10 +283,24 @@ class TenantController extends Controller
 
                 unset(
                     $data['bed_id'], $data['security_deposit_status'], $data['advance_rent_months'],
-                    $data['advance_rent_amount'], $data['aadhaar_verified'], $data['aadhaar_photo_base64']
+                    $data['advance_rent_amount'], $data['aadhaar_verified'], $data['aadhaar_photo_base64'],
+                    $data['police_verification'], $data['police_document']
                 );
 
                 $tenant = Tenant::create($data);
+
+                // Police verification: "yes" with the document marks it done; "no" leaves it pending, and the owner and
+                // the tenant both see it as pending until the document is uploaded.
+                if ($request->input('police_verification') === 'yes' && $request->hasFile('police_document')) {
+                    $file = $request->file('police_document');
+                    TenantDocument::create([
+                        'tenant_id' => $tenant->id,
+                        'document_type' => 'police_verification',
+                        'file_path' => $file->store('tenants/' . $tenant->id, 'public'),
+                        'file_name' => mb_substr(preg_replace('/[^\w.\- ]+/u', '_', $file->getClientOriginalName()), 0, 120),
+                    ]);
+                    $tenant->forceFill(['police_verification_status' => 'done'])->save();
+                }
 
                 // Aadhaar photo (base64 from Setu) — save it the same way a
                 // manually-uploaded photo would be, so it shows up wherever
@@ -348,7 +371,8 @@ class TenantController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
-        return redirect()->route('owner.tenants.show', $tenant)
+        // the one-view page: everything entered in the form, laid out as the tenant's record
+        return redirect()->route('owner.tenants.overview', $tenant)
             ->with('success', '✓ Tenant added'
                 . ($bed ? ' & Room ' . $bed->room->room_number . '/Bed ' . $bed->bed_number . ' assigned' : '')
                 . '. Tenant can log in with their phone number via OTP to access their dashboard.');
@@ -390,10 +414,26 @@ class TenantController extends Controller
         $this->authorize_owner($tenant);
 
         $request->validate([
-            'document_type' => 'required|in:aadhaar_front,aadhaar_back,pan,employment_id,student_id,address_proof,photo,other',
+            'document_type' => 'required|in:aadhaar_front,aadhaar_back,pan,employment_id,student_id,address_proof,photo,police_verification,other',
             'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
             'document_number' => 'nullable|string|max:50',
         ]);
+
+        // the police document replaces the earlier one and marks the verification done (not a KYC document)
+        if ($request->document_type === 'police_verification') {
+            foreach (TenantDocument::where('tenant_id', $tenant->id)->where('document_type', 'police_verification')->get() as $old) {
+                \Storage::disk('public')->delete($old->file_path);
+                $old->delete();
+            }
+            TenantDocument::create([
+                'tenant_id' => $tenant->id,
+                'document_type' => 'police_verification',
+                'file_path' => $request->file('file')->store('tenants/' . $tenant->id, 'public'),
+            ]);
+            $tenant->forceFill(['police_verification_status' => 'done'])->save();
+
+            return back()->with('success', '✓ Police verification document uploaded. Marked Done.');
+        }
 
         $path = $request->file('file')->store('tenants/' . $tenant->id, 'public');
 
@@ -415,7 +455,12 @@ class TenantController extends Controller
     {
         $tenant = $document->tenant;
         $this->authorize_owner($tenant);
+        $wasPolice = $document->document_type === 'police_verification';
         $document->delete();
+        if ($wasPolice) {
+            // no police document any more: pending again, for the owner and the tenant to see
+            $tenant->forceFill(['police_verification_status' => 'pending'])->save();
+        }
         return back()->with('success', '✓ Document removed.');
     }
 
@@ -573,6 +618,9 @@ class TenantController extends Controller
             'aadhaar_number_masked' => 'nullable|string|max:20',
             'aadhaar_name' => 'nullable|string|max:200',
             'aadhaar_photo_base64' => 'nullable|string',
+            // police verification: "yes" needs the document, "no" leaves it pending
+            'police_verification' => 'nullable|in:yes,no',
+            'police_document' => 'nullable|required_if:police_verification,yes|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ]);
     }
 

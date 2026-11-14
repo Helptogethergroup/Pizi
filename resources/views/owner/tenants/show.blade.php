@@ -60,6 +60,34 @@
         </div>
 
         <div class="bg-white p-6 rounded-2xl border border-ink-100">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+                <h2 class="font-display font-bold text-xl"><i class="fa-solid fa-shield-halved fa-fw"></i> Police Verification</h2>
+                @if(($tenant->police_verification_status ?? 'pending') === 'done')
+                    <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-700 text-sm font-bold">Done</span>
+                @else
+                    <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-700 text-sm font-bold">Pending</span>
+                @endif
+            </div>
+            @php $policeDoc = $tenant->documents->firstWhere('document_type', 'police_verification'); @endphp
+            @if($policeDoc)
+                <div class="mt-3 text-sm">Document uploaded:
+                    <a href="{{ $policeDoc->url }}" target="_blank" rel="noopener" class="font-bold text-coral-600 underline">View</a>
+                    <form method="POST" action="{{ route('owner.tenants.documents.delete', $policeDoc) }}" class="inline" onsubmit="return confirm('Remove this document? The status goes back to Pending.')">
+                        @csrf @method('DELETE')
+                        <button class="ml-3 text-rose-600 font-bold">Remove</button>
+                    </form>
+                </div>
+            @else
+                <p class="text-sm text-ink-900/60 mt-2">Not uploaded yet. The tenant can see that this is pending.</p>
+                <form method="POST" action="{{ route('owner.tenants.documents.upload', $tenant) }}" enctype="multipart/form-data" class="mt-3 flex flex-wrap gap-2 items-center">
+                    @csrf
+                    <input type="hidden" name="document_type" value="police_verification">
+                    <input type="file" name="file" required accept="image/*,.pdf" class="text-sm">
+                    <button class="px-4 py-2 bg-coral-500 hover:bg-coral-600 text-white rounded-lg text-sm font-bold">Upload</button>
+                </form>
+            @endif
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-ink-100">
             <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h2 class="font-display font-bold text-xl"><i class="fa-solid fa-file-lines fa-fw"></i> KYC Documents</h2>
                 <div class="text-sm font-bold text-emerald-700">{{ $tenant->kyc_progress }}% Complete</div>

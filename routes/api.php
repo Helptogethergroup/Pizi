@@ -98,6 +98,7 @@ Route::prefix('renter')->middleware(['pizi.auth', 'role:tenant'])->group(functio
 
     Route::get('/home', [$c, 'home']);
     Route::get('/notices', [$c, 'notices']);
+    Route::get('/overview', [$c, 'overview']);
     Route::get('/room', [$c, 'room']);
     Route::get('/rent', [$c, 'rent']);
     Route::get('/rent/{id}', [$c, 'rentShow'])->whereNumber('id');

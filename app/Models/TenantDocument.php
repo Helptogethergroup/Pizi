@@ -40,6 +40,7 @@ class TenantDocument extends Model
             'student_id' => 'Student ID',
             'address_proof' => 'Address Proof',
             'photo' => 'Photo',
+            'police_verification' => 'Police verification',
             default => 'Other',
         };
     }
