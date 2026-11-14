@@ -973,38 +973,42 @@ public function tokenPay()
 
    public function aadhaarKycPage()
 {
-    // Redirect if already verified
-    if (auth()->user()->journey_stage >= 2) {
+    $tenant = Tenant::where('user_id', auth()->id())->first();
+
+    if ($tenant && !empty($tenant->aadhaar_verified_at)) {
         return redirect()->route('tenant.onboarding')
             ->with('info', 'Aadhaar already verified.');
     }
+    // Aadhaar is checked through Setu DigiLocker; until its keys are on the server, documents are uploaded instead
+    if (!app(\App\Services\SetuDigilockerService::class)->isConfigured()) {
+        return redirect()->route('tenant.kyc')
+            ->with('info', 'Aadhaar check is not switched on yet. Please upload your documents.');
+    }
+
     return view('tenant.kyc-aadhaar');
 }
 
+/**
+ * Starts the DigiLocker Aadhaar check and sends the browser to DigiLocker's page. No Aadhaar number is
+ * typed on Pizi. DigiLocker brings the tenant back to /tenant/digilocker/return, which records the result.
+ */
 public function aadhaarSendOtp(Request $request)
 {
-    $request->validate([
-        'aadhaar_number' => ['required', 'digits:12'],
-    ]);
-
-    $setu   = app(SetuKycService::class);
-    $result = $setu->createRequest();
-
-    if (!$result['success']) {
-        return response()->json([
-            'success' => false,
-            'message' => $result['message'],
-        ]);
+    $dl = app(\App\Services\SetuDigilockerService::class);
+    if (!$dl->isConfigured()) {
+        return redirect()->route('tenant.kyc')->with('info', 'Aadhaar check is not switched on yet. Please upload your documents.');
     }
 
-    session(['setu_request_id' => $result['id']]);
+    $result = $dl->createRequest(route('renter.digilocker.return'));
+    if (!$result['success']) {
+        return back()->with('error', $result['message'] ?? 'Could not start the Aadhaar check. Please try again.');
+    }
 
-    return response()->json([
-        'success'       => true,
-        'request_id'    => $result['id'],
-        'captcha_image' => $result['captcha_image'],
-        'valid_upto'    => $result['valid_upto'],
-    ]);
+    // remember whose request this is, so the return page can finish it for the right person
+    \Illuminate\Support\Facades\Cache::put('digilocker:request:' . $result['id'], auth()->id(), now()->addMinutes(30));
+    \Illuminate\Support\Facades\Cache::put('renter:digilocker:' . auth()->id(), $result['id'], now()->addMinutes(30));
+
+    return redirect()->away($result['url']);
 }
 
     public function aadhaarVerifyOtp(Request $request)

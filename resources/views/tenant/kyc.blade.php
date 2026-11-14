@@ -24,6 +24,23 @@
         <p class="text-ink-900/60 text-sm mt-1">Upload your identity documents to complete verification.</p>
     </div>
 
+    @php
+        $dlOn = app(\App\Services\SetuDigilockerService::class)->isConfigured();
+        $aadhaarDone = !empty($tenant->aadhaar_verified_at);
+    @endphp
+    @if($aadhaarDone)
+        <div class="mb-6 rounded-2xl p-5 border bg-emerald-50 border-emerald-200 flex items-center gap-3">
+            <i class="fa-solid fa-circle-check fa-fw text-emerald-600 text-2xl"></i>
+            <div><div class="font-bold text-emerald-800">Aadhaar verified</div><div class="text-sm text-emerald-700">{{ $tenant->aadhaar_number_masked }}. No documents needed.</div></div>
+        </div>
+    @elseif($dlOn)
+        <a href="{{ route('tenant.kyc.aadhaar') }}" class="mb-6 rounded-2xl p-5 border border-coral-200 bg-coral-50 flex items-center gap-3 hover:bg-coral-100">
+            <i class="fa-solid fa-id-card fa-fw text-coral-600 text-2xl"></i>
+            <div class="flex-1"><div class="font-bold text-ink-900">Verify with Aadhaar (fastest)</div><div class="text-sm text-ink-900/60">Through DigiLocker, about a minute. No documents to upload.</div></div>
+            <span class="font-bold text-coral-600">Start →</span>
+        </a>
+    @endif
+
     {{-- Status banner --}}
     <div class="mb-6 rounded-2xl p-5 border
         @if($status === 'approved') bg-emerald-50 border-emerald-200

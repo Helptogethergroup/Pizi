@@ -19,9 +19,11 @@
     @if($done)
         <h1>Aadhaar verified</h1>
         <p>Your Aadhaar check is done. You can close this page and go back to the Pizi app.</p>
+        <p style="margin-top:16px"><a href="{{ url('/tenant/dashboard') }}" style="color:#ed4e3d;font-weight:700">Or continue on pizi.in →</a></p>
     @elseif($failed)
         <h1>The check was not completed</h1>
         <p>Nothing was shared. Go back to the Pizi app and try again.</p>
+        <p style="margin-top:16px"><a href="{{ url('/tenant/kyc') }}" style="color:#ed4e3d;font-weight:700">Or go to your KYC page on pizi.in →</a></p>
     @else
         <h1>We are checking</h1>
         <p>This can take a moment. Go back to the Pizi app, it will show the result.</p>
