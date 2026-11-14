@@ -152,6 +152,7 @@
                             </button>
                         @else
                             <a href="{{ route('owner.tenants.show', $tenant) }}" class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-eye fa-fw"></i> View</a>
+                            <a href="{{ route('owner.tenants.overview', $tenant) }}" class="px-3 py-2 bg-white border border-ink-200 hover:bg-ink-100 text-ink-950 rounded-lg text-xs font-bold"><i class="fa-solid fa-id-card fa-fw"></i> Overview</a>
                             <a href="{{ route('owner.tenants.edit', $tenant) }}" class="px-3 py-2 bg-ink-100 hover:bg-ink-200 text-ink-950 rounded-lg text-xs font-bold"><i class="fa-solid fa-pencil fa-fw"></i> Edit</a>
                         @endif
                         <a href="https://wa.me/91{{ $tenant->phone }}" target="_blank" class="px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold"><i class="fa-solid fa-comment-dots fa-fw"></i> WA</a>

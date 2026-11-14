@@ -2,8 +2,9 @@
 @section('title', $tenant->name)
 @section('content')
 
-<div class="mb-6">
+<div class="mb-6 flex items-center justify-between flex-wrap gap-3">
     <a href="{{ route('owner.tenants.index') }}" class="text-coral-500 font-bold">← Back to tenants</a>
+    <a href="{{ route('owner.tenants.overview', $tenant) }}" class="px-4 py-2.5 bg-white border border-ink-200 hover:bg-ink-100 rounded-xl text-sm font-bold"><i class="fa-solid fa-id-card fa-fw"></i> Overview (all details on one page)</a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
