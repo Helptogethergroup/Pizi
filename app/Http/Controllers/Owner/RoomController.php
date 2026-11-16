@@ -118,6 +118,18 @@ class RoomController extends Controller
         $data['monthly_rent'] = $data['monthly_rent'] ?? 0;
         $data['security_deposit'] = $data['security_deposit'] ?? 0;
 
+        // Bed Plan: a room needs the plan to be running, and its beds are paid for (a full month each) right now
+        $billing = app(\App\Services\BedBillingService::class);
+        if ($message = $billing->operateBlock((int) $data['owner_id'])) {
+            return back()->withErrors(['bed_plan' => $message])->withInput();
+        }
+        $bedsToMake = $autoCreate ? ($bedsCount ?: (new Room(['room_type' => $data['room_type']]))->capacity) : 0;
+        $reservation = $billing->reserveBeds((int) $data['owner_id'], $bedsToMake);
+        if ($reservation['error']) {
+            return back()->withErrors(['bed_plan' => $reservation['error']])->withInput();
+        }
+
+        try {
         $room = Room::create($data);
         $room->amenities()->sync($amenityIds);
 
@@ -137,6 +149,11 @@ class RoomController extends Controller
                     'status' => 'vacant',
                 ]);
             }
+        }
+        } catch (\Throwable $e) {
+            // the beds were paid for but could not be made: give the money back
+            $billing->releaseReservation((int) $data['owner_id'], $reservation);
+            throw $e;
         }
 
         return redirect()->route('owner.rooms.show', $room)
@@ -281,7 +298,20 @@ class RoomController extends Controller
         // an empty Rent field arrives as null, and the column does not accept null
         $data['monthly_rent'] = $data['monthly_rent'] ?? 0;
 
-        Bed::create($data);
+        // Bed Plan: a new bed costs a full month at once (a paid slot left by a deleted bed is used first)
+        $billing = app(\App\Services\BedBillingService::class);
+        $reservation = $billing->reserveBeds((int) $data['owner_id'], 1);
+        if ($reservation['error']) {
+            return back()->withErrors(['bed_plan' => $reservation['error']])->withInput();
+        }
+
+        try {
+            Bed::create($data);
+        } catch (\Throwable $e) {
+            $billing->releaseReservation((int) $data['owner_id'], $reservation);
+            throw $e;
+        }
+
         return back()->with('success', '✓ Bed added.');
     }
 
@@ -394,8 +424,24 @@ class RoomController extends Controller
             abort(403);
         }
 
-        $room->restore();
-        Bed::onlyTrashed()->where('room_id', $room->id)->restore();
+        // Bed Plan: a restored room brings its beds back, so they are charged like new beds
+        $billing = app(\App\Services\BedBillingService::class);
+        if ($message = $billing->operateBlock((int) $room->owner_id)) {
+            return redirect()->back()->withErrors(['bed_plan' => $message]);
+        }
+        $bedsBack = Bed::onlyTrashed()->where('room_id', $room->id)->count();
+        $reservation = $billing->reserveBeds((int) $room->owner_id, $bedsBack);
+        if ($reservation['error']) {
+            return redirect()->back()->withErrors(['bed_plan' => $reservation['error']]);
+        }
+
+        try {
+            $room->restore();
+            Bed::onlyTrashed()->where('room_id', $room->id)->restore();
+        } catch (\Throwable $e) {
+            $billing->releaseReservation((int) $room->owner_id, $reservation);
+            throw $e;
+        }
 
         return redirect()->route('owner.rooms.show', $room)->with('success', '✓ Room restored.');
     }

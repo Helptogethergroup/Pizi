@@ -171,6 +171,12 @@ class TenantController extends Controller
     public function store(Request $request)
     {
         $this->checkAccess();
+
+        // Bed Plan: while the plan has ended (wallet not recharged) no new tenant can be added
+        if ($message = app(\App\Services\BedBillingService::class)->operateBlock((int) $this->effectiveOwnerId())) {
+            return back()->withErrors(['bed_plan' => $message])->withInput();
+        }
+
         $data = $this->validateTenant($request);
 
         // ---- 1. Agar bed select ki hai to usko LOCK karke fetch karo

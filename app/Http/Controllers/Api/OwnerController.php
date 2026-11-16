@@ -1910,6 +1910,11 @@ class OwnerController extends Controller
 
     public function tenantStore(Request $request)
     {
+        // Bed Plan: while the plan has ended (wallet not recharged) no new tenant can be added
+        if ($message = app(\App\Services\BedBillingService::class)->operateBlock((int) $this->ownerId($request))) {
+            return $this->bedPlanError($message);
+        }
+
         $validator = Validator::make($request->all(), [
             'property_id'             => 'required|integer|exists:properties,id',
             'bed_id'                  => 'nullable|integer|exists:beds,id',
@@ -2348,6 +2353,22 @@ class OwnerController extends Controller
             $fields[$f] = $request->boolean($f);
         }
 
+        // Bed Plan: the plan must be running, and the beds of this room are paid for (a full month each) now
+        $billing = app(\App\Services\BedBillingService::class);
+        $planOwnerId = (int) $this->ownerId($request);
+        if ($message = $billing->operateBlock($planOwnerId)) {
+            return $this->bedPlanError($message);
+        }
+        $bedsWanted = $request->boolean('auto_create_beds')
+            ? ($request->filled('beds_count') ? (int) $request->beds_count
+                : (['single' => 1, 'double' => 2, 'triple' => 3, 'quad' => 4, 'quint' => 5, 'dorm' => 8][$request->room_type] ?? 2))
+            : 0;
+        $reservation = $billing->reserveBeds($planOwnerId, $bedsWanted);
+        if ($reservation['error']) {
+            return $this->bedPlanError($reservation['error']);
+        }
+
+        try {
         $id = DB::table('rooms')->insertGetId(array_merge($fields, [
             'owner_id'   => $this->ownerId($request),
             'status'     => 'active',
@@ -2383,6 +2404,11 @@ class OwnerController extends Controller
                     'updated_at'   => now(),
                 ]);
             }
+        }
+        } catch (\Throwable $e) {
+            // the beds were paid for but the room could not be made: give the money back
+            $billing->releaseReservation($planOwnerId, $reservation);
+            throw $e;
         }
 
         return $this->ok(['id' => $id]);
@@ -2471,17 +2497,30 @@ class OwnerController extends Controller
             return response()->json(['success' => false, 'errors' => ['bed_number' => ['Bed already exists.']]], 422);
         }
 
-        $id = DB::table('beds')->insertGetId([
-            'room_id'      => $roomId,
-            'property_id'  => $room->property_id,
-            'owner_id'     => $this->ownerId($request),
-            'bed_number'   => $request->bed_number,
-            'bed_type'     => $this->dbBedType($request->bed_type),
-            'monthly_rent' => $request->monthly_rent ?? 0,
-            'status'       => 'vacant',
-            'created_at'   => now(),
-            'updated_at'   => now(),
-        ]);
+        // Bed Plan: a new bed costs a full month at once (a paid slot left by a deleted bed is used first)
+        $billing = app(\App\Services\BedBillingService::class);
+        $planOwnerId = (int) $this->ownerId($request);
+        $reservation = $billing->reserveBeds($planOwnerId, 1);
+        if ($reservation['error']) {
+            return $this->bedPlanError($reservation['error']);
+        }
+
+        try {
+            $id = DB::table('beds')->insertGetId([
+                'room_id'      => $roomId,
+                'property_id'  => $room->property_id,
+                'owner_id'     => $this->ownerId($request),
+                'bed_number'   => $request->bed_number,
+                'bed_type'     => $this->dbBedType($request->bed_type),
+                'monthly_rent' => $request->monthly_rent ?? 0,
+                'status'       => 'vacant',
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+        } catch (\Throwable $e) {
+            $billing->releaseReservation($planOwnerId, $reservation);
+            throw $e;
+        }
 
         return $this->ok(['id' => $id]);
     }
@@ -3138,6 +3177,12 @@ class OwnerController extends Controller
     private function ok($data)
     {
         return response()->json(['success' => true, 'data' => $data]);
+    }
+
+    /** The owner's Bed Plan stops this action. 402 with a code the app can recognise, and a message in plain words. */
+    private function bedPlanError(string $message)
+    {
+        return response()->json(['success' => false, 'code' => 'bed_plan', 'message' => $message], 402);
     }
 
     private function notFound()
