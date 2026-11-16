@@ -319,6 +319,7 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     // the add-tenant form: vacant beds of a PG, and the Aadhaar instant-KYC steps
     Route::get('/tenants/vacant-beds/{property}', [OwnerController::class, 'tenantVacantBeds']);
     Route::post('/tenants/aadhaar/start',          [OwnerController::class, 'tenantAadhaarStart']);
+    Route::post('/tenants/aadhaar/status',         [OwnerController::class, 'tenantAadhaarStatus'])->middleware('throttle:60,1');
     Route::post('/tenants/aadhaar/verify-captcha', [OwnerController::class, 'tenantAadhaarCaptcha']);
     Route::post('/tenants/aadhaar/verify-otp',     [OwnerController::class, 'tenantAadhaarOtp']);
     // KYC of a tenant: Aadhaar check, "I verified it myself", documents, approve / reject

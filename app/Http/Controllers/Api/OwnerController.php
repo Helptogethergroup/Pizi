@@ -1810,47 +1810,79 @@ class OwnerController extends Controller
         return 'owner-kyc-aadhaar:' . $request->user()->id;
     }
 
-    public function tenantAadhaarStart(Request $request, \App\Services\SetuKycService $setu)
+    /**
+     * Aadhaar check for a new tenant through Setu DigiLocker, the same as the website. The owner starts it and
+     * gets a link; the tenant opens it on their own phone, signs in to DigiLocker and taps Allow. The app then
+     * asks "status" every few seconds, and the Add Tenant form fills itself when it is done.
+     */
+    public function tenantAadhaarStart(Request $request, \App\Services\SetuDigilockerService $dl)
     {
-        // Aadhaar is now checked through DigiLocker, which needs the tenant's own sign-in, so it cannot be
-        // started from this app. The tenant verifies in the Pizi tenant app, or the owner uploads documents.
-        return response()->json([
-            'success' => false,
-            'message' => 'Aadhaar check is not available from here. Ask the tenant to verify their Aadhaar in the Pizi tenant app, or upload their documents.',
-        ], 422);
-    }
-
-    public function tenantAadhaarCaptcha(Request $request, \App\Services\SetuKycService $setu)
-    {
-        $data = $request->validate(['aadhaar_number' => 'required|digits:12', 'captcha' => 'required|string']);
-        $requestId = \Cache::get($this->aadhaarCacheKey($request));
-        if (!$requestId) {
-            return response()->json(['success' => false, 'message' => 'This took too long. Please start the Aadhaar check again.'], 410);
+        if (!$dl->isConfigured()) {
+            return response()->json(['success' => false, 'message' => 'Aadhaar check is not switched on yet. Please add the tenant and upload their documents instead.'], 422);
         }
 
-        $result = $setu->verifyAadhaar($requestId, $data['aadhaar_number'], $data['captcha']);
+        $result = $dl->createRequest(route('renter.digilocker.return'));
         if (empty($result['success'])) {
-            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not send the OTP.'], 422);
+            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not start the Aadhaar check. Please try again.'], 422);
         }
 
-        return $this->ok(['message' => $result['message'] ?? 'OTP sent to the Aadhaar-linked mobile number.']);
+        \Cache::put($this->aadhaarCacheKey($request), $result['id'], now()->addMinutes(30));
+
+        return $this->ok(['id' => $result['id'], 'url' => $result['url']]);
     }
 
-    public function tenantAadhaarOtp(Request $request, \App\Services\SetuKycService $setu)
+    public function tenantAadhaarStatus(Request $request, \App\Services\SetuDigilockerService $dl)
     {
-        $data = $request->validate(['otp' => 'required|digits_between:4,6', 'share_code' => 'required|digits:4']);
         $requestId = \Cache::get($this->aadhaarCacheKey($request));
         if (!$requestId) {
             return response()->json(['success' => false, 'message' => 'This took too long. Please start the Aadhaar check again.'], 410);
         }
 
-        $result = $setu->verifyOtp($requestId, $data['otp'], $data['share_code']);
+        $status = $dl->status($requestId);
+        if (empty($status['success'])) {
+            return response()->json(['success' => false, 'message' => $status['message'] ?? 'Could not check right now.'], 422);
+        }
+        if (($status['status'] ?? '') === 'revoked') {
+            \Cache::forget($this->aadhaarCacheKey($request));
+
+            return response()->json(['success' => false, 'message' => 'This check has expired. Please start again.'], 410);
+        }
+        if (($status['status'] ?? '') !== 'authenticated') {
+            return $this->ok(['pending' => true]);
+        }
+
+        $result = $dl->aadhaar($requestId);
+        if (empty($result['success'])) {
+            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not read the Aadhaar details.'], 422);
+        }
         \Cache::forget($this->aadhaarCacheKey($request));
-        if (empty($result['success'])) {
-            return response()->json(['success' => false, 'message' => $result['message'] ?? 'Verification failed.'], 422);
-        }
 
-        return $this->ok($result['data'] ?? []);
+        $d = $result['data'];
+
+        // no Aadhaar number and no photo leave the server: only what the form needs
+        return $this->ok([
+            'pending' => false,
+            'name' => $d['name'],
+            'dob' => $d['dob'],
+            'gender' => $d['gender'],
+            'address' => $d['address'],
+            'city' => $d['city'],
+            'state' => $d['state'],
+            'pincode' => $d['pincode'],
+            'masked_aadhaar' => 'XXXX XXXX ' . substr(preg_replace('/\D/', '', (string) $d['masked_aadhaar']), -4),
+            'photo_base64' => null,
+        ]);
+    }
+
+    /** The old captcha and OTP steps. DigiLocker has none of them. */
+    public function tenantAadhaarCaptcha(Request $request)
+    {
+        return response()->json(['success' => false, 'message' => 'This step is no longer used.'], 410);
+    }
+
+    public function tenantAadhaarOtp(Request $request)
+    {
+        return response()->json(['success' => false, 'message' => 'This step is no longer used.'], 410);
     }
 
     public function tenantShow(Request $request, $id)
