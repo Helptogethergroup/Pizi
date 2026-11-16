@@ -30,7 +30,7 @@ class SendComplaintEscalationAlerts extends Command
         $sent = 0;
 
         foreach ($complaints as $complaint) {
-            $daysOpen = now()->diffInDays($complaint->created_at);
+            $daysOpen = $complaint->created_at->copy()->startOfDay()->diffInDays(now()->startOfDay());
             foreach ($admins as $admin) {
                 $admin->notify(new ComplaintEscalated(
                     $complaint->id,

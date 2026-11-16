@@ -64,7 +64,8 @@ class SendVacantRoomAlerts extends Command
                     $property->owner->name,
                     $property->name,
                     $property->available_rooms,
-                    now()->diffInDays($property->updated_at),
+                    // whole days (Carbon 3 gives a negative fraction when the earlier date is the argument)
+                    (int) $property->updated_at->copy()->startOfDay()->diffInDays(now()->startOfDay()),
                 ]
             );
 
