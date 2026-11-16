@@ -2264,10 +2264,14 @@ class OwnerController extends Controller
         $doc = DB::table('tenant_documents as d')
             ->join('tenants as t', 't.id', '=', 'd.tenant_id')
             ->where('d.id', $docId)->where('t.owner_id', $this->ownerId($request))
-            ->first(['d.id', 'd.file_path']);
+            ->first(['d.id', 'd.file_path', 'd.tenant_id', 'd.document_type']);
         if (!$doc) return $this->notFound();
 
         DB::table('tenant_documents')->where('id', $docId)->delete();
+        // no police document any more: pending again, for the owner and the tenant to see
+        if ($doc->document_type === 'police_verification') {
+            DB::table('tenants')->where('id', $doc->tenant_id)->update(['police_verification_status' => 'pending', 'updated_at' => now()]);
+        }
         try {
             Storage::disk('public')->delete($doc->file_path);
         } catch (\Throwable $e) {
