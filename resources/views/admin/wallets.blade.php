@@ -1,8 +1,8 @@
 @extends('layouts.dashboard')
-@section('title', 'Wallet Management')
+@section('title', 'Lead Wallets')
 @section('content')
 
-<h1 class="font-display font-black text-3xl mb-2">Owner Wallets</h1>
+<h1 class="font-display font-black text-3xl mb-2">Owner Lead Wallets</h1>
 <p class="text-ink-900/60">Manage credit balances for all PG owners.</p>
 
 <form class="flex gap-2 mt-6 mb-6">

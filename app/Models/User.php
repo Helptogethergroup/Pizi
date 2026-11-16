@@ -57,6 +57,12 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    /** The owner's Bed Plan, when the admin has switched it on for them. */
+    public function bedSubscription()
+    {
+        return $this->hasOne(\App\Models\BedSubscription::class);
+    }
+
     public function isOwner(): bool
     {
         return $this->role === 'owner';

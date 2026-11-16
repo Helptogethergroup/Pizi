@@ -1,9 +1,9 @@
 @extends('layouts.dashboard')
-@section('title', 'My Wallet')
+@section('title', 'Lead Wallet')
 @section('content')
 
-<h1 class="font-display font-black text-4xl mb-2">My Wallet</h1>
-<p class="text-ink-900/60">Manage your credits and view transaction history.</p>
+<h1 class="font-display font-black text-4xl mb-2">Lead Wallet</h1>
+<p class="text-ink-900/60">Your lead credits (used to unlock leads) and their history. Your bed plan is paid from the separate Bed Wallet.</p>
 
 {{-- Balance card --}}
 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">

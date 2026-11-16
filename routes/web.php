@@ -1068,3 +1068,6 @@ Route::post('/owner/verify-payment', function(Request $request) {
 Route::get('/invoices/{invoice}/signed-download', [\App\Http\Controllers\InvoiceDownloadController::class, 'signed'])
     ->middleware('signed')
     ->name('invoices.download.signed');
+
+// Bed Plan (Bed Wallet, monthly bed price, admin control)
+require __DIR__ . '/bed_wallet.php';
