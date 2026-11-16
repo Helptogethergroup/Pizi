@@ -56,7 +56,7 @@ class Room extends Model
 
     public function getCapacityAttribute(): int
     {
-        return match($this->room_type) {
+        $byType = match($this->room_type) {
             'single' => 1,
             'double' => 2,
             'triple' => 3,
@@ -65,6 +65,9 @@ class Room extends Model
             'dorm' => 8,
             default => 2,
         };
+
+        // an owner may have made more beds than the room type gives; show the real number
+        return $this->relationLoaded('beds') ? max($byType, $this->beds->count()) : $byType;
     }
 
     public function getOccupiedCountAttribute(): int

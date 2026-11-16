@@ -84,6 +84,7 @@ class RoomController extends Controller
             'amenities.*' => 'exists:amenities,id',
             'notes' => 'nullable|string',
             'auto_create_beds' => 'nullable|boolean',
+            'beds_count' => 'nullable|integer|min:1|max:26',
         ]);
 
         $property = Property::where('id', $data['property_id'])
@@ -107,7 +108,9 @@ class RoomController extends Controller
         $data['status'] = 'active';
 
         $autoCreate = $request->boolean('auto_create_beds');
-        unset($data['auto_create_beds']);
+        // the owner can ask for any number of beds (A to Z); empty means "as per room type"
+        $bedsCount = isset($data['beds_count']) ? (int) $data['beds_count'] : null;
+        unset($data['auto_create_beds'], $data['beds_count']);
 
         $amenityIds = $data['amenities'] ?? [];
         unset($data['amenities']);
@@ -120,7 +123,7 @@ class RoomController extends Controller
 
         // Auto create beds based on room type
         if ($autoCreate) {
-            $capacity = $room->capacity;
+            $capacity = $bedsCount ?: $room->capacity;
             $bedRent = $room->monthly_rent > 0 ? round($room->monthly_rent / $capacity) : 0;
 
             for ($i = 1; $i <= $capacity; $i++) {
@@ -137,7 +140,7 @@ class RoomController extends Controller
         }
 
         return redirect()->route('owner.rooms.show', $room)
-            ->with('success', '✓ Room added' . ($autoCreate ? ' with ' . $room->capacity . ' beds' : '') . '.');
+            ->with('success', '✓ Room added' . ($autoCreate ? ' with ' . $capacity . ' beds' : '') . '.');
     }
 
     public function show(Room $room)

@@ -2294,6 +2294,7 @@ class OwnerController extends Controller
             'amenities.*'            => 'integer|exists:amenities,id',
             'notes'                  => 'nullable|string',
             'auto_create_beds'       => 'nullable|boolean',
+            'beds_count'             => 'nullable|integer|min:1|max:26',
         ]);
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
@@ -2328,7 +2329,8 @@ class OwnerController extends Controller
         // Auto create beds based on room type capacity — same as owner dashboard.
         if ($request->boolean('auto_create_beds')) {
             $capacityMap = ['single' => 1, 'double' => 2, 'triple' => 3, 'quad' => 4, 'quint' => 5, 'dorm' => 8];
-            $capacity = $capacityMap[$request->room_type] ?? 2;
+            // an owner can ask for any number of beds (A to Z); without it the room type decides
+            $capacity = $request->filled('beds_count') ? (int) $request->beds_count : ($capacityMap[$request->room_type] ?? 2);
             $rent = (float) ($request->monthly_rent ?? 0);
             $bedRent = $rent > 0 ? round($rent / $capacity) : 0;
 

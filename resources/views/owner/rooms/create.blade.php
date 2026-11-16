@@ -87,9 +87,14 @@
             <input type="checkbox" name="auto_create_beds" value="1" checked class="mt-1 rounded w-5 h-5">
             <div>
                 <div class="font-bold text-emerald-900"><i class="fa-solid fa-wand-magic-sparkles fa-fw"></i> Auto-create beds</div>
-                <p class="text-sm text-emerald-800 mt-1">Automatically create beds based on room type (A, B, C, D...). You can edit them later.</p>
+                <p class="text-sm text-emerald-800 mt-1">Automatically create beds (A, B, C, D...). You can edit them later.</p>
             </div>
         </label>
+        <div class="mt-4">
+            <label class="text-xs font-bold uppercase text-emerald-900">Number of beds (optional)</label>
+            <input name="beds_count" type="number" min="1" max="26" value="{{ old('beds_count') }}" placeholder="Leave empty to follow the room type" class="w-full mt-1 px-4 py-3 rounded-xl border border-emerald-200 bg-white">
+            <p class="text-xs text-emerald-800 mt-1">Need more beds than the room type gives? Type the total here, for example 6 gives beds A to F.</p>
+        </div>
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
