@@ -121,7 +121,7 @@
     <div class="overflow-x-auto">
     <table class="w-full text-sm">
         <thead class="bg-ink-900/5 text-left text-ink-900/60 text-xs uppercase">
-            <tr><th class="px-6 py-3">Owner</th><th>Status</th><th class="text-right">Beds</th><th class="text-right">Wallet</th><th>Renews on</th><th class="text-right pr-6"></th></tr>
+            <tr><th class="px-6 py-3">Owner</th><th>Status</th><th class="text-right">Beds</th><th class="text-right">Bed Wallet</th><th>Renews on</th><th class="text-right pr-6"></th></tr>
         </thead>
         <tbody>
         @forelse($owners as $o)
