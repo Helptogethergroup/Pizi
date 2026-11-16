@@ -42,6 +42,11 @@
                 </select>
             </div>
             <div>
+                <label class="text-xs font-bold uppercase text-ink-500">Number of beds *</label>
+                <input id="beds_count" name="beds_count" type="number" min="1" max="26" required value="{{ old('beds_count', 2) }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
+                <p class="text-xs text-ink-500 mt-1">Beds are named A, B, C, D... You can change this number, for example 6 gives A to F.</p>
+            </div>
+            <div>
                 <label class="text-xs font-bold uppercase text-ink-500">Gender *</label>
                 <select name="gender" required class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
                     <option value="male">Boys</option>
@@ -90,11 +95,6 @@
                 <p class="text-sm text-emerald-800 mt-1">Automatically create beds (A, B, C, D...). You can edit them later.</p>
             </div>
         </label>
-        <div class="mt-4">
-            <label class="text-xs font-bold uppercase text-emerald-900">Number of beds (optional)</label>
-            <input name="beds_count" type="number" min="1" max="26" value="{{ old('beds_count') }}" placeholder="Leave empty to follow the room type" class="w-full mt-1 px-4 py-3 rounded-xl border border-emerald-200 bg-white">
-            <p class="text-xs text-emerald-800 mt-1">Need more beds than the room type gives? Type the total here, for example 6 gives beds A to F.</p>
-        </div>
     </div>
 
     <div class="bg-white p-6 rounded-2xl border border-ink-100">
@@ -107,5 +107,16 @@
         <a href="{{ route('owner.rooms.index') }}" class="px-8 py-4 border border-ink-200 rounded-xl font-bold">Cancel</a>
     </div>
 </form>
+
+<script>
+    // choosing a room type fills in the usual number of beds; the owner can still type any number
+    (function () {
+        var type = document.querySelector('select[name="room_type"]');
+        var beds = document.getElementById('beds_count');
+        if (!type || !beds) return;
+        var usual = { single: 1, double: 2, triple: 3, quad: 4, quint: 5, dorm: 8 };
+        type.addEventListener('change', function () { if (usual[type.value]) beds.value = usual[type.value]; });
+    })();
+</script>
 
 @endsection
