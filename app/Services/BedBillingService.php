@@ -259,6 +259,11 @@ class BedBillingService
             if (!$sub || $sub->status === 'disabled') {
                 return false;
             }
+            // Two recharges at the same moment must not start two months: the first one makes the plan active,
+            // and the second finds it active (under this row lock) and does nothing.
+            if ($why === 'recover' && $sub->status !== 'expired') {
+                return false;
+            }
             $beds = $this->bedCount($sub->user_id);
             $price = $this->pricePerBed($sub);
             $cost = round($beds * $price, 2);
@@ -274,7 +279,7 @@ class BedBillingService
                 $this->debit($sub->user_id, $cost, 'plan_renewal', $beds,
                     self::gstInside($cost, $this->gstPercent($sub)),
                     "Bed plan: {$beds} bed(s) x ₹" . number_format($price, 2) . ' for one month',
-                    null, "cycle:{$sub->id}:" . now()->timestamp . ":{$why}");
+                    null, "cycle:{$sub->id}:{$why}:" . \Illuminate\Support\Str::uuid());
             }
 
             $sub->status = 'active';
