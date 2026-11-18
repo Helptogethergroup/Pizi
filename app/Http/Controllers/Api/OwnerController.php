@@ -1789,8 +1789,11 @@ class OwnerController extends Controller
             ->where('b.status', 'vacant')
             ->whereNull('b.deleted_at')
             ->whereNull('r.deleted_at')
-            ->orderByRaw('length(r.room_number), r.room_number, b.bed_number')
             ->get(['b.id', 'b.bed_number', 'b.monthly_rent as bed_rent', 'r.room_number', 'r.monthly_rent as room_rent', 'r.security_deposit']);
+
+        // room by room in the order people read them (1, 02, 3, 11, 38, F4), beds A, B, C inside each
+        $beds = $beds->sort(fn ($x, $y) => \App\Support\NaturalSort::compare($x->room_number, $y->room_number)
+            ?: \App\Support\NaturalSort::compare($x->bed_number, $y->bed_number))->values();
 
         return $this->ok($beds->map(fn ($b) => [
             'id' => $b->id,
@@ -2301,9 +2304,12 @@ class OwnerController extends Controller
         $rooms = $rooms->map(function ($r) use ($beds, $propertyNames) {
             $r = (array) $r;
             $r['property_name'] = $propertyNames[$r['property_id']] ?? null;
-            $r['beds'] = $beds->get($r['id'], collect([]))->values();
+            // beds in the order people read them: A, B, C, A-2, A-10 ...
+            $r['beds'] = \App\Support\NaturalSort::sortBy($beds->get($r['id'], collect([])), fn ($b) => $b->bed_number);
             return (object) $r;
         });
+        // rooms too: 1, 02, 3, 11, 38, F4 (the owner app sorts by PG and number as well)
+        $rooms = \App\Support\NaturalSort::sortBy($rooms, fn ($r) => $r->room_number);
         return $this->ok($rooms);
     }
 
@@ -2312,7 +2318,7 @@ class OwnerController extends Controller
         $room = $this->scopeProps(DB::table('rooms')->where('id', $id)->where('owner_id', $this->ownerId($request))->whereNull('deleted_at'), $request, 'property_id')->first();
         if (!$room) return $this->notFound();
         $room = (array) $room;
-        $room['beds'] = DB::table('beds')->where('room_id', $id)->whereNull('deleted_at')->get();
+        $room['beds'] = \App\Support\NaturalSort::sortBy(DB::table('beds')->where('room_id', $id)->whereNull('deleted_at')->get(), fn ($b) => $b->bed_number);
         return $this->ok((object) $room);
     }
 

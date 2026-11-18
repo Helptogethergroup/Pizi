@@ -34,11 +34,12 @@ class RoomController extends Controller
                 ->first();
 
             if ($selectedProperty) {
-                $rooms = Room::where('property_id', $selectedProperty->id)
-                    ->with(['beds.tenant', 'amenities'])
-                    ->orderBy('floor')
-                    ->orderBy('room_number')
-                    ->get();
+                // in the order people read them: 1, 02, 3, 11, 38, 42, F4 (not a text sort), beds A, B, C...
+                $rooms = \App\Support\NaturalSort::sortBy(
+                    Room::where('property_id', $selectedProperty->id)->with(['beds.tenant', 'amenities'])->get(),
+                    fn ($r) => $r->room_number
+                );
+                $rooms->each(fn ($r) => $r->setRelation('beds', \App\Support\NaturalSort::sortBy($r->beds, fn ($b) => $b->bed_number)));
 
                 $stats = [
                     'total_rooms' => $rooms->count(),
@@ -163,6 +164,7 @@ class RoomController extends Controller
     {
         $this->authorize_owner($room);
         $room->load('beds.tenant', 'property');
+        $room->setRelation('beds', \App\Support\NaturalSort::sortBy($room->beds, fn ($b) => $b->bed_number));
 
         $activeTenants = Tenant::where('owner_id', $this->effectiveOwnerId())
             ->where('property_id', $room->property_id)

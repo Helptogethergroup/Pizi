@@ -579,6 +579,9 @@ class TenantController extends Controller
             ->where('status', 'vacant')
             ->with('room')
             ->get()
+            // room by room in the order people read them (1, 02, 3, 11, 38, F4), beds A, B, C inside each
+            ->sort(fn ($x, $y) => \App\Support\NaturalSort::compare($x->room->room_number, $y->room->room_number)
+                ?: \App\Support\NaturalSort::compare($x->bed_number, $y->bed_number))
             ->map(function ($bed) {
                 return [
                     'id' => $bed->id,
