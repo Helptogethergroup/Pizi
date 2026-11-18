@@ -92,12 +92,18 @@ class RoomController extends Controller
             ->firstOrFail();
 
         // Check duplicate
-        $exists = Room::where('property_id', $property->id)
+        // The database allows one room number per PG, and a room in the Trash still holds its number.
+        $existing = Room::withTrashed()
+            ->where('property_id', $property->id)
             ->where('room_number', $data['room_number'])
-            ->exists();
+            ->first();
 
-        if ($exists) {
-            return back()->withErrors(['room_number' => 'Room already exists.'])->withInput();
+        if ($existing) {
+            $message = $existing->trashed()
+                ? 'Room ' . $data['room_number'] . ' of this PG is in the Trash. Open Trash and restore it, or use a different room number.'
+                : 'Room ' . $data['room_number'] . ' already exists in this PG.';
+
+            return back()->withErrors(['room_number' => $message])->withInput();
         }
 
         // Room/Bed records belong to the actual property owner, not the manager
@@ -205,6 +211,17 @@ class RoomController extends Controller
             'notes' => 'nullable|string',
             'status' => 'required|in:active,maintenance,closed',
         ]);
+
+        // one room number per PG; a room in the Trash still holds its number (otherwise this is a 500 error)
+        if ($data['room_number'] !== $room->room_number) {
+            $clash = Room::withTrashed()->where('property_id', $room->property_id)
+                ->where('id', '!=', $room->id)->where('room_number', $data['room_number'])->first();
+            if ($clash) {
+                return back()->withErrors(['room_number' => $clash->trashed()
+                    ? 'Room ' . $data['room_number'] . ' of this PG is in the Trash. Restore it from Trash, or use a different room number.'
+                    : 'Room ' . $data['room_number'] . ' already exists in this PG.'])->withInput();
+            }
+        }
 
         foreach (['has_ac', 'has_attached_bathroom', 'has_balcony', 'has_geyser', 'has_wifi'] as $f) {
             $data[$f] = $request->boolean($f);
