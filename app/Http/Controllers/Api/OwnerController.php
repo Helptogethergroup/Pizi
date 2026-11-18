@@ -2438,6 +2438,12 @@ class OwnerController extends Controller
         ]);
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
+        // two rooms of one PG can never share a number
+        if ($request->filled('room_number') && $request->room_number !== $room->room_number
+            && DB::table('rooms')->where('property_id', $room->property_id)->where('id', '!=', $id)->where('room_number', $request->room_number)->whereNull('deleted_at')->exists()) {
+            return response()->json(['success' => false, 'errors' => ['room_number' => ['Room already exists.']]], 422);
+        }
+
         $data = $request->only([
             'room_number', 'floor', 'room_type', 'monthly_rent', 'security_deposit',
             'gender', 'has_ac', 'has_attached_bathroom', 'has_balcony', 'has_geyser', 'has_wifi', 'notes', 'status',
@@ -2447,6 +2453,14 @@ class OwnerController extends Controller
         }
         $data['updated_at'] = now();
         DB::table('rooms')->where('id', $id)->update($data);
+
+        // a renamed room: the tenants living in it show the new room number
+        if (isset($data['room_number']) && $data['room_number'] !== $room->room_number) {
+            $tenantIds = DB::table('beds')->where('room_id', $id)->whereNotNull('tenant_id')->pluck('tenant_id');
+            if ($tenantIds->isNotEmpty()) {
+                DB::table('tenants')->whereIn('id', $tenantIds)->update(['room_number' => $data['room_number'], 'updated_at' => now()]);
+            }
+        }
 
         if ($request->has('amenities')) {
             DB::table('room_amenities')->where('room_id', $id)->delete();
@@ -2539,6 +2553,12 @@ class OwnerController extends Controller
         ]);
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
+        // two beds of one room can never share a number
+        if ($request->filled('bed_number') && $request->bed_number !== $bed->bed_number
+            && DB::table('beds')->where('room_id', $bed->room_id)->where('id', '!=', $id)->where('bed_number', $request->bed_number)->whereNull('deleted_at')->exists()) {
+            return response()->json(['success' => false, 'errors' => ['bed_number' => ['Bed already exists.']]], 422);
+        }
+
         $data = $request->only(['bed_number', 'bed_type', 'monthly_rent']);
         if (isset($data['bed_type'])) {
             $data['bed_type'] = $this->dbBedType($data['bed_type']);
@@ -2565,6 +2585,11 @@ class OwnerController extends Controller
 
         $data['updated_at'] = now();
         DB::table('beds')->where('id', $id)->update($data);
+
+        // a renamed bed with a tenant in it: the tenant's own bed number follows, so they never disagree
+        if (isset($data['bed_number']) && $data['bed_number'] !== $bed->bed_number && $bed->tenant_id) {
+            DB::table('tenants')->where('id', $bed->tenant_id)->update(['bed_number' => $data['bed_number'], 'updated_at' => now()]);
+        }
 
         return $this->ok(['message' => 'Updated']);
     }
