@@ -92,19 +92,12 @@ class RoomController extends Controller
             ->firstOrFail();
 
         // Check duplicate
-        // The database allows one room number per PG, and a room in the Trash still holds its number.
-        $existing = Room::withTrashed()
-            ->where('property_id', $property->id)
-            ->where('room_number', $data['room_number'])
-            ->first();
-
-        if ($existing) {
-            $message = $existing->trashed()
-                ? 'Room ' . $data['room_number'] . ' of this PG is in the Trash. Open Trash and restore it, or use a different room number.'
-                : 'Room ' . $data['room_number'] . ' already exists in this PG.';
-
-            return back()->withErrors(['room_number' => $message])->withInput();
+        // A live room with this number: refuse. A room in the Trash only holds the number in the database, so it
+        // is renamed ("12 (deleted #5)") and the owner gets their number.
+        if (Room::where('property_id', $property->id)->where('room_number', $data['room_number'])->exists()) {
+            return back()->withErrors(['room_number' => 'Room ' . $data['room_number'] . ' already exists in this PG.'])->withInput();
         }
+        Room::releaseTrashedNumber((int) $property->id, $data['room_number']);
 
         // Room/Bed records belong to the actual property owner, not the manager
         $data['owner_id'] = $this->effectiveOwnerId();
@@ -212,15 +205,12 @@ class RoomController extends Controller
             'status' => 'required|in:active,maintenance,closed',
         ]);
 
-        // one room number per PG; a room in the Trash still holds its number (otherwise this is a 500 error)
+        // one room number per PG: a live room with the number refuses; a room in the Trash gives it up (renamed)
         if ($data['room_number'] !== $room->room_number) {
-            $clash = Room::withTrashed()->where('property_id', $room->property_id)
-                ->where('id', '!=', $room->id)->where('room_number', $data['room_number'])->first();
-            if ($clash) {
-                return back()->withErrors(['room_number' => $clash->trashed()
-                    ? 'Room ' . $data['room_number'] . ' of this PG is in the Trash. Restore it from Trash, or use a different room number.'
-                    : 'Room ' . $data['room_number'] . ' already exists in this PG.'])->withInput();
+            if (Room::where('property_id', $room->property_id)->where('id', '!=', $room->id)->where('room_number', $data['room_number'])->exists()) {
+                return back()->withErrors(['room_number' => 'Room ' . $data['room_number'] . ' already exists in this PG.'])->withInput();
             }
+            Room::releaseTrashedNumber((int) $room->property_id, $data['room_number'], (int) $room->id);
         }
 
         foreach (['has_ac', 'has_attached_bathroom', 'has_balcony', 'has_geyser', 'has_wifi'] as $f) {
@@ -452,12 +442,27 @@ class RoomController extends Controller
             return redirect()->back()->withErrors(['bed_plan' => $reservation['error']]);
         }
 
+        // A Trash room whose number was given to a new room is called "12 (deleted #5)". It gets "12" back when
+        // nobody else uses it; otherwise it keeps that name and the owner can rename it with Edit.
+        $wanted = Room::originalNumber((string) $room->room_number);
+        $numberBack = $wanted !== $room->room_number
+            && !Room::where('property_id', $room->property_id)->where('room_number', $wanted)->exists();
+
         try {
+            if ($numberBack) {
+                $room->room_number = $wanted;
+                $room->save();
+            }
             $room->restore();
             Bed::onlyTrashed()->where('room_id', $room->id)->restore();
         } catch (\Throwable $e) {
             $billing->releaseReservation((int) $room->owner_id, $reservation);
             throw $e;
+        }
+
+        if ($wanted !== $room->room_number) {
+            return redirect()->route('owner.rooms.show', $room)
+                ->with('success', '✓ Room restored as "' . $room->room_number . '", because another room now uses the number ' . $wanted . '. Use Edit to rename it.');
         }
 
         return redirect()->route('owner.rooms.show', $room)->with('success', '✓ Room restored.');

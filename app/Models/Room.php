@@ -20,6 +20,37 @@ class Room extends Model
         'notes', 'status',
     ];
 
+    /**
+     * The database keeps one room number per PG and a room in the Trash still holds its number. An owner
+     * who makes (or renames to) a number that only a Trash room has gets it: the Trash room is renamed
+     * "12 (deleted #5)" so nothing is lost and it can still be restored.
+     *
+     * @return bool true when a Trash room held the number and was renamed
+     */
+    public static function releaseTrashedNumber(int $propertyId, string $number, ?int $exceptRoomId = null): bool
+    {
+        $trashed = \Illuminate\Support\Facades\DB::table('rooms')
+            ->where('property_id', $propertyId)->where('room_number', $number)
+            ->whereNotNull('deleted_at')
+            ->when($exceptRoomId, fn ($q) => $q->where('id', '!=', $exceptRoomId))
+            ->get(['id']);
+
+        foreach ($trashed as $row) {
+            \Illuminate\Support\Facades\DB::table('rooms')->where('id', $row->id)->update([
+                'room_number' => mb_substr($number, 0, 30) . ' (deleted #' . $row->id . ')',
+                'updated_at' => now(),
+            ]);
+        }
+
+        return $trashed->isNotEmpty();
+    }
+
+    /** "12 (deleted #5)" is "12": the number a Trash room had before its number was given away. */
+    public static function originalNumber(string $number): string
+    {
+        return preg_replace('/ \(deleted #\d+\)$/', '', $number);
+    }
+
     protected $casts = [
         'monthly_rent' => 'decimal:2',
         'security_deposit' => 'decimal:2',

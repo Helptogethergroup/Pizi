@@ -2339,16 +2339,16 @@ class OwnerController extends Controller
         ]);
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
-        // one room number per PG, and a room in the Trash still holds its number
-        $existing = DB::table('rooms')->where('property_id', $request->property_id)
-            ->where('room_number', $request->room_number)->first(['id', 'deleted_at']);
-        if ($existing) {
-            $message = $existing->deleted_at
-                ? 'Room ' . $request->room_number . ' of this PG is in the Trash. Restore it from the website (Rooms and Beds, then Trash), or use a different room number.'
-                : 'Room ' . $request->room_number . ' already exists in this PG.';
+        // a live room with this number refuses; a room in the Trash only holds the number in the database,
+        // so it is renamed ("12 (deleted #5)") and the owner gets their number
+        $live = DB::table('rooms')->where('property_id', $request->property_id)
+            ->where('room_number', $request->room_number)->whereNull('deleted_at')->exists();
+        if ($live) {
+            $message = 'Room ' . $request->room_number . ' already exists in this PG.';
 
             return response()->json(['success' => false, 'message' => $message, 'errors' => ['room_number' => [$message]]], 422);
         }
+        \App\Models\Room::releaseTrashedNumber((int) $request->property_id, (string) $request->room_number);
 
         $fields = $request->only([
             'property_id', 'room_number', 'floor', 'room_type', 'monthly_rent', 'security_deposit',
@@ -2445,15 +2445,14 @@ class OwnerController extends Controller
 
         // two rooms of one PG can never share a number
         if ($request->filled('room_number') && $request->room_number !== $room->room_number) {
-            $clash = DB::table('rooms')->where('property_id', $room->property_id)->where('id', '!=', $id)
-                ->where('room_number', $request->room_number)->first(['id', 'deleted_at']);
-            if ($clash) {
-                $message = $clash->deleted_at
-                    ? 'Room ' . $request->room_number . ' of this PG is in the Trash. Restore it from the website, or use a different room number.'
-                    : 'Room ' . $request->room_number . ' already exists in this PG.';
+            $live = DB::table('rooms')->where('property_id', $room->property_id)->where('id', '!=', $id)
+                ->where('room_number', $request->room_number)->whereNull('deleted_at')->exists();
+            if ($live) {
+                $message = 'Room ' . $request->room_number . ' already exists in this PG.';
 
                 return response()->json(['success' => false, 'message' => $message, 'errors' => ['room_number' => [$message]]], 422);
             }
+            \App\Models\Room::releaseTrashedNumber((int) $room->property_id, (string) $request->room_number, (int) $id);
         }
 
         $data = $request->only([
