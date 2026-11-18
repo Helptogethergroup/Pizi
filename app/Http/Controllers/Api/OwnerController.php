@@ -2517,10 +2517,14 @@ class OwnerController extends Controller
         ]);
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
-        $exists = DB::table('beds')->where('room_id', $roomId)->where('bed_number', $request->bed_number)->exists();
+        $exists = DB::table('beds')->where('room_id', $roomId)->where('bed_number', $request->bed_number)->whereNull('deleted_at')->exists();
         if ($exists) {
-            return response()->json(['success' => false, 'errors' => ['bed_number' => ['Bed already exists.']]], 422);
+            $message = 'Bed ' . $request->bed_number . ' already exists in this room.';
+
+            return response()->json(['success' => false, 'message' => $message, 'errors' => ['bed_number' => [$message]]], 422);
         }
+        // a bed in the Trash only holds the number in the database: it is renamed and the owner gets the number
+        \App\Models\Bed::releaseTrashedNumber((int) $roomId, (string) $request->bed_number);
 
         // Bed Plan: a new bed costs a full month at once (a paid slot left by a deleted bed is used first)
         $billing = app(\App\Services\BedBillingService::class);
@@ -2565,9 +2569,13 @@ class OwnerController extends Controller
         if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
 
         // two beds of one room can never share a number
-        if ($request->filled('bed_number') && $request->bed_number !== $bed->bed_number
-            && DB::table('beds')->where('room_id', $bed->room_id)->where('id', '!=', $id)->where('bed_number', $request->bed_number)->whereNull('deleted_at')->exists()) {
-            return response()->json(['success' => false, 'errors' => ['bed_number' => ['Bed already exists.']]], 422);
+        if ($request->filled('bed_number') && $request->bed_number !== $bed->bed_number) {
+            if (DB::table('beds')->where('room_id', $bed->room_id)->where('id', '!=', $id)->where('bed_number', $request->bed_number)->whereNull('deleted_at')->exists()) {
+                $message = 'Bed ' . $request->bed_number . ' already exists in this room.';
+
+                return response()->json(['success' => false, 'message' => $message, 'errors' => ['bed_number' => [$message]]], 422);
+            }
+            \App\Models\Bed::releaseTrashedNumber((int) $bed->room_id, (string) $request->bed_number, (int) $id);
         }
 
         $data = $request->only(['bed_number', 'bed_type', 'monthly_rent']);

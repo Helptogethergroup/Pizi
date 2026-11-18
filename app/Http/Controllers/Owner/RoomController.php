@@ -295,8 +295,10 @@ class RoomController extends Controller
             ->exists();
 
         if ($exists) {
-            return back()->withErrors(['bed_number' => 'Bed already exists.']);
+            return back()->withErrors(['bed_number' => 'Bed ' . $data['bed_number'] . ' already exists in this room.']);
         }
+        // a bed in the Trash only holds the number in the database: it is renamed and the owner gets the number
+        Bed::releaseTrashedNumber((int) $room->id, $data['bed_number']);
 
         $data['room_id'] = $room->id;
         $data['property_id'] = $room->property_id;
@@ -436,7 +438,10 @@ class RoomController extends Controller
         if ($message = $billing->operateBlock((int) $room->owner_id)) {
             return redirect()->back()->withErrors(['bed_plan' => $message]);
         }
-        $bedsBack = Bed::onlyTrashed()->where('room_id', $room->id)->count();
+        // only the beds that went to the Trash together with the room come back (not one deleted long before)
+        $cutoff = ($room->deleted_at ?? now())->copy()->subSeconds(30);   // taken now: restore() clears deleted_at
+        $deletedWith = fn ($q) => $q->where('room_id', $room->id)->where('deleted_at', '>=', $cutoff);
+        $bedsBack = $deletedWith(Bed::onlyTrashed())->count();
         $reservation = $billing->reserveBeds((int) $room->owner_id, $bedsBack);
         if ($reservation['error']) {
             return redirect()->back()->withErrors(['bed_plan' => $reservation['error']]);
@@ -454,7 +459,7 @@ class RoomController extends Controller
                 $room->save();
             }
             $room->restore();
-            Bed::onlyTrashed()->where('room_id', $room->id)->restore();
+            $deletedWith(Bed::onlyTrashed())->restore();
         } catch (\Throwable $e) {
             $billing->releaseReservation((int) $room->owner_id, $reservation);
             throw $e;
