@@ -13,6 +13,8 @@ Schedule::command('kyc:send-pending-reminders --days=2')->dailyAt('11:00');
 Schedule::command('owner:send-pg-reminder --days=1')->dailyAt('12:00');
 Schedule::command('leads:check-followups --stale-days=5')->hourly();
 Schedule::command('complaints:check-escalated --days=3')->dailyAt('09:00');
+// Owners whose Pizi Owner app is out of date get a WhatsApp reminder each day until they update (admin switches it on)
+Schedule::command('owner-app:send-update-reminders')->dailyAt('12:30');
 // Bed Plan: renew months that have ended (or end the plan when the Bed Wallet cannot pay)
 Schedule::command('bed-plan:renew')->hourly()->withoutOverlapping();
 

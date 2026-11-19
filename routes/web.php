@@ -1071,3 +1071,6 @@ Route::get('/invoices/{invoice}/signed-download', [\App\Http\Controllers\Invoice
 
 // Bed Plan (Bed Wallet, monthly bed price, admin control)
 require __DIR__ . '/bed_wallet.php';
+
+// Owner app update reminders (admin)
+require __DIR__ . '/app_update.php';

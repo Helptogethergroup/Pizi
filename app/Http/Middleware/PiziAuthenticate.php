@@ -84,9 +84,18 @@ class PiziAuthenticate
             return response()->json(['success' => false, 'message' => 'User not found or disabled', 'code' => 'session_ended'], 401);
         }
 
+        // The app tells us its version on every request ("1.2.2+24"). Keep it fresh on the session, so an owner
+        // who updates the app without signing in again stops being reminded to update. Written only when it changed.
+        $reported = substr(trim((string) $request->header('X-App-Version', '')), 0, 20);
+        $versionChanged = $reported !== '' && preg_match('/^\d+(\.\d+){0,3}(\+\d+)?$/', $reported) && $reported !== $session->app_version;
+
         // "last seen" without a write on every single request.
-        if (!$session->last_used_at || $session->last_used_at->lt(now()->subMinute())) {
-            $session->forceFill(['last_used_at' => now()])->saveQuietly();
+        if ($versionChanged || !$session->last_used_at || $session->last_used_at->lt(now()->subMinute())) {
+            $changes = ['last_used_at' => now()];
+            if ($versionChanged) {
+                $changes['app_version'] = $reported;
+            }
+            $session->forceFill($changes)->saveQuietly();
         }
 
         $request->user = $user;
