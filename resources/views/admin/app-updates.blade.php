@@ -135,4 +135,20 @@
     </div>
 </div>
 
+<h2 class="font-display font-black text-2xl mt-12 mb-1">Tenant app invite for new tenants</h2>
+<p class="text-ink-900/60 text-sm">The moment an owner adds a tenant (website or owner app), the tenant gets one WhatsApp message with the Play Store link of the Pizi tenant app. One message per phone number, ever. Tenants who already use the app on Android are skipped.</p>
+
+<form method="POST" action="{{ route('admin.app-updates.save-tenant-invite') }}" class="mt-6 bg-white rounded-2xl border border-ink-900/10 p-6 space-y-4">
+    @csrf
+    <div class="flex flex-wrap gap-6 text-sm">
+        <div><span class="text-xs text-ink-900/50">Invites sent today</span><div class="font-display font-black text-2xl">{{ $tenantInvitesToday }}</div></div>
+        <div><span class="text-xs text-ink-900/50">Invites sent in total</span><div class="font-display font-black text-2xl">{{ $tenantInvitesSent }}</div></div>
+    </div>
+    <label class="flex items-center gap-3">
+        <input type="checkbox" name="tenant_invite_enabled" value="1" @checked(old('tenant_invite_enabled', $tenantInviteOn)) class="w-5 h-5 rounded">
+        <span><span class="font-bold">Message new tenants</span><br><span class="text-xs text-ink-900/50">Off means nobody is messaged. Uses the WhatsApp template <strong>tenant_app_invite</strong>, which must be approved on Meta first.</span></span>
+    </label>
+    <button class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-sm">Save</button>
+</form>
+
 @endsection

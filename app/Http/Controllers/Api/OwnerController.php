@@ -2107,6 +2107,9 @@ class OwnerController extends Controller
             ]);
         }
 
+        // the tenant gets the "download the Pizi app" WhatsApp (after this response, never blocks adding the tenant)
+        \App\Services\TenantAppInviteService::queue((int) $id);
+
         return $this->ok(['id' => $id]);
     }
 

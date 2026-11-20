@@ -29,6 +29,9 @@ class AppUpdateController extends Controller
                 ->where('r.latest_version', '!=', OwnerAppUpdateService::INSTALL_KIND)
                 ->orderByDesc('r.id')->limit(20)
                 ->get(['u.name', 'u.phone', 'r.version_seen', 'r.latest_version', 'r.sent_at']),
+            'tenantInviteOn' => \App\Services\TenantAppInviteService::enabled(),
+            'tenantInvitesSent' => (int) DB::table('tenant_app_invites')->count(),
+            'tenantInvitesToday' => (int) DB::table('tenant_app_invites')->whereDate('sent_at', today())->count(),
             'installOn' => $this->updates->installEnabled(),
             'installMax' => $this->updates->installMax(),
             'noApp' => $this->updates->installTargets()->take(25),
@@ -38,6 +41,16 @@ class AppUpdateController extends Controller
                 ->orderByDesc('r.id')->limit(20)
                 ->get(['u.name', 'u.phone', 'r.sent_at']),
         ]);
+    }
+
+    public function saveTenantInvite(Request $request)
+    {
+        $on = $request->boolean('tenant_invite_enabled');
+        \App\Services\TenantAppInviteService::setEnabled($on);
+
+        return back()->with('success', $on
+            ? 'Saved. Every tenant an owner adds now gets a WhatsApp with the tenant app download link (once per phone number).'
+            : 'Saved. New tenants are not messaged.');
     }
 
     public function saveInstall(Request $request)

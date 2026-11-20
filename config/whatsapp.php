@@ -43,6 +43,10 @@ return [
         //   php artisan whatsapp:submit-templates --send --only=owner_app_install
         'owner_app_install'                => ['name' => env('WHATSAPP_TEMPLATE_OWNER_APP_INSTALL', 'owner_app_install'), 'lang' => 'en'],
 
+        // "Download the Pizi app" for a tenant the owner just added (tenant app Play Store button). Submit with:
+        //   php artisan whatsapp:submit-templates --send --only=tenant_app_invite
+        'tenant_app_invite'                => ['name' => env('WHATSAPP_TEMPLATE_TENANT_APP_INVITE', 'tenant_app_invite'), 'lang' => 'en'],
+
         // Document-header template for auto-emailed/WhatsApp'd invoices.
         // Must be submitted+approved in Meta with a DOCUMENT header component.
         'invoice_ready'                    => ['name' => 'invoice_ready', 'lang' => 'en'],

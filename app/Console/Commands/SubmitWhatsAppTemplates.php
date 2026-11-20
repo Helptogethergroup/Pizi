@@ -113,6 +113,14 @@ class SubmitWhatsAppTemplates extends Command
                 'example' => ['Rajesh'],
                 'button' => ['text' => 'Download app', 'url' => 'https://play.google.com/store/apps/details?id=com.pizi_owner.india'],
             ],
+            // Sent once, right after an owner adds a tenant (website or owner app), to the tenant's phone.
+            // The button is the tenant app's Play Store page.
+            'tenant_app_invite' => [
+                'category' => 'MARKETING',
+                'body' => "Hi {{1}}, your PG owner has added you on Pizi.\n\n*Download the Pizi app from the Play Store* to *pay your rent, see your bills, raise complaints and review your PG*. You can also find *new PGs* to stay.\n\nTap the button below to download it.",
+                'example' => ['Rahul'],
+                'button' => ['text' => 'Download app', 'url' => 'https://play.google.com/store/apps/details?id=com.pizi.india'],
+            ],
         ];
     }
 

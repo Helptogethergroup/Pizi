@@ -377,6 +377,9 @@ class TenantController extends Controller
             return back()->withErrors($e->errors())->withInput();
         }
 
+        // the tenant gets the "download the Pizi app" WhatsApp (after this response, never blocks adding the tenant)
+        \App\Services\TenantAppInviteService::queue($tenant->id);
+
         // the one-view page: everything entered in the form, laid out as the tenant's record
         return redirect()->route('owner.tenants.overview', $tenant)
             ->with('success', '✓ Tenant added'
