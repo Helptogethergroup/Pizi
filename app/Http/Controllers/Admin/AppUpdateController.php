@@ -30,8 +30,11 @@ class AppUpdateController extends Controller
                 ->orderByDesc('r.id')->limit(20)
                 ->get(['u.name', 'u.phone', 'r.version_seen', 'r.latest_version', 'r.sent_at']),
             'tenantInviteOn' => \App\Services\TenantAppInviteService::enabled(),
-            'tenantInvitesSent' => (int) DB::table('tenant_app_invites')->count(),
-            'tenantInvitesToday' => (int) DB::table('tenant_app_invites')->whereDate('sent_at', today())->count(),
+            'tenantInvitesSent' => (int) DB::table('tenant_app_invites')->where('status', 'sent')->count(),
+            'tenantInvitesToday' => (int) DB::table('tenant_app_invites')->where('status', 'sent')->whereDate('sent_at', today())->count(),
+            'tenantBackfillOn' => \App\Services\TenantAppInviteService::backfillEnabled(),
+            'tenantBatch' => \App\Services\TenantAppInviteService::batchSize(),
+            'tenantsPending' => app(\App\Services\TenantAppInviteService::class)->pendingExisting()->count(),
             'installOn' => $this->updates->installEnabled(),
             'installMax' => $this->updates->installMax(),
             'noApp' => $this->updates->installTargets()->take(25),
@@ -45,12 +48,19 @@ class AppUpdateController extends Controller
 
     public function saveTenantInvite(Request $request)
     {
+        $data = $request->validate(['tenant_batch' => 'required|integer|min:1|max:2000']);
         $on = $request->boolean('tenant_invite_enabled');
+        $backfill = $request->boolean('tenant_invite_backfill');
         \App\Services\TenantAppInviteService::setEnabled($on);
+        \App\Services\TenantAppInviteService::setBackfillEnabled($backfill);
+        \App\Services\TenantAppInviteService::setBatchSize((int) $data['tenant_batch']);
 
-        return back()->with('success', $on
-            ? 'Saved. Every tenant an owner adds now gets a WhatsApp with the tenant app download link (once per phone number).'
-            : 'Saved. New tenants are not messaged.');
+        if (!$on) {
+            return back()->with('success', 'Saved. Nobody is messaged' . ($backfill ? ' (the batch for earlier tenants also needs "Message new tenants" ticked).' : '.'));
+        }
+
+        return back()->with('success', 'Saved. Every tenant an owner adds gets a WhatsApp with the tenant app download link (once per phone number)'
+            . ($backfill ? ', and tenants added earlier get it in daily batches of ' . $data['tenant_batch'] . '.' : '.'));
     }
 
     public function saveInstall(Request $request)

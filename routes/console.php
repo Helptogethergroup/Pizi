@@ -17,6 +17,8 @@ Schedule::command('complaints:check-escalated --days=3')->dailyAt('09:00');
 Schedule::command('owner-app:send-update-reminders')->dailyAt('12:30');
 // Owners who never signed in to the owner app get a daily "download it from the Play Store" WhatsApp (admin switches it on)
 Schedule::command('owner-app:send-install-reminders')->dailyAt('12:45');
+// Tenants added before the automatic message existed get the tenant app link too, a batch a day (admin switches it on)
+Schedule::command('tenant-app:invite-existing')->dailyAt('13:15')->withoutOverlapping();
 // Bed Plan: renew months that have ended (or end the plan when the Bed Wallet cannot pay)
 Schedule::command('bed-plan:renew')->hourly()->withoutOverlapping();
 

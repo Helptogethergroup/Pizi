@@ -143,10 +143,20 @@
     <div class="flex flex-wrap gap-6 text-sm">
         <div><span class="text-xs text-ink-900/50">Invites sent today</span><div class="font-display font-black text-2xl">{{ $tenantInvitesToday }}</div></div>
         <div><span class="text-xs text-ink-900/50">Invites sent in total</span><div class="font-display font-black text-2xl">{{ $tenantInvitesSent }}</div></div>
+        <div><span class="text-xs text-ink-900/50">Earlier tenants still to message</span><div class="font-display font-black text-2xl text-rose-700">{{ $tenantsPending }}</div></div>
     </div>
     <label class="flex items-center gap-3">
         <input type="checkbox" name="tenant_invite_enabled" value="1" @checked(old('tenant_invite_enabled', $tenantInviteOn)) class="w-5 h-5 rounded">
         <span><span class="font-bold">Message new tenants</span><br><span class="text-xs text-ink-900/50">Off means nobody is messaged. Uses the WhatsApp template <strong>tenant_app_invite</strong>, which must be approved on Meta first.</span></span>
+    </label>
+    <label class="flex items-center gap-3">
+        <input type="checkbox" name="tenant_invite_backfill" value="1" @checked(old('tenant_invite_backfill', $tenantBackfillOn)) class="w-5 h-5 rounded">
+        <span><span class="font-bold">Also message tenants added earlier</span><br><span class="text-xs text-ink-900/50">Every day at 1:15 PM a batch of tenants who are living in a PG now (active or on notice) get the message, until all have had it. Needs "Message new tenants" ticked too.</span></span>
+    </label>
+    <label class="block text-sm">
+        <span class="font-bold">Tenants per day</span>
+        <span class="block text-xs text-ink-900/50 mb-1">Keeps WhatsApp happy. With {{ $tenantsPending }} still to go, this takes about {{ $tenantBatch > 0 ? ceil($tenantsPending / $tenantBatch) : 0 }} day(s).</span>
+        <input name="tenant_batch" type="number" min="1" max="2000" value="{{ old('tenant_batch', $tenantBatch) }}" class="w-32 px-3 py-2 rounded-lg border border-ink-200">
     </label>
     <button class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-sm">Save</button>
 </form>
