@@ -82,4 +82,57 @@
     </div>
 </div>
 
+<h2 class="font-display font-black text-2xl mt-12 mb-1">Owners who have not installed the app</h2>
+<p class="text-ink-900/60 text-sm">Every day, owners who have never signed in to the Pizi Owner app get a WhatsApp message with the Play Store download link. It stops by itself for an owner the moment they install and sign in. Owners who sign up later are added automatically.</p>
+
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
+    @foreach([
+        ['Owners without the app (get messages)', $counts['no_app'], 'text-rose-700'],
+        ['Messages sent today', $counts['install_sent_today'], 'text-ink-900'],
+        ['Messages sent in total', $counts['install_sent_total'], 'text-ink-900'],
+    ] as [$label, $value, $color])
+        <div class="p-4 rounded-xl bg-white border border-ink-900/10">
+            <div class="text-xs text-ink-900/50">{{ $label }}</div>
+            <div class="font-display font-black text-2xl mt-1 {{ $color }}">{{ $value }}</div>
+        </div>
+    @endforeach
+</div>
+
+<form method="POST" action="{{ route('admin.app-updates.save-install') }}" class="mt-6 bg-white rounded-2xl border border-ink-900/10 p-6 space-y-4">
+    @csrf
+    <label class="flex items-center gap-3">
+        <input type="checkbox" name="install_enabled" value="1" @checked(old('install_enabled', $installOn)) class="w-5 h-5 rounded">
+        <span><span class="font-bold">Send the daily download reminders</span><br><span class="text-xs text-ink-900/50">Off means nobody is messaged. Uses the WhatsApp template <strong>owner_app_install</strong>, which must be approved on Meta first.</span></span>
+    </label>
+    <label class="block text-sm">
+        <span class="font-bold">Most messages one owner can ever get</span>
+        <span class="block text-xs text-ink-900/50 mb-1">One message a day at most. After this many, the owner is left alone.</span>
+        <input name="install_max" type="number" min="1" max="365" value="{{ old('install_max', $installMax) }}" class="w-32 px-3 py-2 rounded-lg border border-ink-200">
+    </label>
+    <button class="px-5 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl font-bold text-sm">Save</button>
+</form>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+    <div class="bg-white rounded-2xl border border-ink-900/10 overflow-hidden">
+        <div class="p-5 border-b border-ink-900/10"><h2 class="font-display font-bold text-lg">Without the app (first 25)</h2></div>
+        <table class="w-full text-sm"><tbody>
+        @forelse($noApp as $o)
+            <tr class="border-t border-ink-900/5"><td class="px-5 py-3"><div class="font-semibold">{{ $o->name }}</div><div class="text-xs text-ink-900/50">{{ $o->phone }}</div></td></tr>
+        @empty
+            <tr><td class="px-5 py-8 text-center text-ink-900/50">Every owner has the app.</td></tr>
+        @endforelse
+        </tbody></table>
+    </div>
+    <div class="bg-white rounded-2xl border border-ink-900/10 overflow-hidden">
+        <div class="p-5 border-b border-ink-900/10"><h2 class="font-display font-bold text-lg">Last download messages sent</h2></div>
+        <table class="w-full text-sm"><tbody>
+        @forelse($installRecent as $r)
+            <tr class="border-t border-ink-900/5"><td class="px-5 py-3"><div class="font-semibold">{{ $r->name }}</div><div class="text-xs text-ink-900/50">{{ $r->phone }}</div></td><td class="text-xs">{{ \Illuminate\Support\Carbon::parse($r->sent_at)->format('d M, h:i A') }}</td></tr>
+        @empty
+            <tr><td class="px-5 py-8 text-center text-ink-900/50">Nothing sent yet.</td></tr>
+        @endforelse
+        </tbody></table>
+    </div>
+</div>
+
 @endsection

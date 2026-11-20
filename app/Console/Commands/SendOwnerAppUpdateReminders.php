@@ -40,7 +40,7 @@ class SendOwnerAppUpdateReminders extends Command
                 $skipped++;
                 continue;
             }
-            $already = DB::table('owner_app_update_reminders')->where('user_id', $owner->user_id);
+            $already = DB::table('owner_app_update_reminders')->where('user_id', $owner->user_id)->where('latest_version', '!=', OwnerAppUpdateService::INSTALL_KIND);
             if ((clone $already)->whereDate('sent_at', today())->exists() || (clone $already)->count() >= $cap) {
                 $skipped++;
                 continue;

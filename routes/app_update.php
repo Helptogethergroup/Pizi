@@ -7,4 +7,5 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/app-updates', [AppUpdateController::class, 'index'])->name('app-updates');
     Route::post('/app-updates', [AppUpdateController::class, 'save'])->name('app-updates.save');
+    Route::post('/app-updates/install', [AppUpdateController::class, 'saveInstall'])->name('app-updates.save-install');
 });

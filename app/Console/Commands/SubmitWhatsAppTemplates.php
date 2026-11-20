@@ -105,6 +105,14 @@ class SubmitWhatsAppTemplates extends Command
                 'example' => ['Rajesh'],
                 'button' => ['text' => 'Update app', 'url' => 'https://play.google.com/store/apps/details?id=com.pizi_owner.india'],
             ],
+            // Sent daily (by owner-app:send-install-reminders) to owners who never signed in to the Pizi Owner app,
+            // until they do. The button is the app's Play Store page.
+            'owner_app_install' => [
+                'category' => 'MARKETING',
+                'body' => "Hi {{1}}, *download the Pizi Owner app from the Play Store* and manage your *PG leads, rooms and beds* with one app.\n\nAdd rooms and beds, track rent, verify tenants and answer leads, all from your phone.\n\nTap the button below to download it.",
+                'example' => ['Rajesh'],
+                'button' => ['text' => 'Download app', 'url' => 'https://play.google.com/store/apps/details?id=com.pizi_owner.india'],
+            ],
         ];
     }
 

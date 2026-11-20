@@ -26,9 +26,31 @@ class AppUpdateController extends Controller
             'outdated' => $latest ? $this->updates->outdated($latest)->take(25) : collect(),
             'recent' => DB::table('owner_app_update_reminders as r')
                 ->join('users as u', 'u.id', '=', 'r.user_id')
+                ->where('r.latest_version', '!=', OwnerAppUpdateService::INSTALL_KIND)
                 ->orderByDesc('r.id')->limit(20)
                 ->get(['u.name', 'u.phone', 'r.version_seen', 'r.latest_version', 'r.sent_at']),
+            'installOn' => $this->updates->installEnabled(),
+            'installMax' => $this->updates->installMax(),
+            'noApp' => $this->updates->installTargets()->take(25),
+            'installRecent' => DB::table('owner_app_update_reminders as r')
+                ->join('users as u', 'u.id', '=', 'r.user_id')
+                ->where('r.latest_version', OwnerAppUpdateService::INSTALL_KIND)
+                ->orderByDesc('r.id')->limit(20)
+                ->get(['u.name', 'u.phone', 'r.sent_at']),
         ]);
+    }
+
+    public function saveInstall(Request $request)
+    {
+        $data = $request->validate(['install_max' => 'required|integer|min:1|max:365']);
+        $on = $request->boolean('install_enabled');
+
+        $this->updates->setSetting('owner_install_max_reminders', $data['install_max']);
+        $this->updates->setSetting('owner_install_reminders', $on ? '1' : '0');
+
+        return back()->with('success', $on
+            ? 'Saved. Owners who have not installed the app get a WhatsApp message every day until they install and sign in.'
+            : 'Saved. The download reminders are OFF: nobody is messaged.');
     }
 
     public function save(Request $request)

@@ -39,6 +39,10 @@ return [
         //   php artisan whatsapp:submit-templates --send --only=owner_app_update
         'owner_app_update'                 => ['name' => env('WHATSAPP_TEMPLATE_OWNER_APP_UPDATE', 'owner_app_update'), 'lang' => 'en'],
 
+        // "Download the Pizi Owner app" (Play Store button) for owners who never installed it. Submit with:
+        //   php artisan whatsapp:submit-templates --send --only=owner_app_install
+        'owner_app_install'                => ['name' => env('WHATSAPP_TEMPLATE_OWNER_APP_INSTALL', 'owner_app_install'), 'lang' => 'en'],
+
         // Document-header template for auto-emailed/WhatsApp'd invoices.
         // Must be submitted+approved in Meta with a DOCUMENT header component.
         'invoice_ready'                    => ['name' => 'invoice_ready', 'lang' => 'en'],
