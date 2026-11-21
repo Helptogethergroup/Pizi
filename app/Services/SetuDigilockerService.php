@@ -90,6 +90,8 @@ class SetuDigilockerService
         try {
             $res = $this->client()->get('/api/digilocker/' . rawurlencode($id) . '/status');
             $body = $res->json() ?: [];
+            // the outcome only (an HTTP code and Setu's status word), never anything about the person
+            Log::info('Setu DigiLocker status', ['http' => $res->status(), 'status' => $body['status'] ?? ($body['error']['code'] ?? null)]);
             if ($res->successful()) {
                 return ['success' => true, 'status' => (string) ($body['status'] ?? 'unauthenticated')];
             }
