@@ -304,6 +304,7 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     Route::post('/rent/generate-all',      [OwnerController::class, 'rentGenerateAll']);
     Route::post('/rent',                   [OwnerController::class, 'rentStore']);
     Route::get('/rent/{id}',               [OwnerController::class, 'rentShow']);
+    Route::post('/rent/{id}',              [OwnerController::class, 'rentUpdate'])->whereNumber('id');
     Route::delete('/rent/{id}',            [OwnerController::class, 'rentDelete']);
     Route::post('/rent/{id}/payment',      [OwnerController::class, 'rentPayment']);
     Route::post('/rent/{id}/reminder',     [OwnerController::class, 'rentReminder']);

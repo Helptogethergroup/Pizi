@@ -240,6 +240,10 @@
             }
             </script>
 
+            @if($bill->status !== 'paid' && auth()->user()->role !== 'pg_manager')
+                <a href="{{ route('owner.rent.edit', $bill) }}" class="block text-center w-full px-4 py-2.5 bg-white border border-ink-200 hover:bg-cream rounded-xl text-sm font-bold"><i class="fa-solid fa-pen fa-fw"></i> Edit Bill</a>
+            @endif
+
             <form method="POST" action="{{ route('owner.rent.destroy', $bill) }}" onsubmit="return confirm('Delete this bill and all its payments?')">
                 @csrf @method('DELETE')
                 <button class="w-full px-4 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-bold"><i class="fa-solid fa-trash-can fa-fw"></i> Delete Bill</button>

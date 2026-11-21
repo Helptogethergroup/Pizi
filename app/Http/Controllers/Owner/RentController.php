@@ -182,6 +182,51 @@ class RentController extends Controller
         return view('owner.rent.show', compact('bill'));
     }
 
+    /** Edit a bill that is not paid yet: amounts, due date and notes. */
+    public function edit(RentBill $bill)
+    {
+        $this->authorize_owner($bill);
+        if (auth()->user()->role === 'pg_manager') {
+            return redirect()->route('owner.rent.show', $bill)->with('error', '⛔ PG Managers cannot edit rent bills.');
+        }
+        if ($bill->status === 'paid') {
+            return redirect()->route('owner.rent.show', $bill)->with('error', 'A paid bill cannot be edited.');
+        }
+        $bill->load('tenant', 'property', 'payments');
+
+        return view('owner.rent.edit', compact('bill'));
+    }
+
+    public function update(Request $request, RentBill $bill)
+    {
+        $this->authorize_owner($bill);
+        if (auth()->user()->role === 'pg_manager') {
+            return back()->with('error', '⛔ PG Managers cannot edit rent bills.');
+        }
+
+        $data = $request->validate([
+            'rent_amount' => 'required|numeric|min:0',
+            'electricity' => 'nullable|numeric|min:0',
+            'water' => 'nullable|numeric|min:0',
+            'maintenance' => 'nullable|numeric|min:0',
+            'food_charges' => 'nullable|numeric|min:0',
+            'other_charges' => 'nullable|numeric|min:0',
+            'other_charges_label' => 'nullable|string|max:100',
+            'late_fee' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'due_date' => 'required|date',
+            'notes' => 'nullable|string',
+        ]);
+
+        try {
+            app(\App\Services\RentBillingService::class)->updateBill($bill, $data);
+        } catch (\RuntimeException $e) {
+            return back()->withErrors(['rent_amount' => $e->getMessage()])->withInput();
+        }
+
+        return redirect()->route('owner.rent.show', $bill)->with('success', '✓ Bill updated.');
+    }
+
          public function destroy(RentBill $bill)
     {
         $this->authorize_owner($bill);

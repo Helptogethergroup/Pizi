@@ -6,6 +6,7 @@ use App\Models\RentBill;
 use App\Models\RentPayment;
 use App\Models\Tenant;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use RuntimeException;
 
@@ -61,6 +62,51 @@ class RentBillingService
         ]);
 
         return $bill;
+    }
+
+    /**
+     * Change the amounts, due date and notes of a bill that is not paid yet. A paid bill is locked. Whatever was
+     * already paid stays: the new total can never be below it. The status is worked out again (a later due date
+     * takes an overdue bill back to pending, and a total that equals what was paid makes it paid).
+     *
+     * @throws RuntimeException a message that is safe to show
+     */
+    public function updateBill(RentBill $bill, array $data): RentBill
+    {
+        return DB::transaction(function () use ($bill, $data) {
+            $b = RentBill::lockForUpdate()->findOrFail($bill->id);
+            if ($b->status === 'paid') {
+                throw new RuntimeException('A paid bill cannot be edited.');
+            }
+
+            $n = fn ($key) => round((float) ($data[$key] ?? 0), 2);
+            $total = $n('rent_amount') + $n('electricity') + $n('water') + $n('maintenance')
+                + $n('food_charges') + $n('other_charges') + $n('late_fee') - $n('discount');
+            if ($total <= 0) {
+                throw new RuntimeException('The total of the bill must be more than ₹0.');
+            }
+            $paid = (float) $b->payments()->sum('amount');
+            if ($total + 0.001 < $paid) {
+                throw new RuntimeException('₹' . number_format($paid, 0) . ' is already paid on this bill, so the total cannot be lower than that.');
+            }
+
+            $b->update([
+                'rent_amount' => $n('rent_amount'),
+                'electricity' => $n('electricity'),
+                'water' => $n('water'),
+                'maintenance' => $n('maintenance'),
+                'food_charges' => $n('food_charges'),
+                'other_charges' => $n('other_charges'),
+                'other_charges_label' => $n('other_charges') > 0 ? ($data['other_charges_label'] ?? null) : null,
+                'late_fee' => $n('late_fee'),
+                'discount' => $n('discount'),
+                'due_date' => $data['due_date'],
+                'notes' => $data['notes'] ?? null,
+            ]);
+            $b->recalculate();
+
+            return $b->fresh();
+        });
     }
 
     /** @return array{created:int, skipped:int} */

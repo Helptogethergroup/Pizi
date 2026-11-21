@@ -374,6 +374,8 @@ Route::post('/guide/dismiss', [\App\Http\Controllers\Owner\GuideController::clas
     Route::post('/rent/collected', [\App\Http\Controllers\Owner\RentController::class, 'collectedStore'])->name('rent.collected.store');
     Route::get('/rent/{bill}', [\App\Http\Controllers\Owner\RentController::class, 'show'])->name('rent.show');
     Route::delete('/rent/{bill}', [\App\Http\Controllers\Owner\RentController::class, 'destroy'])->name('rent.destroy');
+    Route::get('/rent/{bill}/edit', [\App\Http\Controllers\Owner\RentController::class, 'edit'])->name('rent.edit');
+    Route::patch('/rent/{bill}', [\App\Http\Controllers\Owner\RentController::class, 'update'])->name('rent.update');
     Route::get('/rent-archive', [\App\Http\Controllers\Owner\RentController::class, 'archive'])->name('rent.archive');
     Route::post('/rent/{id}/restore', [\App\Http\Controllers\Owner\RentController::class, 'restore'])->name('rent.restore');
     Route::post('/rent/{bill}/payment', [\App\Http\Controllers\Owner\RentController::class, 'recordPayment'])->name('rent.payment');

@@ -1660,6 +1660,40 @@ class OwnerController extends Controller
     }
 
     /** Deletes a bill into the Bill Archive (it can be restored). Owner only, like the website. */
+    /** Edit a bill that is not paid yet: amounts, due date and notes (a paid bill is locked). Owner only. */
+    public function rentUpdate(Request $request, $id, RentBillingService $rent)
+    {
+        if (!$this->onlyOwner($request)) {
+            return response()->json(['success' => false, 'message' => 'Only the owner can edit rent bills.'], 403);
+        }
+        $validator = Validator::make($request->all(), [
+            'rent_amount' => 'required|numeric|min:0',
+            'electricity' => 'nullable|numeric|min:0',
+            'water' => 'nullable|numeric|min:0',
+            'maintenance' => 'nullable|numeric|min:0',
+            'food_charges' => 'nullable|numeric|min:0',
+            'other_charges' => 'nullable|numeric|min:0',
+            'other_charges_label' => 'nullable|string|max:100',
+            'late_fee' => 'nullable|numeric|min:0',
+            'discount' => 'nullable|numeric|min:0',
+            'due_date' => 'required|date',
+            'notes' => 'nullable|string',
+        ]);
+        if ($validator->fails()) return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+
+        $bill = $this->rentBillOrFail($request, $id);
+        if (!$bill) return $this->notFound();
+
+        try {
+            $bill = $rent->updateBill($bill, $validator->validated());
+        } catch (\RuntimeException $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+        }
+
+        return $this->ok(['id' => $bill->id, 'status' => $bill->status, 'total_amount' => (float) $bill->total_amount,
+            'due_amount' => (float) $bill->due_amount, 'message' => 'Bill updated.']);
+    }
+
     public function rentDelete(Request $request, $id)
     {
         if (!$this->onlyOwner($request)) {
