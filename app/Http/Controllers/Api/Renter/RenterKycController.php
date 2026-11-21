@@ -336,7 +336,10 @@ class RenterKycController extends Controller
             }
         }
 
-        return response()->view('tenant.digilocker-return', ['done' => $done, 'failed' => $failed]);
+        // an owner adding a tenant started this check: tell the page, so it can take them back to the owner app
+        $ownerFlow = $id !== '' && Cache::has('digilocker:owner:' . $id);
+
+        return response()->view('tenant.digilocker-return', ['done' => $done, 'failed' => $failed, 'ownerFlow' => $ownerFlow]);
     }
 
     public function submit(Request $request): JsonResponse

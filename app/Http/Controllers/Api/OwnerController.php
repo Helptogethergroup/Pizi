@@ -1830,6 +1830,8 @@ class OwnerController extends Controller
         }
 
         \Cache::put($this->aadhaarCacheKey($request), $result['id'], now()->addMinutes(30));
+        // so the page DigiLocker ends on knows this check belongs to an owner adding a tenant (and can send them back to the owner app)
+        \Cache::put('digilocker:owner:' . $result['id'], 1, now()->addMinutes(30));
 
         return $this->ok(['id' => $result['id'], 'url' => $result['url']]);
     }
@@ -1850,12 +1852,20 @@ class OwnerController extends Controller
 
             return response()->json(['success' => false, 'message' => 'This check has expired. Please start again.'], 410);
         }
-        if (($status['status'] ?? '') !== 'authenticated') {
+        // "Check now" (force) also tries to read the Aadhaar when Setu has not said "authenticated" yet: if the tenant
+        // really did agree, the details come back and the wait is over; if not, it just stays pending.
+        $authenticated = ($status['status'] ?? '') === 'authenticated';
+        $force = $request->boolean('force');
+        if (!$authenticated && !$force) {
             return $this->ok(['pending' => true]);
         }
 
         $result = $dl->aadhaar($requestId);
         if (empty($result['success'])) {
+            if (!$authenticated) {
+                return $this->ok(['pending' => true]);
+            }
+
             return response()->json(['success' => false, 'message' => $result['message'] ?? 'Could not read the Aadhaar details.'], 422);
         }
         \Cache::forget($this->aadhaarCacheKey($request));
