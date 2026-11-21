@@ -70,13 +70,20 @@
                     <option value="pending">Pending</option>
                 </select>
             </div>
+            <p class="md:col-span-3 text-xs text-ink-900/50 -mt-2">
+                <b>Security deposit</b> is money the tenant gives once and gets back when they leave. It does not pay any rent bill.
+            </p>
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Move-in Date</label>
                 <input name="move_in_date" type="date" value="{{ date('Y-m-d') }}" class="w-full mt-1 px-4 py-3 rounded-xl border border-ink-200">
             </div>
 
             <div class="md:col-span-3 border-t border-ink-100 pt-4 mt-1">
-                <h3 class="text-sm font-bold text-ink-900/70 mb-3"><i class="fa-solid fa-sack-dollar fa-fw"></i> Advance Rent (Optional)</h3>
+                <h3 class="text-sm font-bold text-ink-900/70 mb-1"><i class="fa-solid fa-sack-dollar fa-fw"></i> Advance Rent (Optional)</h3>
+                <p class="text-xs text-ink-900/50 mb-3">
+                    <b>Advance rent</b> is rent paid early for the coming months. It is not refunded, and it marks those months' bills as paid.
+                    Do not enter the security deposit here.
+                </p>
             </div>
             <div>
                 <label class="text-xs font-bold uppercase text-ink-900/60">Advance Rent (Months)</label>
