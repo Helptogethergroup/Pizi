@@ -2242,7 +2242,8 @@ class OwnerController extends Controller
     {
         $request->validate([
             'document_type' => 'required|in:aadhaar_front,aadhaar_back,pan,employment_id,student_id,address_proof,photo,police_verification,other',
-            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            // the police verification paper may be a big scan: up to 30 MB; every other document stays at 5 MB
+            'file' => 'required|file|mimes:jpg,jpeg,png,pdf|max:' . ($request->input('document_type') === 'police_verification' ? 30720 : 5120),
             'document_number' => 'nullable|string|max:50',
         ]);
         $tenant = $this->ownedTenant($request, $id);

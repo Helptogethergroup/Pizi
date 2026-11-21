@@ -226,7 +226,7 @@
             </label>
         </div>
         <div id="policeFileBox" class="hidden mt-4">
-            <label class="text-xs font-bold uppercase text-ink-900/60">Police verification document (PDF or photo, up to 5 MB)</label>
+            <label class="text-xs font-bold uppercase text-ink-900/60">Police verification document (PDF or photo, up to 30 MB)</label>
             <input type="file" name="police_document" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*" class="w-full mt-1 text-sm">
         </div>
         <p id="policePendingNote" class="mt-4 text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3"><i class="fa-solid fa-hourglass-half fa-fw"></i> It will show as <b>Pending</b> to you and to the tenant until the document is uploaded. You can upload it later from the tenant's page.</p>
