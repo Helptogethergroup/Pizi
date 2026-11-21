@@ -329,6 +329,7 @@ Route::prefix('owner')->middleware(['role:owner,admin,pg_manager', 'manager.api'
     Route::post('/tenants/{id}/kyc/reject',       [OwnerController::class, 'tenantKycReject']);
     Route::post('/tenants/{id}/kyc/aadhaar',      [OwnerController::class, 'tenantKycAadhaar']);
     Route::get('/tenants/{id}',     [OwnerController::class, 'tenantShow']);
+    Route::get('/tenants/{id}/pdf', [OwnerController::class, 'tenantPdf']);
     Route::post('/tenants',         [OwnerController::class, 'tenantStore']);
     Route::post('/tenants/{id}',    [OwnerController::class, 'tenantUpdate']);
     Route::delete('/tenants/{id}',  [OwnerController::class, 'tenantDelete']);

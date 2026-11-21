@@ -168,6 +168,18 @@ class TenantController extends Controller
         return view('owner.tenants.overview', ['tenant' => $tenant]);
     }
 
+    /** The overview page as a PDF: ?copy=owner (for the owner's records, the default) or ?copy=tenant (to send to the tenant). */
+    public function pdf(Request $request, Tenant $tenant)
+    {
+        $this->authorize_owner($tenant);
+        [$name, $bytes] = app(\App\Services\TenantDetailsPdf::class)->make($tenant, $request->query('copy') !== 'tenant');
+
+        return response($bytes, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $name . '"',
+        ]);
+    }
+
     public function store(Request $request)
     {
         $this->checkAccess();

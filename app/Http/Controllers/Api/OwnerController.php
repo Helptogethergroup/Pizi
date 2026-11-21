@@ -1921,6 +1921,21 @@ class OwnerController extends Controller
         return $this->ok((object) $tenant);
     }
 
+    /** The tenant's details page as a PDF: ?copy=owner (for the owner's records, the default) or ?copy=tenant (to send to the tenant). */
+    public function tenantPdf(Request $request, $id)
+    {
+        $row = $this->scopeProps(DB::table('tenants')->where('id', $id)->where('owner_id', $this->ownerId($request)), $request, 'property_id')->first();
+        $tenant = $row ? \App\Models\Tenant::find($row->id) : null;
+        if (!$tenant) return $this->notFound();
+
+        [$name, $bytes] = app(\App\Services\TenantDetailsPdf::class)->make($tenant, $request->query('copy') !== 'tenant');
+
+        return response($bytes, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $name . '"',
+        ]);
+    }
+
     public function tenantStore(Request $request)
     {
         // Bed Plan: while the plan has ended (wallet not recharged) no new tenant can be added

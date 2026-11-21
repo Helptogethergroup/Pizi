@@ -8,6 +8,8 @@
         <p class="text-ink-900/60 mt-1">Everything about this tenant in one place.</p>
     </div>
     <div class="flex gap-2">
+        <a href="{{ route('owner.tenants.pdf', ['tenant' => $tenant, 'copy' => 'owner']) }}" class="px-4 py-2.5 bg-white border border-ink-200 rounded-xl text-sm font-bold"><i class="fa-solid fa-file-pdf fa-fw"></i> My copy (PDF)</a>
+        <a href="{{ route('owner.tenants.pdf', ['tenant' => $tenant, 'copy' => 'tenant']) }}" class="px-4 py-2.5 bg-white border border-ink-200 rounded-xl text-sm font-bold"><i class="fa-solid fa-file-pdf fa-fw"></i> Copy for the tenant (PDF)</a>
         <button type="button" onclick="window.print()" class="px-4 py-2.5 bg-white border border-ink-200 rounded-xl text-sm font-bold"><i class="fa-solid fa-print fa-fw"></i> Print</button>
         <a href="{{ route('owner.tenants.show', $tenant) }}" class="px-4 py-2.5 bg-coral-500 hover:bg-coral-600 text-white rounded-xl text-sm font-bold">Manage tenant</a>
     </div>
